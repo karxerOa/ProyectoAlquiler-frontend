@@ -1,0 +1,39 @@
+<div class="app-shell">
+  <aside class="sidebar">
+    <a class="brand" routerLink="/clientes" aria-label="Proyecto Alquiler, inicio">
+      <span class="brand-mark" aria-hidden="true">PA</span>
+      <span class="brand-name">Proyecto<span>Alquiler</span></span>
+    </a>
+
+    <p class="nav-heading">GESTIÓN</p>
+    <nav class="main-nav" aria-label="Navegación principal">
+      @for (item of navigation; track item.path) {
+        <a
+          class="nav-link"
+          [routerLink]="item.path"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: true }"
+          ariaCurrentWhenActive="page"
+        >
+          {{ item.label }}
+        </a>
+      }
+    </nav>
+
+    <div class="sidebar-footer">Sistema de gestión de vestimentas</div>
+  </aside>
+
+  <main class="main-content">
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">ADMINISTRACIÓN</p>
+        <h1>Gestión de alquiler de vestimentas</h1>
+      </div>
+      <span class="status-badge"><span aria-hidden="true"></span> Panel de control</span>
+    </header>
+
+    <section class="page-content" aria-label="Contenido de la página">
+      <router-outlet></router-outlet>
+    </section>
+  </main>
+</div>
