@@ -1,8 +1,9 @@
 import { Component } from '@angular/core';
 
 @Component({
+  imports: [],
   selector: 'app-cliente',
-  standalone: true,
-  template: '<h2>Cliente</h2>',
+  styleUrl: './cliente.component.css',
+  templateUrl: './cliente.component.html',
 })
 export class ClienteComponent {}

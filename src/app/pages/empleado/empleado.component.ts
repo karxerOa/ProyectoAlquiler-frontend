@@ -1,8 +1,9 @@
 import { Component } from '@angular/core';
 
 @Component({
+  imports: [],
   selector: 'app-empleado',
-  standalone: true,
-  template: '<h2>Empleado</h2>',
+  styleUrl: './empleado.component.css',
+  templateUrl: './empleado.component.html',
 })
 export class EmpleadoComponent {}
