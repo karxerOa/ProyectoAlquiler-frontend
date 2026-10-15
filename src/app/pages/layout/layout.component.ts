@@ -10,18 +10,7 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 })
 export class LayoutComponent {
   protected readonly navigation = [
-    { label: 'Alquileres', path: '/alquileres' },
-    { label: 'Categorías', path: '/categorias' },
     { label: 'Clientes', path: '/clientes' },
-    { label: 'Detalles de alquiler', path: '/detalles-alquiler' },
-    { label: 'Devoluciones', path: '/devoluciones' },
     { label: 'Empleados', path: '/empleados' },
-    { label: 'Mantenimientos', path: '/mantenimientos' },
-    { label: 'Pagos', path: '/pagos' },
-    { label: 'Penalidades', path: '/penalidades' },
-    { label: 'Prendas', path: '/prendas' },
-    { label: 'Producción', path: '/producciones' },
-    { label: 'Roles', path: '/roles' },
-    { label: 'Usuarios', path: '/usuarios' },
   ];
 }
