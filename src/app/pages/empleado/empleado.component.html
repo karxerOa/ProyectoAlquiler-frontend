@@ -1,1 +1,159 @@
-<p>empleado works!</p>
+<div class="page-container">
+
+  <div class="page-header">
+    <div>
+      <h1>Gestión de empleados</h1>
+      <p>Administra la información de los empleados de Lucy.</p>
+    </div>
+
+    <button class="btn-primary" type="button" (click)="nuevo()">
+      + Nuevo empleado
+    </button>
+  </div>
+
+  <div class="stats-card">
+    <div class="stats-icon">👥</div>
+    <div>
+      <p>Total de empleados</p>
+      <h2>{{ empleados().length }}</h2>
+    </div>
+  </div>
+
+  <section class="content-card">
+    <div class="table-header">
+      <h2>Lista de empleados</h2>
+
+      <input
+        type="text"
+        placeholder="Buscar por nombre, DNI, teléfono o cargo..."
+        (input)="buscar($any($event.target).value)"
+      />
+    </div>
+
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Nombre completo</th>
+            <th>DNI</th>
+            <th>Teléfono</th>
+            <th>Cargo</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          @for (empleado of empleadosFiltrados(); track empleado.idEmpleado) {
+            <tr>
+              <td>
+                <div class="persona">
+                  <span class="avatar-mini">{{ empleado.nombres.charAt(0) }}{{ empleado.apellidos.charAt(0) }}</span>
+                  <strong>{{ empleado.nombres }} {{ empleado.apellidos }}</strong>
+                </div>
+              </td>
+              <td>{{ empleado.dni }}</td>
+              <td>{{ empleado.telefono }}</td>
+              <td>{{ empleado.cargo }}</td>
+              <td>
+                <span class="pill" [class.pill-ok]="empleado.estado === 'Activo'">
+                  {{ empleado.estado }}
+                </span>
+              </td>
+              <td>
+                <div class="acciones">
+                  <button class="btn-action" type="button" (click)="editar(empleado)">Editar</button>
+                  <button class="btn-action btn-danger" type="button" (click)="eliminar(empleado)">Eliminar</button>
+                </div>
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="6" class="empty-message">
+                No se encontraron empleados.
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+</div>
+
+<!-- MODAL NUEVO / EDITAR -->
+@if (modalAbierto()) {
+  <div class="modal-overlay" (click)="cerrarModal()">
+    <div class="modal" (click)="$event.stopPropagation()">
+
+      <h2>{{ editandoId() === null ? 'Nuevo empleado' : 'Editar empleado' }}</h2>
+
+      <form [formGroup]="form" (ngSubmit)="guardar()">
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="nombres">Nombres</label>
+            <input id="nombres" type="text" formControlName="nombres" />
+            @if (campoInvalido('nombres')) {
+              <small class="error">Los nombres son obligatorios.</small>
+            }
+          </div>
+
+          <div class="form-group">
+            <label for="apellidos">Apellidos</label>
+            <input id="apellidos" type="text" formControlName="apellidos" />
+            @if (campoInvalido('apellidos')) {
+              <small class="error">Los apellidos son obligatorios.</small>
+            }
+          </div>
+
+          <div class="form-group">
+            <label for="dni">DNI</label>
+            <input id="dni" type="text" inputmode="numeric" maxlength="8" formControlName="dni" />
+            @if (campoInvalido('dni')) {
+              <small class="error">El DNI debe tener 8 dígitos.</small>
+            }
+          </div>
+
+          <div class="form-group">
+            <label for="telefono">Teléfono</label>
+            <input id="telefono" type="text" inputmode="numeric" maxlength="9" formControlName="telefono" />
+            @if (campoInvalido('telefono')) {
+              <small class="error">El teléfono debe tener 9 dígitos.</small>
+            }
+          </div>
+
+          <div class="form-group">
+            <label for="cargo">Cargo</label>
+            <input id="cargo" type="text" formControlName="cargo" />
+            @if (campoInvalido('cargo')) {
+              <small class="error">El cargo es obligatorio.</small>
+            }
+          </div>
+
+          <div class="form-group">
+            <label for="estado">Estado</label>
+            <select id="estado" formControlName="estado">
+              <option value="Activo">Activo</option>
+              <option value="Inactivo">Inactivo</option>
+            </select>
+          </div>
+        </div>
+
+        @if (mensajeError()) {
+          <p class="error-box">{{ mensajeError() }}</p>
+        }
+
+        <div class="modal-actions">
+          <button type="button" class="btn-secondary" (click)="cerrarModal()">
+            Cancelar
+          </button>
+          <button type="submit" class="btn-primary" [disabled]="guardando()">
+            {{ guardando() ? 'Guardando...' : 'Guardar' }}
+          </button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+}
