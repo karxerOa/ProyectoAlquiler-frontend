@@ -1,14 +1,12 @@
 import { HttpClient } from '@angular/common/http';
-import { inject, Injectable } from '@angular/core';
+import { inject, Service } from '@angular/core';
 import { Observable } from 'rxjs';
 import { Categoria } from '../model/categoria';
 import { environment } from '../../environments/environment';
 
 type CategoriaData = Pick<Categoria, 'nombre' | 'descripcion' | 'estado'>;
 
-@Injectable({
-  providedIn: 'root',
-})
+@Service()
 export class CategoriaService {
   private readonly apiUrl = `${environment.apiUrl}/categorias`;
   private readonly http = inject(HttpClient);

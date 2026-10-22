@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { inject, Injectable } from '@angular/core';
+import { inject, Service } from '@angular/core';
 import { Observable } from 'rxjs';
 import type { Empleado } from '../model/empleado';
 import { Produccion } from '../model/produccion';
@@ -11,9 +11,7 @@ type ProduccionData = Omit<Produccion, 'idProduccion' | 'prenda' | 'empleado'> &
   empleado: Pick<Empleado, 'idEmpleado'>;
 };
 
-@Injectable({
-  providedIn: 'root',
-})
+@Service()
 export class ProduccionService {
   private readonly apiUrl = `${environment.apiUrl}/producciones`;
   private readonly http = inject(HttpClient);
