@@ -1,33 +1,61 @@
+import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { inject, Service } from '@angular/core';
 import { Observable } from 'rxjs';
-import { Prenda } from '../model/prenda';
-import { environment } from '../../environments/environment';
 
-type PrendaData = Omit<Prenda, 'idPrenda' | 'categoriaNombre'>;
+export interface PrendaDTO {
+  idPrenda?: number;
+  nombre: string;
+  descripcion: string;
+  talla: string;
+  color: string;
+  precioAlquiler: number;
+  estado: string;
+  idCategoria: number;
+}
 
-@Service()
+export interface PrendaResponse {
+  idPrenda: number;
+  nombre: string;
+  descripcion: string;
+  talla: string;
+  color: string;
+  precioAlquiler: number;
+  estado: string;
+  categoria: { idCategoria: number; nombre: string };
+}
+
+export interface CategoriaSimple {
+  idCategoria: number;
+  nombre: string;
+}
+
+@Injectable({ providedIn: 'root' })
 export class PrendaService {
-  private readonly apiUrl = `${environment.apiUrl}/prendas`;
+  private readonly apiUrl = 'http://localhost:9494/v1/prendas';
+  private readonly catUrl = 'http://localhost:9494/v1/categorias';
   private readonly http = inject(HttpClient);
 
-  findAll(): Observable<Prenda[]> {
-    return this.http.get<Prenda[]>(this.apiUrl);
+  findAll(): Observable<PrendaResponse[]> {
+    return this.http.get<PrendaResponse[]>(this.apiUrl);
   }
 
-  findById(id: number): Observable<Prenda> {
-    return this.http.get<Prenda>(`${this.apiUrl}/${id}`);
+  findById(id: number): Observable<PrendaResponse> {
+    return this.http.get<PrendaResponse>(`${this.apiUrl}/${id}`);
   }
 
-  create(prenda: PrendaData): Observable<Prenda> {
-    return this.http.post<Prenda>(this.apiUrl, prenda);
+  create(prenda: PrendaDTO): Observable<PrendaResponse> {
+    return this.http.post<PrendaResponse>(this.apiUrl, prenda);
   }
 
-  update(id: number, prenda: PrendaData): Observable<Prenda> {
-    return this.http.put<Prenda>(`${this.apiUrl}/${id}`, prenda);
+  update(id: number, prenda: PrendaDTO): Observable<PrendaResponse> {
+    return this.http.put<PrendaResponse>(`${this.apiUrl}/${id}`, prenda);
   }
 
   delete(id: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
+  }
+
+  getCategorias(): Observable<CategoriaSimple[]> {
+    return this.http.get<CategoriaSimple[]>(this.catUrl);
   }
 }

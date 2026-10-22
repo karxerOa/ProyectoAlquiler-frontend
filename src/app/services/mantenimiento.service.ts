@@ -1,33 +1,74 @@
+import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { inject, Service } from '@angular/core';
 import { Observable } from 'rxjs';
-import { Mantenimiento } from '../model/mantenimiento';
-import { environment } from '../../environments/environment';
 
-type MantenimientoData = Omit<Mantenimiento, 'idMantenimiento'>;
+export interface MantenimientoDTO {
+  idMantenimiento?: number;
+  fechaInicio: string;
+  fechaFin: string;
+  tipoMantenimiento: string;
+  descripcion: string;
+  costo: number;
+  estado: string;
+  idPrenda: number;
+  idEmpleado: number;
+}
 
-@Service()
+export interface MantenimientoResponse {
+  idMantenimiento: number;
+  fechaInicio: string;
+  fechaFin: string;
+  tipoMantenimiento: string;
+  descripcion: string;
+  costo: number;
+  estado: string;
+  prenda: { idPrenda: number; nombre: string };
+  empleado: { idEmpleado: number; nombres: string; apellidos: string };
+}
+
+export interface PrendaSimple {
+  idPrenda: number;
+  nombre: string;
+}
+
+export interface EmpleadoSimple {
+  idEmpleado: number;
+  nombres: string;
+  apellidos: string;
+}
+
+@Injectable({ providedIn: 'root' })
 export class MantenimientoService {
-  private readonly apiUrl = `${environment.apiUrl}/mantenimientos`;
+  private readonly apiUrl      = 'http://localhost:9494/v1/mantenimientos';
+  private readonly prendaUrl   = 'http://localhost:9494/v1/prendas';
+  private readonly empleadoUrl = 'http://localhost:9494/v1/empleados';
   private readonly http = inject(HttpClient);
 
-  findAll(): Observable<Mantenimiento[]> {
-    return this.http.get<Mantenimiento[]>(this.apiUrl);
+  findAll(): Observable<MantenimientoResponse[]> {
+    return this.http.get<MantenimientoResponse[]>(this.apiUrl);
   }
 
-  findById(id: number): Observable<Mantenimiento> {
-    return this.http.get<Mantenimiento>(`${this.apiUrl}/${id}`);
+  findById(id: number): Observable<MantenimientoResponse> {
+    return this.http.get<MantenimientoResponse>(`${this.apiUrl}/${id}`);
   }
 
-  create(mantenimiento: MantenimientoData): Observable<Mantenimiento> {
-    return this.http.post<Mantenimiento>(this.apiUrl, mantenimiento);
+  create(m: MantenimientoDTO): Observable<MantenimientoResponse> {
+    return this.http.post<MantenimientoResponse>(this.apiUrl, m);
   }
 
-  update(id: number, mantenimiento: MantenimientoData): Observable<Mantenimiento> {
-    return this.http.put<Mantenimiento>(`${this.apiUrl}/${id}`, mantenimiento);
+  update(id: number, m: MantenimientoDTO): Observable<MantenimientoResponse> {
+    return this.http.put<MantenimientoResponse>(`${this.apiUrl}/${id}`, m);
   }
 
   delete(id: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
+  }
+
+  getPrendas(): Observable<PrendaSimple[]> {
+    return this.http.get<PrendaSimple[]>(this.prendaUrl);
+  }
+
+  getEmpleados(): Observable<EmpleadoSimple[]> {
+    return this.http.get<EmpleadoSimple[]>(this.empleadoUrl);
   }
 }

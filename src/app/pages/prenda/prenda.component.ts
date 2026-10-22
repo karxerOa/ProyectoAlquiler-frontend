@@ -1,79 +1,104 @@
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Prenda } from '../../model/prenda';
-import { PrendaService } from '../../services/prenda.service';
+import { CommonModule } from '@angular/common';
+import {
+  PrendaService,
+  PrendaResponse,
+  CategoriaSimple,
+} from '../../services/prenda.service';
+
+const ESTADOS = ['DISPONIBLE', 'ALQUILADO', 'EN_MANTENIMIENTO', 'DADO_DE_BAJA'];
+const TALLAS   = ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'ÚNICO'];
 
 @Component({
   selector: 'app-prenda',
   standalone: true,
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, CommonModule],
   templateUrl: './prenda.component.html',
-  styleUrl: '../cliente/cliente.component.css'
+  styleUrl: './prenda.component.css',
 })
 export class PrendaComponent implements OnInit {
-  private readonly prendaService = inject(PrendaService);
-  private readonly fb = inject(FormBuilder);
+  private prendaService = inject(PrendaService);
+  private fb = inject(FormBuilder);
 
-  busqueda = signal('');
-  prendas = signal<Prenda[]>([]);
+  // ── datos ──────────────────────────────────────────────────────────────────
+  prendas    = signal<PrendaResponse[]>([]);
+  categorias = signal<CategoriaSimple[]>([]);
+  readonly estados = ESTADOS;
+  readonly tallas  = TALLAS;
+
+  // ── UI ─────────────────────────────────────────────────────────────────────
+  busqueda     = signal('');
   modalAbierto = signal(false);
-  editandoId = signal<number | null>(null);
-  guardando = signal(false);
+  editandoId   = signal<number | null>(null);
+  guardando    = signal(false);
   mensajeError = signal('');
-  errorCarga = signal('');
+  cargando     = signal(false);
 
+  // ── formulario ─────────────────────────────────────────────────────────────
   form = this.fb.nonNullable.group({
-    nombre: ['', [Validators.required, Validators.maxLength(100)]],
-    descripcion: ['', [Validators.required, Validators.maxLength(255)]],
-    talla: ['', [Validators.required, Validators.maxLength(20)]],
-    color: ['', [Validators.required, Validators.maxLength(50)]],
-    precioAlquiler: [0, [Validators.required, Validators.min(0)]],
-    estado: ['DISPONIBLE', Validators.required],
-    categoriaId: ['', [Validators.required, Validators.min(1)]]
+    nombre:        ['', [Validators.required, Validators.maxLength(80)]],
+    descripcion:   ['', [Validators.required, Validators.maxLength(200)]],
+    talla:         ['', Validators.required],
+    color:         ['', [Validators.required, Validators.maxLength(40)]],
+    precioAlquiler:[0,  [Validators.required, Validators.min(0.01)]],
+    estado:        ['DISPONIBLE', Validators.required],
+    idCategoria:   [0,  Validators.required],
   });
 
+  // ── computed ────────────────────────────────────────────────────────────────
   prendasFiltradas = computed(() => {
-    const texto = this.busqueda();
-    return this.prendas().filter(prenda =>
-      `${prenda.nombre} ${prenda.descripcion} ${prenda.talla} ${prenda.color} ${prenda.estado} ${prenda.categoriaNombre ?? ''}`
-        .toLowerCase().includes(texto)
+    const txt = this.busqueda().toLowerCase();
+    return this.prendas().filter(p =>
+      `${p.nombre} ${p.talla} ${p.color} ${p.estado} ${p.categoria?.nombre ?? ''}`
+        .toLowerCase()
+        .includes(txt)
     );
   });
 
-  ngOnInit(): void { this.cargar(); }
+  // ── ciclo de vida ───────────────────────────────────────────────────────────
+  ngOnInit(): void {
+    this.cargar();
+    this.cargarCategorias();
+  }
 
   cargar(): void {
+    this.cargando.set(true);
     this.prendaService.findAll().subscribe({
-      next: data => { this.prendas.set(data); this.errorCarga.set(''); },
-      error: (error: unknown) => {
-        console.error('Error al cargar prendas:', error);
-        this.errorCarga.set('No se pudieron cargar las prendas.');
-      }
+      next:  (data) => { this.prendas.set(data); this.cargando.set(false); },
+      error: (err)  => { console.error('Error al cargar prendas:', err); this.cargando.set(false); },
     });
   }
 
-  buscar(valor: string): void { this.busqueda.set(valor.trim().toLowerCase()); }
+  cargarCategorias(): void {
+    this.prendaService.getCategorias().subscribe({
+      next:  (data) => this.categorias.set(data),
+      error: (err)  => console.error('Error al cargar categorías:', err),
+    });
+  }
 
+  buscar(valor: string): void {
+    this.busqueda.set(valor.trim().toLowerCase());
+  }
+
+  // ── acciones ────────────────────────────────────────────────────────────────
   nuevo(): void {
     this.editandoId.set(null);
-    this.form.reset({
-      nombre: '', descripcion: '', talla: '', color: '',
-      precioAlquiler: 0, estado: 'DISPONIBLE', categoriaId: ''
-    });
+    this.form.reset({ estado: 'DISPONIBLE', precioAlquiler: 0, idCategoria: 0 });
     this.mensajeError.set('');
     this.modalAbierto.set(true);
   }
 
-  editar(prenda: Prenda): void {
-    this.editandoId.set(prenda.idPrenda);
+  editar(p: PrendaResponse): void {
+    this.editandoId.set(p.idPrenda);
     this.form.setValue({
-      nombre: prenda.nombre,
-      descripcion: prenda.descripcion,
-      talla: prenda.talla,
-      color: prenda.color,
-      precioAlquiler: prenda.precioAlquiler,
-      estado: prenda.estado.trim(),
-      categoriaId: String(prenda.categoriaId)
+      nombre:         p.nombre,
+      descripcion:    p.descripcion,
+      talla:          p.talla,
+      color:          p.color,
+      precioAlquiler: p.precioAlquiler,
+      estado:         p.estado,
+      idCategoria:    p.categoria?.idCategoria ?? 0,
     });
     this.mensajeError.set('');
     this.modalAbierto.set(true);
@@ -81,35 +106,51 @@ export class PrendaComponent implements OnInit {
 
   guardar(): void {
     if (this.form.invalid) { this.form.markAllAsTouched(); return; }
-    const value = this.form.getRawValue();
-    const data = { ...value, categoriaId: Number(value.categoriaId) };
+
+    const v = this.form.getRawValue();
     const id = this.editandoId();
     this.guardando.set(true);
     this.mensajeError.set('');
-    const request = id === null ? this.prendaService.create(data) : this.prendaService.update(id, data);
-    request.subscribe({
-      next: () => { this.guardando.set(false); this.modalAbierto.set(false); this.cargar(); },
-      error: (error: unknown) => {
-        console.error('Error al guardar prenda:', error);
+
+    const peticion = id === null
+      ? this.prendaService.create(v)
+      : this.prendaService.update(id, v);
+
+    peticion.subscribe({
+      next: () => { this.guardando.set(false); this.cerrarModal(); this.cargar(); },
+      error: (err) => {
+        console.error('Error al guardar prenda:', err);
         this.guardando.set(false);
-        this.mensajeError.set('No se pudo guardar la prenda. Verifica el ID de categoría.');
-      }
+        this.mensajeError.set('No se pudo guardar. Verifica los datos e inténtalo de nuevo.');
+      },
     });
   }
 
-  eliminar(prenda: Prenda): void {
-    if (!confirm(`¿Eliminar la prenda "${prenda.nombre}"?`)) return;
-    this.prendaService.delete(prenda.idPrenda).subscribe({
-      next: () => this.cargar(),
-      error: (error: unknown) => {
-        console.error('Error al eliminar prenda:', error);
-        alert('No se pudo eliminar la prenda. Puede tener registros asociados.');
-      }
+  eliminar(p: PrendaResponse): void {
+    if (!confirm(`¿Eliminar la prenda "${p.nombre}"?`)) return;
+    this.prendaService.delete(p.idPrenda).subscribe({
+      next:  () => this.cargar(),
+      error: (err) => {
+        console.error('Error al eliminar prenda:', err);
+        alert('No se pudo eliminar. La prenda puede tener registros asociados.');
+      },
     });
   }
+
+  cerrarModal(): void { this.modalAbierto.set(false); }
 
   campoInvalido(campo: string): boolean {
-    const control = this.form.get(campo);
-    return !!control && control.invalid && control.touched;
+    const c = this.form.get(campo);
+    return !!c && c.invalid && c.touched;
+  }
+
+  estadoBadge(estado: string): string {
+    const map: Record<string, string> = {
+      DISPONIBLE:      'badge-ok',
+      ALQUILADO:       'badge-info',
+      EN_MANTENIMIENTO:'badge-warn',
+      DADO_DE_BAJA:    'badge-off',
+    };
+    return map[estado] ?? '';
   }
 }
