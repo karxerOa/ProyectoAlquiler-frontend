@@ -1,0 +1,29 @@
+<div class="page-container">
+  <div class="page-header"><div><h1>Gestión de usuarios</h1><p>Administra las cuentas de acceso y sus roles.</p></div><button class="btn-primary" type="button" (click)="nuevo()">+ Nuevo usuario</button></div>
+  @if (errorCarga()) { <p class="error-box">{{ errorCarga() }}</p> }
+  <div class="stats-card"><div class="stats-icon">👤</div><div><p>Total de usuarios</p><h2>{{ usuarios().length }}</h2></div></div>
+  <section class="content-card">
+    <div class="table-header"><h2>Lista de usuarios</h2><input type="text" placeholder="Buscar por usuario o rol..." (input)="buscar($any($event.target).value)" /></div>
+    <div class="table-container"><table>
+      <thead><tr><th>Usuario</th><th>Rol</th><th>Estado</th><th>Acciones</th></tr></thead>
+      <tbody>
+        @for (usuario of usuariosFiltrados(); track usuario.idUser) {
+          <tr><td>{{ usuario.username }}</td><td>{{ usuario.name || usuario.rolId }}</td><td><span class="pill" [class.pill-ok]="usuario.enabled">{{ usuario.enabled ? 'Activo' : 'Inactivo' }}</span></td><td><div class="acciones"><button class="btn-action" type="button" (click)="editar(usuario)">Editar</button><button class="btn-action btn-danger" type="button" (click)="eliminar(usuario)">Eliminar</button></div></td></tr>
+        } @empty { <tr><td colspan="4" class="empty-message">No se encontraron usuarios.</td></tr> }
+      </tbody>
+    </table></div>
+  </section>
+</div>
+@if (modalAbierto()) {
+  <div class="modal-overlay" (click)="cerrarModal()"><div class="modal" (click)="$event.stopPropagation()">
+    <h2>{{ editandoId() === null ? 'Nuevo usuario' : 'Editar usuario' }}</h2>
+    <form [formGroup]="form" (ngSubmit)="guardar()"><div class="form-grid">
+      <div class="form-group full"><label for="username">Nombre de usuario</label><input id="username" type="text" autocomplete="username" formControlName="username" />@if (campoInvalido('username')) { <small class="error">El usuario es obligatorio.</small> }</div>
+      <div class="form-group full"><label for="password">{{ editandoId() === null ? 'Contraseña' : 'Nueva contraseña (opcional)' }}</label><input id="password" type="password" autocomplete="new-password" formControlName="password" />@if (campoInvalido('password')) { <small class="error">La contraseña debe tener al menos 6 caracteres.</small> }@if (editandoId() !== null) { <small>Déjala vacía para conservar la contraseña actual.</small> }</div>
+      <div class="form-group"><label for="rolId">Rol</label><select id="rolId" formControlName="rolId"><option value="">Selecciona un rol</option>@for (rol of roles(); track rol.idRol) { <option [value]="rol.idRol">{{ rol.name }}</option> }</select>@if (campoInvalido('rolId')) { <small class="error">Selecciona un rol válido.</small> }</div>
+      <div class="form-group"><label for="enabled">Estado</label><select id="enabled" formControlName="enabled"><option [ngValue]="true">Activo</option><option [ngValue]="false">Inactivo</option></select></div>
+    </div>
+    @if (mensajeError()) { <p class="error-box">{{ mensajeError() }}</p> }
+    <div class="modal-actions"><button type="button" class="btn-secondary" (click)="cerrarModal()">Cancelar</button><button type="submit" class="btn-primary" [disabled]="guardando()">{{ guardando() ? 'Guardando...' : 'Guardar' }}</button></div></form>
+  </div></div>
+}

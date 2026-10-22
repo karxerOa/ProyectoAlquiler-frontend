@@ -1,0 +1,33 @@
+<div class="page-container">
+  <div class="page-header"><div><h1>Gestión de mantenimientos</h1><p>Registra y controla los trabajos realizados en las prendas.</p></div><button class="btn-primary" type="button" (click)="nuevo()">+ Nuevo mantenimiento</button></div>
+  @if (errorCarga()) { <p class="error-box">{{ errorCarga() }}</p> }
+  <div class="stats-card"><div class="stats-icon">🛠️</div><div><p>Total de mantenimientos</p><h2>{{ mantenimientos().length }}</h2></div></div>
+  <section class="content-card">
+    <div class="table-header"><h2>Lista de mantenimientos</h2><input type="text" placeholder="Buscar por tipo, estado o ID..." (input)="buscar($any($event.target).value)" /></div>
+    <div class="table-container"><table>
+      <thead><tr><th>Tipo</th><th>Descripción</th><th>Fechas</th><th>Costo</th><th>Estado</th><th>ID prenda</th><th>ID empleado</th><th>Acciones</th></tr></thead>
+      <tbody>
+        @for (item of mantenimientosFiltrados(); track item.idMantenimiento) {
+          <tr><td>{{ item.tipoMantenimiento }}</td><td>{{ item.descripcion }}</td><td>{{ item.fechaInicio }} — {{ item.fechaFin }}</td><td>S/ {{ item.costo }}</td><td>{{ item.estado }}</td><td>{{ item.prendaId }}</td><td>{{ item.empleadoId }}</td><td><div class="acciones"><button class="btn-action" type="button" (click)="editar(item)">Editar</button><button class="btn-action btn-danger" type="button" (click)="eliminar(item)">Eliminar</button></div></td></tr>
+        } @empty { <tr><td colspan="8" class="empty-message">No se encontraron mantenimientos.</td></tr> }
+      </tbody>
+    </table></div>
+  </section>
+</div>
+@if (modalAbierto()) {
+  <div class="modal-overlay" (click)="modalAbierto.set(false)"><div class="modal" (click)="$event.stopPropagation()">
+    <h2>{{ editandoId() === null ? 'Nuevo mantenimiento' : 'Editar mantenimiento' }}</h2>
+    <form [formGroup]="form" (ngSubmit)="guardar()"><div class="form-grid">
+      <div class="form-group"><label for="fechaInicio">Fecha de inicio</label><input id="fechaInicio" type="date" formControlName="fechaInicio" /></div>
+      <div class="form-group"><label for="fechaFin">Fecha de fin</label><input id="fechaFin" type="date" formControlName="fechaFin" /></div>
+      <div class="form-group"><label for="tipoMantenimiento">Tipo</label><input id="tipoMantenimiento" type="text" formControlName="tipoMantenimiento" />@if (campoInvalido('tipoMantenimiento')) { <small class="error">Campo obligatorio.</small> }</div>
+      <div class="form-group"><label for="costo">Costo (S/)</label><input id="costo" type="number" min="0" step="0.01" formControlName="costo" /></div>
+      <div class="form-group"><label for="estado">Estado</label><select id="estado" formControlName="estado"><option value="EN CURSO">EN CURSO</option><option value="PENDIENTE">PENDIENTE</option><option value="FINALIZADO">FINALIZADO</option></select></div>
+      <div class="form-group"><label for="prendaId">ID de prenda</label><input id="prendaId" type="number" min="1" formControlName="prendaId" /></div>
+      <div class="form-group"><label for="empleadoId">ID de empleado</label><input id="empleadoId" type="number" min="1" formControlName="empleadoId" /></div>
+      <div class="form-group full"><label for="descripcion">Descripción</label><textarea id="descripcion" rows="3" formControlName="descripcion"></textarea></div>
+    </div>
+    @if (mensajeError()) { <p class="error-box">{{ mensajeError() }}</p> }
+    <div class="modal-actions"><button type="button" class="btn-secondary" (click)="modalAbierto.set(false)">Cancelar</button><button type="submit" class="btn-primary" [disabled]="guardando()">{{ guardando() ? 'Guardando...' : 'Guardar' }}</button></div></form>
+  </div></div>
+}
