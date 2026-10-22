@@ -1,0 +1,88 @@
+<router-outlet></router-outlet>
+
+<mat-form-field>
+  <mat-label>Filter</mat-label>
+  <input matInput (keyup)="applyFilter($event)" placeholder="Ex. ACTIVO" #input />
+</mat-form-field>
+
+<div class="mat-shadow-2">
+  <table mat-table [dataSource]="$dataSource()" matSort>
+
+    <div [hidden]="true">
+      <ng-container matColumnDef="idAlquiler">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>ID</th>
+        <td mat-cell *matCellDef="let row">{{ row.idAlquiler }}</td>
+      </ng-container>
+    </div>
+
+    <ng-container matColumnDef="fechaAlquiler">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>Fecha Alquiler</th>
+      <td mat-cell *matCellDef="let row">{{ row.fechaAlquiler }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="fechaInicio">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>Fecha Inicio</th>
+      <td mat-cell *matCellDef="let row">{{ row.fechaInicio }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="fechaFin">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>Fecha Fin</th>
+      <td mat-cell *matCellDef="let row">{{ row.fechaFin }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="estado">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>Estado</th>
+      <td mat-cell *matCellDef="let row">{{ row.estado }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="subtotal">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>Subtotal</th>
+      <td mat-cell *matCellDef="let row">{{ row.subtotal }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="total">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>Total</th>
+      <td mat-cell *matCellDef="let row">{{ row.total }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="nombresCliente">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>Cliente</th>
+      <td mat-cell *matCellDef="let row">{{ row.nombresCliente }} {{ row.apellidosCliente }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="nombresEmpleado">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>Empleado</th>
+      <td mat-cell *matCellDef="let row">{{ row.nombresEmpleado }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="actions">
+      <th mat-header-cell *matHeaderCellDef>Actions</th>
+      <td mat-cell *matCellDef="let row">
+        <button mat-flat-button [routerLink]="['edit', row.idAlquiler]">
+          <span>Edit</span>
+          <mat-icon>edit</mat-icon>
+        </button>
+        <button mat-flat-button class="cancel-button" (click)="delete(row.idAlquiler)">
+          <span>Delete</span>
+          <mat-icon>delete</mat-icon>
+        </button>
+      </td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+
+    <tr class="mat-row" *matNoDataRow>
+      <td class="mat-cell" colspan="10">No data matching the filter "{{ input.value }}"</td>
+    </tr>
+  </table>
+
+  <mat-paginator
+    [pageSizeOptions]="[5, 10, 25, 100]"
+    aria-label="Select page of alquileres">
+  </mat-paginator>
+
+  <button mat-fab style="float: right" routerLink="/pages/alquiler/new">
+    <mat-icon>add</mat-icon>
+  </button>
+</div>

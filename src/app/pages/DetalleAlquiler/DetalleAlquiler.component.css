@@ -1,0 +1,64 @@
+.details-page {
+  display: grid;
+  gap: 1rem;
+}
+
+.details-page h2 {
+  margin: 0;
+}
+
+.eyebrow {
+  margin: 0 0 0.35rem;
+  color: #64748b;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.filter-field {
+  width: min(100%, 28rem);
+}
+
+.table-container {
+  overflow-x: auto;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.75rem;
+  background: #fff;
+  box-shadow: 0 2px 8px rgb(15 23 42 / 6%);
+}
+
+table {
+  width: 100%;
+  min-width: 54rem;
+}
+
+th {
+  color: #475569;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+td {
+  color: #334155;
+  white-space: nowrap;
+}
+
+tr.mat-mdc-row:hover {
+  background: #f8fafc;
+}
+
+.empty-state {
+  padding: 2rem;
+  color: #64748b;
+  text-align: center;
+}
+
+mat-paginator {
+  background: transparent;
+}
+
+@media (max-width: 640px) {
+  .filter-field {
+    width: 100%;
+  }
+}

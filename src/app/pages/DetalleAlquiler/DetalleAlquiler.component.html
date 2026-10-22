@@ -1,0 +1,93 @@
+<section class="details-page">
+  <header>
+    <p class="eyebrow">GESTIÓN</p>
+    <h2>Detalles de alquiler</h2>
+  </header>
+
+  <mat-form-field appearance="outline" class="filter-field">
+    <mat-label>Buscar detalle</mat-label>
+    <input
+      matInput
+      type="search"
+      (input)="applyFilter($event)"
+      placeholder="Prenda, talla, color o cliente"
+    />
+  </mat-form-field>
+
+  <div class="table-container">
+    <table mat-table [dataSource]="$dataSource()" matSort>
+      <ng-container matColumnDef="idDetalle">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>ID</th>
+        <td mat-cell *matCellDef="let row">{{ row.idDetalle }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="prenda">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Prenda</th>
+        <td mat-cell *matCellDef="let row">{{ row.prenda.nombre }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="talla">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Talla</th>
+        <td mat-cell *matCellDef="let row">{{ row.prenda.talla }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="color">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Color</th>
+        <td mat-cell *matCellDef="let row">{{ row.prenda.color }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="cantidad">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Cantidad</th>
+        <td mat-cell *matCellDef="let row">{{ row.cantidad }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="precioUnitario">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Precio unitario</th>
+        <td mat-cell *matCellDef="let row">{{ row.precioUnitario | currency: 'PEN' }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="subtotal">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Subtotal</th>
+        <td mat-cell *matCellDef="let row">{{ row.subtotal | currency: 'PEN' }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="cliente">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Cliente</th>
+        <td mat-cell *matCellDef="let row">
+          {{ row.alquiler.cliente.nombre }} {{ row.alquiler.cliente.apellidos }}
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef>Acciones</th>
+        <td mat-cell *matCellDef="let row">
+          <button
+            mat-icon-button
+            type="button"
+            aria-label="Eliminar detalle"
+            (click)="delete(row.idDetalle)"
+          >
+            <mat-icon>delete</mat-icon>
+          </button>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+
+      <tr *matNoDataRow>
+        <td class="empty-state" [attr.colspan]="displayedColumns.length">
+          No se encontraron detalles de alquiler.
+        </td>
+      </tr>
+    </table>
+
+    <mat-paginator
+      [pageSize]="10"
+      [pageSizeOptions]="[5, 10, 25, 100]"
+      showFirstLastButtons
+      aria-label="Paginación de detalles de alquiler"
+    >
+    </mat-paginator>
+  </div>
+</section>
