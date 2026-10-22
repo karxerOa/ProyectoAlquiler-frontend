@@ -9,10 +9,9 @@
     "ProyectoAlquiler-Frontend": {
       "projectType": "application",
       "schematics": {
-        "@schematics/angular:component": { "type": "component" },
-        "@schematics/angular:service": { "type": "service" },
-        "@schematics/angular:module": { "typeSeparator": "." },
-        "@schematics/angular:pipe": { "typeSeparator": "." }
+        "@schematics/angular:component": { "type": "component" }, 
+        "@schematics/angular:service": { "type": "service" }, 
+        "@schematics/angular:module": { "typeSeparator": "." }
       },
       "root": "",
       "sourceRoot": "src",

@@ -1,0 +1,154 @@
+<div class="page-container">
+
+  <div class="page-header">
+    <div>
+      <h1>Gestión de producciones</h1>
+      <p>Administra los registros de producción del sistema.</p>
+    </div>
+
+    <button class="btn-primary" type="button" (click)="nuevo()">
+      + Nueva producción
+    </button>
+  </div>
+
+  <div class="stats-card">
+    <div class="stats-icon">📦</div>
+    <div>
+      <p>Total de producciones</p>
+      <h2>{{ producciones().length }}</h2>
+    </div>
+  </div>
+
+  <section class="content-card">
+    <div class="table-header">
+      <h2>Lista de producciones</h2>
+
+      <input
+        type="text"
+        placeholder="Buscar por descripción, prenda o empleado..."
+        (input)="buscar($any($event.target).value)"
+      />
+    </div>
+
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Fecha</th>
+            <th>Cantidad</th>
+            <th>Costo Total</th>
+            <th>Descripción</th>
+            <th>ID Prenda</th>
+            <th>ID Empleado</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          @for (prod of produccionesFiltradas(); track prod.idProduccion) {
+            <tr>
+              <td>{{ prod.fechaProduccion }}</td>
+              <td>{{ prod.cantidad }}</td>
+              <td>S/ {{ prod.costoProduccion }}</td>
+              <td>{{ prod.descripcion }}</td>
+              <td>{{ prod.prenda.idPrenda }}</td>
+              <td>{{ prod.empleado.idEmpleado }}</td>
+              <td class="acciones">
+                <button class="btn-action" type="button" (click)="editar(prod)">
+                  Editar
+                </button>
+                <button class="btn-action btn-danger" type="button" (click)="eliminar(prod)">
+                  Eliminar
+                </button>
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="7" class="empty-message">
+                No se encontraron registros de producción.
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+</div>
+
+<!-- MODAL NUEVO / EDITAR -->
+@if (modalAbierto()) {
+  <div class="modal-overlay" (click)="cerrarModal()">
+    <div class="modal" (click)="$event.stopPropagation()">
+
+      <h2>{{ editandoId() === null ? 'Nueva producción' : 'Editar producción' }}</h2>
+
+      <form [formGroup]="form" (ngSubmit)="guardar()">
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="fechaProduccion">Fecha de Producción</label>
+            <input id="fechaProduccion" type="date" formControlName="fechaProduccion" />
+            @if (campoInvalido('fechaProduccion')) {
+              <small class="error">La fecha es obligatoria.</small>
+            }
+          </div>
+
+          <div class="form-group">
+            <label for="cantidad">Cantidad</label>
+            <input id="cantidad" type="number" min="1" formControlName="cantidad" />
+            @if (campoInvalido('cantidad')) {
+              <small class="error">Ingrese una cantidad válida.</small>
+            }
+          </div>
+
+          <div class="form-group">
+            <label for="costoProduccion">Costo de Producción (S/)</label>
+            <input id="costoProduccion" type="number" step="0.01" min="0" formControlName="costoProduccion" />
+            @if (campoInvalido('costoProduccion')) {
+              <small class="error">Ingrese un costo válido.</small>
+            }
+          </div>
+
+          <div class="form-group">
+            <label for="idPrenda">ID Prenda</label>
+            <input id="idPrenda" type="number" min="1" formControlName="idPrenda" />
+            @if (campoInvalido('idPrenda')) {
+              <small class="error">El ID de prenda es obligatorio.</small>
+            }
+          </div>
+
+          <div class="form-group full">
+            <label for="idEmpleado">ID Empleado</label>
+            <input id="idEmpleado" type="number" min="1" formControlName="idEmpleado" />
+            @if (campoInvalido('idEmpleado')) {
+              <small class="error">El ID de empleado es obligatorio.</small>
+            }
+          </div>
+
+          <div class="form-group full">
+            <label for="descripcion">Descripción</label>
+            <input id="descripcion" type="text" formControlName="descripcion" />
+            @if (campoInvalido('descripcion')) {
+              <small class="error">La descripción es obligatoria.</small>
+            }
+          </div>
+        </div>
+
+        @if (mensajeError()) {
+          <p class="error-box">{{ mensajeError() }}</p>
+        }
+
+        <div class="modal-actions">
+          <button type="button" class="btn-secondary" (click)="cerrarModal()">
+            Cancelar
+          </button>
+          <button type="submit" class="btn-primary" [disabled]="guardando()">
+            {{ guardando() ? 'Guardando...' : 'Guardar' }}
+          </button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+}
