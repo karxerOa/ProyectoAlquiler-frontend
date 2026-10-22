@@ -3,7 +3,7 @@ import type { Empleado } from './empleado';
 import type { Penalidad } from './penalidad';
 
 export interface Devolucion {
-  idDevolucion: number;
+  idDevolucion?: number;
   fechaDevolucion: string;
   estadoPrenda: string;
   observacion: string;
