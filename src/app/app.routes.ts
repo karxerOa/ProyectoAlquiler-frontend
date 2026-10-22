@@ -4,6 +4,8 @@ import { EmpleadoComponent } from './pages/empleado/empleado.component';
 import { ResumenComponent } from './resumen/resumen.component';
 import { DevolucionComponent } from './pages/devolucion/devolucion.component';
 import { PenalidadComponent } from './pages/penalidad/penalidad.component';
+import { CategoriaComponent } from './pages/categoria/categoria.component';
+import { ProduccionComponent } from './pages/produccion/produccion.component';
 
 export const routes: Routes = [
   {
@@ -15,7 +17,8 @@ export const routes: Routes = [
       { path: 'clientes', component: ClienteComponent },
       { path: 'devoluciones', component: DevolucionComponent },
       { path: 'penalidades', component: PenalidadComponent },
-      { path: '', redirectTo: 'devoluciones', pathMatch: 'full' }
+      { path: 'categorias', component: CategoriaComponent },
+      { path: 'producciones', component: ProduccionComponent },
 
     ],
   },

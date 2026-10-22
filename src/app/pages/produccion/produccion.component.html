@@ -11,6 +11,10 @@
     </button>
   </div>
 
+  @if (errorCarga()) {
+    <p class="error-box">{{ errorCarga() }}</p>
+  }
+
   <div class="stats-card">
     <div class="stats-icon">📦</div>
     <div>
@@ -112,16 +116,16 @@
 
           <div class="form-group">
             <label for="idPrenda">ID Prenda</label>
-            <input id="idPrenda" type="number" min="1" formControlName="idPrenda" />
-            @if (campoInvalido('idPrenda')) {
+            <input id="idPrenda" type="number" min="1" formControlName="prenda" />
+            @if (campoInvalido('prenda')) {
               <small class="error">El ID de prenda es obligatorio.</small>
             }
           </div>
 
           <div class="form-group full">
             <label for="idEmpleado">ID Empleado</label>
-            <input id="idEmpleado" type="number" min="1" formControlName="idEmpleado" />
-            @if (campoInvalido('idEmpleado')) {
+            <input id="idEmpleado" type="number" min="1" formControlName="empleado" />
+            @if (campoInvalido('empleado')) {
               <small class="error">El ID de empleado es obligatorio.</small>
             }
           </div>

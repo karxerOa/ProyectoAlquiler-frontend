@@ -2,6 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { Categoria } from '../model/categoria';
+import { environment } from '../../environments/environment';
 
 type CategoriaData = Pick<Categoria, 'nombre' | 'descripcion' | 'estado'>;
 
@@ -9,7 +10,7 @@ type CategoriaData = Pick<Categoria, 'nombre' | 'descripcion' | 'estado'>;
   providedIn: 'root',
 })
 export class CategoriaService {
-  private readonly apiUrl = 'http://localhost:8080/v1/categorias';
+  private readonly apiUrl = `${environment.apiUrl}/categorias`;
   private readonly http = inject(HttpClient);
 
   findAll(): Observable<Categoria[]> {

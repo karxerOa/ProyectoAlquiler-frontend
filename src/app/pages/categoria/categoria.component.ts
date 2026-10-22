@@ -16,6 +16,7 @@ export class CategoriaComponent implements OnInit {
 
   busqueda = signal('');
   categorias = signal<Categoria[]>([]);
+  errorCarga = signal('');
 
   modalAbierto = signal(false);
   editandoId = signal<number | null>(null);
@@ -43,8 +44,14 @@ export class CategoriaComponent implements OnInit {
 
   cargarCategorias(): void {
     this.categoriaService.findAll().subscribe({
-      next: (data) => this.categorias.set(data),
-      error: (error) => console.error('Error al cargar categorías:', error)
+      next: (data) => {
+        this.categorias.set(data);
+        this.errorCarga.set('');
+      },
+      error: (error: unknown) => {
+        console.error('Error al cargar categorías:', error);
+        this.errorCarga.set('No se pudieron cargar las categorías. Verifica la conexión con el servidor.');
+      }
     });
   }
 

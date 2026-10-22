@@ -16,6 +16,7 @@ export class ProduccionComponent implements OnInit {
 
   busqueda = signal('');
   producciones = signal<Produccion[]>([]);
+  errorCarga = signal('');
 
   modalAbierto = signal(false);
   editandoId = signal<number | null>(null);
@@ -46,8 +47,14 @@ export class ProduccionComponent implements OnInit {
 
   cargarProducciones(): void {
     this.produccionService.findAll().subscribe({
-      next: (data) => this.producciones.set(data),
-      error: (error) => console.error('Error al cargar producciones:', error)
+      next: (data) => {
+        this.producciones.set(data);
+        this.errorCarga.set('');
+      },
+      error: (error: unknown) => {
+        console.error('Error al cargar producciones:', error);
+        this.errorCarga.set('No se pudieron cargar las producciones. Verifica la conexión con el servidor.');
+      }
     });
   }
 

@@ -11,6 +11,10 @@
     </button>
   </div>
 
+  @if (errorCarga()) {
+    <p class="error-box">{{ errorCarga() }}</p>
+  }
+
   <div class="stats-card">
     <div class="stats-icon">🏷️</div>
     <div>

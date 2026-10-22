@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 import type { Empleado } from '../model/empleado';
 import { Produccion } from '../model/produccion';
 import type { Prenda } from '../model/prenda';
+import { environment } from '../../environments/environment';
 
 type ProduccionData = Omit<Produccion, 'idProduccion' | 'prenda' | 'empleado'> & {
   prenda: Pick<Prenda, 'idPrenda'>;
@@ -14,7 +15,7 @@ type ProduccionData = Omit<Produccion, 'idProduccion' | 'prenda' | 'empleado'> &
   providedIn: 'root',
 })
 export class ProduccionService {
-  private readonly apiUrl = 'http://localhost:8080/v1/producciones';
+  private readonly apiUrl = `${environment.apiUrl}/producciones`;
   private readonly http = inject(HttpClient);
 
   findAll(): Observable<Produccion[]> {
