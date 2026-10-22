@@ -1,4 +1,4 @@
-import { Component, computed, inject, OnInit, signal } from '@angular/core';
+import { Component, computed, effect, inject, signal, untracked } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Categoria } from '../../model/categoria';
 import { CategoriaService } from '../../services/categoria.service';
@@ -10,13 +10,14 @@ import { CategoriaService } from '../../services/categoria.service';
   templateUrl: './categoria.component.html',
   styleUrl: './categoria.component.css'
 })
-export class CategoriaComponent implements OnInit {
+export class CategoriaComponent {
   private categoriaService = inject(CategoriaService);
   private fb = inject(FormBuilder);
 
   busqueda = signal('');
-  categorias = signal<Categoria[]>([]);
+  readonly categorias = this.categoriaService.$categoriasChange;
   errorCarga = signal('');
+  mensajeExito = signal('');
 
   modalAbierto = signal(false);
   editandoId = signal<number | null>(null);
@@ -38,14 +39,21 @@ export class CategoriaComponent implements OnInit {
     );
   });
 
-  ngOnInit(): void {
+  constructor() {
     this.cargarCategorias();
+    effect(() => {
+      const message = this.categoriaService.$messageChange();
+      if (message) {
+        this.mensajeExito.set(message);
+        untracked(() => this.categoriaService.setMessageChange(''));
+      }
+    });
   }
 
   cargarCategorias(): void {
     this.categoriaService.findAll().subscribe({
       next: (data) => {
-        this.categorias.set(data);
+        this.categoriaService.setCategoriasChange(data);
         this.errorCarga.set('');
       },
       error: (error: unknown) => {
@@ -63,6 +71,7 @@ export class CategoriaComponent implements OnInit {
     this.editandoId.set(null);
     this.form.reset({ estado: 'ACTIVO' });
     this.mensajeError.set('');
+    this.mensajeExito.set('');
     this.modalAbierto.set(true);
   }
 
@@ -74,6 +83,7 @@ export class CategoriaComponent implements OnInit {
       estado: categoria.estado
     });
     this.mensajeError.set('');
+    this.mensajeExito.set('');
     this.modalAbierto.set(true);
   }
 
@@ -97,6 +107,9 @@ export class CategoriaComponent implements OnInit {
       next: () => {
         this.guardando.set(false);
         this.cerrarModal();
+        this.categoriaService.setMessageChange(
+          id === null ? 'Categoría creada correctamente.' : 'Categoría actualizada correctamente.'
+        );
         this.cargarCategorias();
       },
       error: (error: unknown) => {
@@ -113,7 +126,10 @@ export class CategoriaComponent implements OnInit {
     }
 
     this.categoriaService.delete(categoria.idCategoria).subscribe({
-      next: () => this.cargarCategorias(),
+      next: () => {
+        this.categoriaService.setMessageChange('Categoría eliminada correctamente.');
+        this.cargarCategorias();
+      },
       error: (error) => {
         console.error('Error al eliminar categoría:', error);
         alert('No se pudo eliminar la categoría.');

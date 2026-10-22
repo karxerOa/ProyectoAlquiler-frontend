@@ -1,4 +1,4 @@
-import { Component, computed, inject, OnInit, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Prenda } from '../../model/prenda';
 import { PrendaService } from '../../services/prenda.service';
@@ -10,12 +10,12 @@ import { PrendaService } from '../../services/prenda.service';
   templateUrl: './prenda.component.html',
   styleUrl: '../cliente/cliente.component.css'
 })
-export class PrendaComponent implements OnInit {
+export class PrendaComponent {
   private readonly prendaService = inject(PrendaService);
   private readonly fb = inject(FormBuilder);
 
   busqueda = signal('');
-  prendas = signal<Prenda[]>([]);
+  readonly prendas = this.prendaService.$prendasChange;
   modalAbierto = signal(false);
   editandoId = signal<number | null>(null);
   guardando = signal(false);
@@ -40,11 +40,11 @@ export class PrendaComponent implements OnInit {
     );
   });
 
-  ngOnInit(): void { this.cargar(); }
+  constructor() { this.cargar(); }
 
   cargar(): void {
     this.prendaService.findAll().subscribe({
-      next: data => { this.prendas.set(data); this.errorCarga.set(''); },
+      next: data => { this.prendaService.setPrendasChange(data); this.errorCarga.set(''); },
       error: (error: unknown) => {
         console.error('Error al cargar prendas:', error);
         this.errorCarga.set('No se pudieron cargar las prendas.');

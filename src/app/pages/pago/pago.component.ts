@@ -1,4 +1,4 @@
-import { Component, computed, inject, OnInit, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Pago } from '../../model/pago';
 import { PagoService } from '../../services/pago.service';
@@ -10,12 +10,12 @@ import { PagoService } from '../../services/pago.service';
   templateUrl: './pago.component.html',
   styleUrl: '../cliente/cliente.component.css'
 })
-export class PagoComponent implements OnInit {
+export class PagoComponent {
   private readonly pagoService = inject(PagoService);
   private readonly fb = inject(FormBuilder);
 
   busqueda = signal('');
-  pagos = signal<Pago[]>([]);
+  readonly pagos = this.pagoService.$pagosChange;
   modalAbierto = signal(false);
   guardando = signal(false);
   mensajeError = signal('');
@@ -37,11 +37,11 @@ export class PagoComponent implements OnInit {
     );
   });
 
-  ngOnInit(): void { this.cargar(); }
+  constructor() { this.cargar(); }
 
   cargar(): void {
     this.pagoService.findAll().subscribe({
-      next: data => { this.pagos.set(data); this.errorCarga.set(''); },
+      next: data => { this.pagoService.setPagosChange(data); this.errorCarga.set(''); },
       error: (error: unknown) => {
         console.error('Error al cargar pagos:', error);
         this.errorCarga.set('No se pudieron cargar los pagos.');

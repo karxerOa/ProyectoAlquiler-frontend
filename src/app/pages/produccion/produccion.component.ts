@@ -1,4 +1,4 @@
-import { Component, computed, inject, OnInit, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Produccion } from '../../model/produccion';
 import { ProduccionService } from '../../services/produccion.service';
@@ -10,12 +10,12 @@ import { ProduccionService } from '../../services/produccion.service';
   templateUrl: './produccion.component.html',
   styleUrl: './produccion.component.css'
 })
-export class ProduccionComponent implements OnInit {
-  private produccionService = inject(ProduccionService);
-  private fb = inject(FormBuilder);
+export class ProduccionComponent {
+  private readonly produccionService = inject(ProduccionService);
+  private readonly fb = inject(FormBuilder);
 
   busqueda = signal('');
-  producciones = signal<Produccion[]>([]);
+  readonly producciones = this.produccionService.$produccionesChange;
   errorCarga = signal('');
 
   modalAbierto = signal(false);
@@ -41,14 +41,14 @@ export class ProduccionComponent implements OnInit {
     );
   });
 
-  ngOnInit(): void {
+  constructor() {
     this.cargarProducciones();
   }
 
   cargarProducciones(): void {
     this.produccionService.findAll().subscribe({
       next: (data) => {
-        this.producciones.set(data);
+        this.produccionService.setProduccionesChange(data);
         this.errorCarga.set('');
       },
       error: (error: unknown) => {

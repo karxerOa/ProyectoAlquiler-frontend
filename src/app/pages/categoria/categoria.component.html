@@ -14,6 +14,9 @@
   @if (errorCarga()) {
     <p class="error-box">{{ errorCarga() }}</p>
   }
+  @if (mensajeExito()) {
+    <p class="success-box" role="status">{{ mensajeExito() }}</p>
+  }
 
   <div class="stats-card">
     <div class="stats-icon">🏷️</div>

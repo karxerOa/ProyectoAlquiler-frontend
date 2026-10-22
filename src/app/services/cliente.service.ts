@@ -1,6 +1,6 @@
-import { inject, Service } from '@angular/core';
+import { inject, Service, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { environment } from '../../environments/environment';
 
 export interface Cliente {
   idCliente: number;
@@ -14,26 +14,33 @@ export interface Cliente {
 
 @Service()
 export class ClienteService {
-  private readonly apiUrl = 'http://localhost:9494/v1/clientes';
+  private readonly apiUrl = `${environment.apiUrl}/clientes`;
   private readonly http = inject(HttpClient);
+  private readonly _clientes = signal<Cliente[]>([]);
 
-  findAll(): Observable<Cliente[]> {
+  readonly $clientesChange = this._clientes.asReadonly();
+
+  findAll() {
     return this.http.get<Cliente[]>(this.apiUrl);
   }
 
-  findById(id: number): Observable<Cliente> {
+  findById(id: number) {
     return this.http.get<Cliente>(`${this.apiUrl}/${id}`);
   }
 
-  create(cliente: Omit<Cliente, 'idCliente'>): Observable<Cliente> {
+  create(cliente: Omit<Cliente, 'idCliente'>) {
     return this.http.post<Cliente>(this.apiUrl, cliente);
   }
 
-  update(id: number, cliente: Omit<Cliente, 'idCliente'>): Observable<Cliente> {
+  update(id: number, cliente: Omit<Cliente, 'idCliente'>) {
     return this.http.put<Cliente>(`${this.apiUrl}/${id}`, cliente);
   }
 
-  delete(id: number): Observable<void> {
+  delete(id: number) {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
+  }
+
+  setClientesChange(data: Cliente[]): void {
+    this._clientes.set(data);
   }
 }

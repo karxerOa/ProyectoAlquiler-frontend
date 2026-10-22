@@ -6,8 +6,8 @@
     </div>
   </header>
 
-  @if (errorCarga) {
-    <p class="message message-error" role="alert">{{ errorCarga }}</p>
+  @if (errorCarga()) {
+    <p class="message message-error" role="alert">{{ errorCarga() }}</p>
   }
 
   <section class="content-card">
@@ -75,16 +75,16 @@
         </div>
       </div>
 
-      @if (errorGuardar) {
-        <p class="message message-error" role="alert">{{ errorGuardar }}</p>
+      @if (errorGuardar()) {
+        <p class="message message-error" role="alert">{{ errorGuardar() }}</p>
       }
 
       <div class="form-actions">
         <button type="button" class="btn-secondary" (click)="limpiarFormulario(form)">
           Limpiar
         </button>
-        <button type="submit" class="btn-primary" [disabled]="form.invalid || guardando">
-          {{ guardando ? 'Guardando...' : 'Registrar devolución' }}
+        <button type="submit" class="btn-primary" [disabled]="form.invalid || guardando()">
+          {{ guardando() ? 'Guardando...' : 'Registrar devolución' }}
         </button>
       </div>
     </form>
@@ -93,8 +93,8 @@
   <section class="content-card">
     <div class="table-header">
       <h2>Devoluciones registradas</h2>
-      <button type="button" class="btn-secondary" (click)="cargarDevoluciones()" [disabled]="cargando">
-        {{ cargando ? 'Actualizando...' : 'Actualizar' }}
+      <button type="button" class="btn-secondary" (click)="cargarDevoluciones()" [disabled]="cargando()">
+        {{ cargando() ? 'Actualizando...' : 'Actualizar' }}
       </button>
     </div>
 
@@ -111,7 +111,7 @@
           </tr>
         </thead>
         <tbody>
-          @for (devolucion of listaDevoluciones; track devolucion.idDevolucion) {
+          @for (devolucion of listaDevoluciones(); track devolucion.idDevolucion) {
             <tr>
               <td>{{ devolucion.idDevolucion }}</td>
               <td>{{ devolucion.fechaDevolucion | date:'yyyy-MM-dd' }}</td>
@@ -123,7 +123,7 @@
           } @empty {
             <tr>
               <td colspan="6" class="empty-message">
-                {{ cargando ? 'Cargando devoluciones...' : 'No hay devoluciones registradas.' }}
+                {{ cargando() ? 'Cargando devoluciones...' : 'No hay devoluciones registradas.' }}
               </td>
             </tr>
           }

@@ -1,6 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { inject, Service } from '@angular/core';
-import { Observable } from 'rxjs';
+import { inject, Service, signal } from '@angular/core';
 import { Devolucion } from '../model/devolucion';
 import { environment } from '../../environments/environment';
 
@@ -10,12 +9,19 @@ type DevolucionData = Omit<Devolucion, 'idDevolucion'>;
 export class DevolucionService {
   private readonly http = inject(HttpClient);
   private readonly url = `${environment.apiUrl}/devoluciones`;
+  private readonly _devoluciones = signal<Devolucion[]>([]);
 
-  listar(): Observable<Devolucion[]> {
+  readonly $devolucionesChange = this._devoluciones.asReadonly();
+
+  listar() {
     return this.http.get<Devolucion[]>(this.url);
   }
 
-  registrar(devolucion: DevolucionData): Observable<Devolucion> {
+  registrar(devolucion: DevolucionData) {
     return this.http.post<Devolucion>(this.url, devolucion);
+  }
+
+  setDevolucionesChange(data: Devolucion[]): void {
+    this._devoluciones.set(data);
   }
 }

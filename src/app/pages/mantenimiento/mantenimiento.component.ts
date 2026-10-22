@@ -1,4 +1,4 @@
-import { Component, computed, inject, OnInit, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Mantenimiento } from '../../model/mantenimiento';
 import { MantenimientoService } from '../../services/mantenimiento.service';
@@ -10,12 +10,12 @@ import { MantenimientoService } from '../../services/mantenimiento.service';
   templateUrl: './mantenimiento.component.html',
   styleUrl: '../cliente/cliente.component.css'
 })
-export class MantenimientoComponent implements OnInit {
+export class MantenimientoComponent {
   private readonly mantenimientoService = inject(MantenimientoService);
   private readonly fb = inject(FormBuilder);
 
   busqueda = signal('');
-  mantenimientos = signal<Mantenimiento[]>([]);
+  readonly mantenimientos = this.mantenimientoService.$mantenimientosChange;
   modalAbierto = signal(false);
   editandoId = signal<number | null>(null);
   guardando = signal(false);
@@ -41,11 +41,11 @@ export class MantenimientoComponent implements OnInit {
     );
   });
 
-  ngOnInit(): void { this.cargar(); }
+  constructor() { this.cargar(); }
 
   cargar(): void {
     this.mantenimientoService.findAll().subscribe({
-      next: data => { this.mantenimientos.set(data); this.errorCarga.set(''); },
+      next: data => { this.mantenimientoService.setMantenimientosChange(data); this.errorCarga.set(''); },
       error: (error: unknown) => {
         console.error('Error al cargar mantenimientos:', error);
         this.errorCarga.set('No se pudieron cargar los mantenimientos.');

@@ -6,8 +6,8 @@
     </div>
   </header>
 
-  @if (errorCarga) {
-    <p class="message message-error" role="alert">{{ errorCarga }}</p>
+  @if (errorCarga()) {
+    <p class="message message-error" role="alert">{{ errorCarga() }}</p>
   }
 
   <section class="content-card">
@@ -80,16 +80,16 @@
         </label>
       </div>
 
-      @if (errorGuardar) {
-        <p class="message message-error" role="alert">{{ errorGuardar }}</p>
+      @if (errorGuardar()) {
+        <p class="message message-error" role="alert">{{ errorGuardar() }}</p>
       }
 
       <div class="form-actions">
         <button type="button" class="btn-secondary" (click)="limpiarFormulario(form)">
           Limpiar
         </button>
-        <button type="submit" class="btn-primary" [disabled]="form.invalid || guardando">
-          {{ guardando ? 'Guardando...' : 'Registrar penalidad' }}
+        <button type="submit" class="btn-primary" [disabled]="form.invalid || guardando()">
+          {{ guardando() ? 'Guardando...' : 'Registrar penalidad' }}
         </button>
       </div>
     </form>
@@ -98,8 +98,8 @@
   <section class="content-card">
     <div class="table-header">
       <h2>Penalidades registradas</h2>
-      <button type="button" class="btn-secondary" (click)="cargarPenalidades()" [disabled]="cargando">
-        {{ cargando ? 'Actualizando...' : 'Actualizar' }}
+      <button type="button" class="btn-secondary" (click)="cargarPenalidades()" [disabled]="cargando()">
+        {{ cargando() ? 'Actualizando...' : 'Actualizar' }}
       </button>
     </div>
 
@@ -117,7 +117,7 @@
           </tr>
         </thead>
         <tbody>
-          @for (penalidad of listaPenalidades; track penalidad.idPenalidad) {
+          @for (penalidad of listaPenalidades(); track penalidad.idPenalidad) {
             <tr>
               <td>{{ penalidad.idPenalidad }}</td>
               <td>{{ penalidad.tipo_penalidad }}</td>
@@ -130,7 +130,7 @@
           } @empty {
             <tr>
               <td colspan="7" class="empty-message">
-                {{ cargando ? 'Cargando penalidades...' : 'No hay penalidades registradas.' }}
+                {{ cargando() ? 'Cargando penalidades...' : 'No hay penalidades registradas.' }}
               </td>
             </tr>
           }

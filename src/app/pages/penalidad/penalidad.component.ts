@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
 import { Penalidad } from '../../model/penalidad';
 import { PenalidadService } from '../../services/penalidad.service';
@@ -11,45 +11,45 @@ import { PenalidadService } from '../../services/penalidad.service';
   templateUrl: './penalidad.component.html',
   styleUrl: './penalidad.component.css'
 })
-export class PenalidadComponent implements OnInit {
+export class PenalidadComponent {
   private readonly penalidadService = inject(PenalidadService);
 
-  listaPenalidades: Penalidad[] = [];
+  readonly listaPenalidades = this.penalidadService.$penalidadesChange;
   nuevaPenalidad: Omit<Penalidad, 'idPenalidad'> = this.formularioVacio();
-  cargando = false;
-  guardando = false;
-  errorCarga = '';
-  errorGuardar = '';
+  cargando = signal(false);
+  guardando = signal(false);
+  errorCarga = signal('');
+  errorGuardar = signal('');
 
-  ngOnInit(): void {
+  constructor() {
     this.cargarPenalidades();
   }
 
   cargarPenalidades(): void {
-    this.cargando = true;
-    this.errorCarga = '';
+    this.cargando.set(true);
+    this.errorCarga.set('');
 
     this.penalidadService.listar().subscribe({
       next: (data) => {
-        this.listaPenalidades = data;
-        this.cargando = false;
+        this.penalidadService.setPenalidadesChange(data);
+        this.cargando.set(false);
       },
       error: (error: unknown) => {
         console.error('Error al cargar penalidades:', error);
-        this.errorCarga = 'No se pudieron cargar las penalidades. Verifica la conexión con el servidor.';
-        this.cargando = false;
+        this.errorCarga.set('No se pudieron cargar las penalidades. Verifica la conexión con el servidor.');
+        this.cargando.set(false);
       }
     });
   }
 
   guardarPenalidad(form: NgForm): void {
-    if (form.invalid || this.guardando) {
+    if (form.invalid || this.guardando()) {
       form.control.markAllAsTouched();
       return;
     }
 
-    this.guardando = true;
-    this.errorGuardar = '';
+    this.guardando.set(true);
+    this.errorGuardar.set('');
     const datos = {
       ...this.nuevaPenalidad,
       fecha_penalidad: new Date(this.nuevaPenalidad.fecha_penalidad).toISOString()
@@ -57,21 +57,21 @@ export class PenalidadComponent implements OnInit {
 
     this.penalidadService.registrar(datos).subscribe({
       next: () => {
-        this.guardando = false;
+        this.guardando.set(false);
         this.limpiarFormulario(form);
         this.cargarPenalidades();
       },
       error: (error: unknown) => {
         console.error('Error al guardar penalidad:', error);
-        this.errorGuardar = 'No se pudo guardar la penalidad. Revisa los datos e inténtalo nuevamente.';
-        this.guardando = false;
+        this.errorGuardar.set('No se pudo guardar la penalidad. Revisa los datos e inténtalo nuevamente.');
+        this.guardando.set(false);
       }
     });
   }
 
   limpiarFormulario(form: NgForm): void {
     this.nuevaPenalidad = this.formularioVacio();
-    this.errorGuardar = '';
+    this.errorGuardar.set('');
     form.resetForm(this.nuevaPenalidad);
   }
 

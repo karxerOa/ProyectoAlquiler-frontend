@@ -1,4 +1,4 @@
-import { Component, computed, inject, OnInit, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { DetalleAlquiler } from '../../model/detalle-alquiler';
 import { DetalleAlquilerService } from '../../services/detalle-alquiler.service';
@@ -10,12 +10,12 @@ import { DetalleAlquilerService } from '../../services/detalle-alquiler.service'
   templateUrl: './detalle-alquiler.component.html',
   styleUrl: '../cliente/cliente.component.css'
 })
-export class DetalleAlquilerComponent implements OnInit {
+export class DetalleAlquilerComponent {
   private readonly detalleService = inject(DetalleAlquilerService);
   private readonly fb = inject(FormBuilder);
 
   busqueda = signal('');
-  detalles = signal<DetalleAlquiler[]>([]);
+  readonly detalles = this.detalleService.$detallesChange;
   modalAbierto = signal(false);
   editandoId = signal<number | null>(null);
   guardando = signal(false);
@@ -38,11 +38,11 @@ export class DetalleAlquilerComponent implements OnInit {
     );
   });
 
-  ngOnInit(): void { this.cargar(); }
+  constructor() { this.cargar(); }
 
   cargar(): void {
     this.detalleService.findAll().subscribe({
-      next: data => { this.detalles.set(data); this.errorCarga.set(''); },
+      next: data => { this.detalleService.setDetallesChange(data); this.errorCarga.set(''); },
       error: (error: unknown) => {
         console.error('Error al cargar detalles de alquiler:', error);
         this.errorCarga.set('No se pudieron cargar los detalles de alquiler.');

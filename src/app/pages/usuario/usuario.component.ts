@@ -1,4 +1,4 @@
-import { Component, computed, inject, OnInit, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RolService } from '../../services/rol.service';
 import { Usuario } from '../../model/usuario';
@@ -12,14 +12,14 @@ import { Rol } from '../../model/rol';
   templateUrl: './usuario.component.html',
   styleUrl: '../cliente/cliente.component.css'
 })
-export class UsuarioComponent implements OnInit {
+export class UsuarioComponent {
   private readonly usuarioService = inject(UsuarioService);
   private readonly rolService = inject(RolService);
   private readonly fb = inject(FormBuilder);
 
   busqueda = signal('');
-  usuarios = signal<Usuario[]>([]);
-  roles = signal<Rol[]>([]);
+  readonly usuarios = this.usuarioService.$usuariosChange;
+  readonly roles = this.rolService.$rolesChange;
   modalAbierto = signal(false);
   editandoId = signal<number | null>(null);
   guardando = signal(false);
@@ -41,14 +41,14 @@ export class UsuarioComponent implements OnInit {
     );
   });
 
-  ngOnInit(): void {
+  constructor() {
     this.cargarUsuarios();
     this.cargarRoles();
   }
 
   cargarUsuarios(): void {
     this.usuarioService.findAll().subscribe({
-      next: data => { this.usuarios.set(data); this.errorCarga.set(''); },
+      next: data => { this.usuarioService.setUsuariosChange(data); this.errorCarga.set(''); },
       error: (error: unknown) => {
         console.error('Error al cargar usuarios:', error);
         this.errorCarga.set('No se pudieron cargar los usuarios.');
@@ -58,7 +58,7 @@ export class UsuarioComponent implements OnInit {
 
   cargarRoles(): void {
     this.rolService.findAll().subscribe({
-      next: data => this.roles.set(data),
+      next: data => this.rolService.setRolesChange(data),
       error: (error: unknown) => {
         console.error('Error al cargar roles para usuarios:', error);
         this.errorCarga.set('No se pudieron cargar los roles para el formulario.');

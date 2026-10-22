@@ -1,7 +1,7 @@
-import { inject, Service } from '@angular/core';
+import { inject, Service, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
 import type { Empleado } from '../model/empleado';
+import { environment } from '../../environments/environment';
 
 type EmpleadoDatos = Omit<
   Empleado,
@@ -10,26 +10,33 @@ type EmpleadoDatos = Omit<
 
 @Service()
 export class EmpleadoService {
-  private readonly apiUrl = 'http://localhost:9494/v1/empleados';
+  private readonly apiUrl = `${environment.apiUrl}/empleados`;
   private readonly http = inject(HttpClient);
+  private readonly _empleados = signal<Empleado[]>([]);
 
-  findAll(): Observable<Empleado[]> {
+  readonly $empleadosChange = this._empleados.asReadonly();
+
+  findAll() {
     return this.http.get<Empleado[]>(this.apiUrl);
   }
 
-  findById(id: number): Observable<Empleado> {
+  findById(id: number) {
     return this.http.get<Empleado>(`${this.apiUrl}/${id}`);
   }
 
-  create(empleado: EmpleadoDatos): Observable<Empleado> {
+  create(empleado: EmpleadoDatos) {
     return this.http.post<Empleado>(this.apiUrl, empleado);
   }
 
-  update(id: number, empleado: EmpleadoDatos): Observable<Empleado> {
+  update(id: number, empleado: EmpleadoDatos) {
     return this.http.put<Empleado>(`${this.apiUrl}/${id}`, empleado);
   }
 
-  delete(id: number): Observable<void> {
+  delete(id: number) {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
+  }
+
+  setEmpleadosChange(data: Empleado[]): void {
+    this._empleados.set(data);
   }
 }

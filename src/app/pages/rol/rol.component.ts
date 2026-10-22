@@ -1,4 +1,4 @@
-import { Component, computed, inject, OnInit, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Rol } from '../../model/rol';
 import { RolService } from '../../services/rol.service';
@@ -10,12 +10,12 @@ import { RolService } from '../../services/rol.service';
   templateUrl: './rol.component.html',
   styleUrl: '../cliente/cliente.component.css'
 })
-export class RolComponent implements OnInit {
+export class RolComponent {
   private readonly rolService = inject(RolService);
   private readonly fb = inject(FormBuilder);
 
   busqueda = signal('');
-  roles = signal<Rol[]>([]);
+  readonly roles = this.rolService.$rolesChange;
   modalAbierto = signal(false);
   editandoId = signal<number | null>(null);
   guardando = signal(false);
@@ -34,11 +34,11 @@ export class RolComponent implements OnInit {
     );
   });
 
-  ngOnInit(): void { this.cargar(); }
+  constructor() { this.cargar(); }
 
   cargar(): void {
     this.rolService.findAll().subscribe({
-      next: data => { this.roles.set(data); this.errorCarga.set(''); },
+      next: data => { this.rolService.setRolesChange(data); this.errorCarga.set(''); },
       error: (error: unknown) => {
         console.error('Error al cargar roles:', error);
         this.errorCarga.set('No se pudieron cargar los roles.');

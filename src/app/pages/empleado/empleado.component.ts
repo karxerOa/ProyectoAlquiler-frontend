@@ -1,4 +1,4 @@
-import { Component, computed, inject, OnInit, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Empleado } from '../../model/empleado';
 import { EmpleadoService } from '../../services/empleado.service';
@@ -10,12 +10,12 @@ import { EmpleadoService } from '../../services/empleado.service';
   templateUrl: './empleado.component.html',
   styleUrl: './empleado.component.css'
 })
-export class EmpleadoComponent implements OnInit {
-  private empleadoService = inject(EmpleadoService);
-  private fb = inject(FormBuilder);
+export class EmpleadoComponent {
+  private readonly empleadoService = inject(EmpleadoService);
+  private readonly fb = inject(FormBuilder);
 
   busqueda = signal('');
-  empleados = signal<Empleado[]>([]);
+  readonly empleados = this.empleadoService.$empleadosChange;
 
   modalAbierto = signal(false);
   editandoId = signal<number | null>(null);
@@ -40,13 +40,13 @@ export class EmpleadoComponent implements OnInit {
     );
   });
 
-  ngOnInit(): void {
+  constructor() {
     this.cargarEmpleados();
   }
 
   cargarEmpleados(): void {
     this.empleadoService.findAll().subscribe({
-      next: (data) => this.empleados.set(data),
+      next: (data) => this.empleadoService.setEmpleadosChange(data),
       error: (error) => console.error('Error al cargar empleados:', error)
     });
   }

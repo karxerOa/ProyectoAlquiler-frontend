@@ -291,6 +291,15 @@ tbody tr:last-child td {
   font-size: 12px;
 }
 
+.success-box {
+  margin: 16px 0 0;
+  padding: 10px 12px;
+  color: #2f6b43;
+  background: #d8eadc;
+  border-radius: 8px;
+  font-size: 12px;
+}
+
 .modal-actions {
   display: flex;
   justify-content: flex-end;

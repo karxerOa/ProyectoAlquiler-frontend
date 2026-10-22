@@ -1,4 +1,4 @@
-import { Component, computed, inject, OnInit, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Cliente, ClienteService } from '../../services/cliente.service';
 
@@ -9,12 +9,12 @@ import { Cliente, ClienteService } from '../../services/cliente.service';
   templateUrl: './cliente.component.html',
   styleUrl: './cliente.component.css'
 })
-export class ClienteComponent implements OnInit {
-  private clienteService = inject(ClienteService);
-  private fb = inject(FormBuilder);
+export class ClienteComponent {
+  private readonly clienteService = inject(ClienteService);
+  private readonly fb = inject(FormBuilder);
 
   busqueda = signal('');
-  clientes = signal<Cliente[]>([]);
+  readonly clientes = this.clienteService.$clientesChange;
 
   modalAbierto = signal(false);
   editandoId = signal<number | null>(null);
@@ -39,13 +39,13 @@ export class ClienteComponent implements OnInit {
     );
   });
 
-  ngOnInit(): void {
+  constructor() {
     this.cargarClientes();
   }
 
   cargarClientes(): void {
     this.clienteService.findAll().subscribe({
-      next: (data) => this.clientes.set(data),
+      next: (data) => this.clienteService.setClientesChange(data),
       error: (error) => console.error('Error al cargar clientes:', error)
     });
   }

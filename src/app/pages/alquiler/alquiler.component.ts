@@ -1,4 +1,4 @@
-import { Component, computed, inject, OnInit, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Alquiler } from '../../model/alquiler';
 import { AlquilerService } from '../../services/alquiler.service';
@@ -10,12 +10,12 @@ import { AlquilerService } from '../../services/alquiler.service';
   templateUrl: './alquiler.component.html',
   styleUrl: '../cliente/cliente.component.css'
 })
-export class AlquilerComponent implements OnInit {
+export class AlquilerComponent {
   private readonly alquilerService = inject(AlquilerService);
   private readonly fb = inject(FormBuilder);
 
   busqueda = signal('');
-  alquileres = signal<Alquiler[]>([]);
+  readonly alquileres = this.alquilerService.$alquileresChange;
   modalAbierto = signal(false);
   editandoId = signal<number | null>(null);
   guardando = signal(false);
@@ -42,14 +42,14 @@ export class AlquilerComponent implements OnInit {
     );
   });
 
-  ngOnInit(): void {
+  constructor() {
     this.cargarAlquileres();
   }
 
   cargarAlquileres(): void {
     this.alquilerService.findAll().subscribe({
       next: (data) => {
-        this.alquileres.set(data);
+        this.alquilerService.setAlquileresChange(data);
         this.errorCarga.set('');
       },
       error: (error: unknown) => {

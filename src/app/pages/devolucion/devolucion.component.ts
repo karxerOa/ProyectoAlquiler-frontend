@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
 import { Devolucion } from '../../model/devolucion';
 import { DevolucionService } from '../../services/devolucion.service';
@@ -11,45 +11,45 @@ import { DevolucionService } from '../../services/devolucion.service';
   templateUrl: './devolucion.component.html',
   styleUrl: './devolucion.component.css'
 })
-export class DevolucionComponent implements OnInit {
+export class DevolucionComponent {
   private readonly devolucionService = inject(DevolucionService);
 
-  listaDevoluciones: Devolucion[] = [];
+  readonly listaDevoluciones = this.devolucionService.$devolucionesChange;
   nuevaDevolucion: Omit<Devolucion, 'idDevolucion'> = this.formularioVacio();
-  cargando = false;
-  guardando = false;
-  errorCarga = '';
-  errorGuardar = '';
+  cargando = signal(false);
+  guardando = signal(false);
+  errorCarga = signal('');
+  errorGuardar = signal('');
 
-  ngOnInit(): void {
+  constructor() {
     this.cargarDevoluciones();
   }
 
   cargarDevoluciones(): void {
-    this.cargando = true;
-    this.errorCarga = '';
+    this.cargando.set(true);
+    this.errorCarga.set('');
 
     this.devolucionService.listar().subscribe({
       next: (data) => {
-        this.listaDevoluciones = data;
-        this.cargando = false;
+        this.devolucionService.setDevolucionesChange(data);
+        this.cargando.set(false);
       },
       error: (error: unknown) => {
         console.error('Error al cargar devoluciones:', error);
-        this.errorCarga = 'No se pudieron cargar las devoluciones. Verifica la conexión con el servidor.';
-        this.cargando = false;
+        this.errorCarga.set('No se pudieron cargar las devoluciones. Verifica la conexión con el servidor.');
+        this.cargando.set(false);
       }
     });
   }
 
   guardarDevolucion(form: NgForm): void {
-    if (form.invalid || this.guardando) {
+    if (form.invalid || this.guardando()) {
       form.control.markAllAsTouched();
       return;
     }
 
-    this.guardando = true;
-    this.errorGuardar = '';
+    this.guardando.set(true);
+    this.errorGuardar.set('');
     const datos = {
       ...this.nuevaDevolucion,
       fechaDevolucion: new Date(this.nuevaDevolucion.fechaDevolucion).toISOString()
@@ -57,21 +57,21 @@ export class DevolucionComponent implements OnInit {
 
     this.devolucionService.registrar(datos).subscribe({
       next: () => {
-        this.guardando = false;
+        this.guardando.set(false);
         this.limpiarFormulario(form);
         this.cargarDevoluciones();
       },
       error: (error: unknown) => {
         console.error('Error al guardar devolución:', error);
-        this.errorGuardar = 'No se pudo guardar la devolución. Revisa los datos e inténtalo nuevamente.';
-        this.guardando = false;
+        this.errorGuardar.set('No se pudo guardar la devolución. Revisa los datos e inténtalo nuevamente.');
+        this.guardando.set(false);
       }
     });
   }
 
   limpiarFormulario(form: NgForm): void {
     this.nuevaDevolucion = this.formularioVacio();
-    this.errorGuardar = '';
+    this.errorGuardar.set('');
     form.resetForm(this.nuevaDevolucion);
   }
 
