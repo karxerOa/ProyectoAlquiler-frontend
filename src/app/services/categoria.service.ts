@@ -1,13 +1,11 @@
 import { HttpClient } from '@angular/common/http';
-import { inject, Injectable } from '@angular/core';
+import { inject, Service } from '@angular/core';
 import { Observable } from 'rxjs';
 import { Categoria } from '../model/categoria';
 
 type CategoriaData = Pick<Categoria, 'nombre' | 'descripcion' | 'estado'>;
 
-@Injectable({
-  providedIn: 'root',
-})
+@Service()
 export class CategoriaService {
   private readonly apiUrl = 'http://localhost:8080/v1/categorias';
   private readonly http = inject(HttpClient);

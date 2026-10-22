@@ -1,20 +1,19 @@
 import { HttpClient } from '@angular/common/http';
-import { inject, Injectable } from '@angular/core';
+import { inject, Service } from '@angular/core';
 import { Observable } from 'rxjs';
+import { environment } from '../../environments/environment';
 import type { Empleado } from '../model/empleado';
-import { Produccion } from '../model/produccion';
 import type { Prenda } from '../model/prenda';
+import type { Produccion } from '../model/produccion';
 
 type ProduccionData = Omit<Produccion, 'idProduccion' | 'prenda' | 'empleado'> & {
   prenda: Pick<Prenda, 'idPrenda'>;
   empleado: Pick<Empleado, 'idEmpleado'>;
 };
 
-@Injectable({
-  providedIn: 'root',
-})
+@Service()
 export class ProduccionService {
-  private readonly apiUrl = 'http://localhost:8080/v1/producciones';
+  private readonly apiUrl = `${environment.apiUrl}/producciones`;
   private readonly http = inject(HttpClient);
 
   findAll(): Observable<Produccion[]> {
