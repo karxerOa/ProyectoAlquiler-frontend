@@ -1,0 +1,30 @@
+<div class="page-container">
+  <div class="page-header"><div><h1>Gestión de pagos</h1><p>Registra pagos asociados a los alquileres y consulta sus estados.</p></div><button class="btn-primary" type="button" (click)="nuevo()">+ Registrar pago</button></div>
+  @if (errorCarga()) { <p class="error-box">{{ errorCarga() }}</p> }
+  <div class="stats-card"><div class="stats-icon">💳</div><div><p>Total de pagos</p><h2>{{ pagos().length }}</h2></div></div>
+  <section class="content-card">
+    <div class="table-header"><h2>Lista de pagos</h2><input type="text" placeholder="Buscar por alquiler, método o estado..." (input)="buscar($any($event.target).value)" /></div>
+    <div class="table-container"><table>
+      <thead><tr><th>Fecha</th><th>Monto</th><th>Método</th><th>Estado</th><th>ID alquiler</th></tr></thead>
+      <tbody>
+        @for (pago of pagosFiltrados(); track $index) {
+          <tr><td>{{ pago.fechaPago }}</td><td>S/ {{ pago.monto }}</td><td>{{ pago.metodoPago }}</td><td>{{ pago.estado }}</td><td>{{ pago.alquilerId }}</td></tr>
+        } @empty { <tr><td colspan="5" class="empty-message">No se encontraron pagos.</td></tr> }
+      </tbody>
+    </table></div>
+  </section>
+</div>
+@if (modalAbierto()) {
+  <div class="modal-overlay" (click)="modalAbierto.set(false)"><div class="modal" (click)="$event.stopPropagation()">
+    <h2>Registrar pago</h2>
+    <form [formGroup]="form" (ngSubmit)="guardar()"><div class="form-grid">
+      <div class="form-group"><label for="fechaPago">Fecha</label><input id="fechaPago" type="date" formControlName="fechaPago" /></div>
+      <div class="form-group"><label for="monto">Monto (S/)</label><input id="monto" type="number" min="0.01" step="0.01" formControlName="monto" />@if (campoInvalido('monto')) { <small class="error">El monto debe ser mayor que cero.</small> }</div>
+      <div class="form-group"><label for="metodoPago">Método de pago</label><select id="metodoPago" formControlName="metodoPago"><option value="EFECTIVO">Efectivo</option><option value="TARJETA">Tarjeta</option><option value="TRANSFERENCIA">Transferencia</option><option value="YAPE">Yape / Plin</option></select></div>
+      <div class="form-group"><label for="estado">Estado</label><select id="estado" formControlName="estado"><option value="PAGADO">PAGADO</option><option value="PENDIENTE">PENDIENTE</option><option value="ANULADO">ANULADO</option></select></div>
+      <div class="form-group full"><label for="alquilerId">ID de alquiler</label><input id="alquilerId" type="number" min="1" formControlName="alquilerId" />@if (campoInvalido('alquilerId')) { <small class="error">Ingresa un ID válido.</small> }</div>
+    </div>
+    @if (mensajeError()) { <p class="error-box">{{ mensajeError() }}</p> }
+    <div class="modal-actions"><button type="button" class="btn-secondary" (click)="modalAbierto.set(false)">Cancelar</button><button type="submit" class="btn-primary" [disabled]="guardando()">{{ guardando() ? 'Guardando...' : 'Registrar pago' }}</button></div></form>
+  </div></div>
+}

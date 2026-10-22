@@ -1,0 +1,155 @@
+<div class="resumen">
+  <header class="page-head">
+    <div>
+      <p class="eyebrow">OPERACIÓN DIARIA</p>
+      <h1>Todo listo para un gran día</h1>
+      <p class="lead">Una mirada a tus alquileres, devoluciones y cobros de hoy.</p>
+    </div>
+    <a class="btn-primary" routerLink="/alquileres/nuevo"><span aria-hidden="true">+</span> Nuevo alquiler</a>
+  </header>
+
+  <section class="kpis" aria-label="Indicadores">
+    <article class="card kpi">
+      <p class="kpi-label">Alquileres en curso</p>
+      <p class="kpi-value">3</p>
+      <p class="kpi-note">5 prendas fuera de la boutique</p>
+    </article>
+
+    <article class="card kpi">
+      <p class="kpi-label">Devoluciones de hoy</p>
+      <p class="kpi-value">1</p>
+      <p class="kpi-note">Además, 1 devolución vencida</p>
+    </article>
+
+    <article class="card kpi">
+      <p class="kpi-label">Prendas disponibles</p>
+      <p class="kpi-value">36 de 48</p>
+      <p class="kpi-note">75 % del inventario listo para alquilar</p>
+    </article>
+
+    <article class="card kpi kpi-dark">
+      <p class="kpi-label">Cobrado en octubre</p>
+      <p class="kpi-value">3.840,00</p>
+      <p class="kpi-note">+20 % frente a septiembre · sin garantías</p>
+    </article>
+  </section>
+
+  <section class="split">
+    <article class="card chart-card">
+      <div class="card-head">
+        <h2>Evolución de cobros</h2>
+        <span class="muted">Octubre de 2026</span>
+      </div>
+
+      <div class="chart-total">
+        <strong>3.840,00</strong>
+        <span class="pill pill-green">↑ 20 % este mes</span>
+      </div>
+
+      <div class="bars" role="img" aria-label="Cobros de mayo a octubre">
+        <div class="bar-col"><span class="bar-val">2.100</span><div class="bar" style="height: 55%"></div><span class="bar-lbl">May</span></div>
+        <div class="bar-col"><span class="bar-val">2.650</span><div class="bar" style="height: 69%"></div><span class="bar-lbl">Jun</span></div>
+        <div class="bar-col"><span class="bar-val">2.400</span><div class="bar" style="height: 63%"></div><span class="bar-lbl">Jul</span></div>
+        <div class="bar-col"><span class="bar-val">3.000</span><div class="bar" style="height: 78%"></div><span class="bar-lbl">Ago</span></div>
+        <div class="bar-col"><span class="bar-val">3.200</span><div class="bar" style="height: 83%"></div><span class="bar-lbl">Sep</span></div>
+        <div class="bar-col is-current"><span class="bar-val">3.840</span><div class="bar" style="height: 100%"></div><span class="bar-lbl">Oct</span></div>
+      </div>
+
+      <p class="foot-note">Cobros de alquiler confirmados · Las garantías reembolsadas no son ingresos.</p>
+    </article>
+
+    <article class="card">
+      <div class="card-head">
+        <h2>Próximas devoluciones</h2>
+        <a class="link" routerLink="/devoluciones">Ver agenda →</a>
+      </div>
+
+      <ul class="returns">
+        <li>
+          <span class="date-chip">14 OCT</span>
+          <div class="ret-info">
+            <strong>Elena Vargas</strong>
+            <span>AL-1046 · Vestido Aurora</span>
+          </div>
+          <span class="pill pill-red">1 día de atraso</span>
+        </li>
+        <li>
+          <span class="date-chip">15 OCT</span>
+          <div class="ret-info">
+            <strong>Mateo Ríos</strong>
+            <span>AL-1047 · Traje y chaleco</span>
+          </div>
+          <span class="pill pill-amber">Hoy · 18:00</span>
+        </li>
+        <li>
+          <span class="date-chip">17 OCT</span>
+          <div class="ret-info">
+            <strong>Camila Torres</strong>
+            <span>AL-1048 · Vestido y estola</span>
+          </div>
+          <span class="pill pill-gray">En 2 días</span>
+        </li>
+      </ul>
+    </article>
+  </section>
+
+  <section class="card table-card">
+    <div class="card-head">
+      <h2>Alquileres recientes</h2>
+      <a class="link" routerLink="/alquileres">Ver todos los alquileres →</a>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>ALQUILER / CLIENTE</th>
+            <th>PRENDAS</th>
+            <th>PERÍODO</th>
+            <th>ESTADO</th>
+            <th class="num">TOTAL</th>
+            <th class="num">SALDO</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>AL-1048 · Camila Torres</strong><small>Atendió Ana Beltrán</small></td>
+            <td>Vestido Celeste + estola</td>
+            <td>15–17 oct 2026</td>
+            <td><span class="pill pill-purple">En curso</span></td>
+            <td class="num">220,00</td>
+            <td class="num">120,00</td>
+          </tr>
+          <tr>
+            <td><strong>AL-1047 · Mateo Ríos</strong><small>Atendió Ana Beltrán</small></td>
+            <td>Traje Siena + chaleco</td>
+            <td>13–15 oct 2026</td>
+            <td><span class="pill pill-purple">En curso</span></td>
+            <td class="num">160,00</td>
+            <td class="num">0,00</td>
+          </tr>
+          <tr>
+            <td><strong>AL-1046 · Elena Vargas</strong><small>Atendió Lucía Moreno</small></td>
+            <td>Vestido Aurora</td>
+            <td>12–14 oct 2026</td>
+            <td><span class="pill pill-red">Vencido</span></td>
+            <td class="num">180,00</td>
+            <td class="num">0,00</td>
+          </tr>
+          <tr>
+            <td><strong>AL-1049 · Sofía Méndez</strong><small>Atendió Lucía Moreno</small></td>
+            <td>Conjunto Gala · 3 prendas</td>
+            <td>16–19 oct 2026</td>
+            <td><span class="pill pill-amber">Reservado</span></td>
+            <td class="num">240,00</td>
+            <td class="num">120,00</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p class="foot-note">
+      Saldo de alquileres: 240,00 · Penalidad proximal de AL-1046: 20,00, pendiente de confirmar.
+    </p>
+  </section>
+</div>

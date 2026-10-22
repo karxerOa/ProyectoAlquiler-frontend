@@ -1,6 +1,3 @@
-import type { Empleado } from './empleado';
-import type { Prenda } from './prenda';
-
 export interface Mantenimiento {
   idMantenimiento: number;
   fechaInicio: string;
@@ -9,6 +6,6 @@ export interface Mantenimiento {
   descripcion: string;
   costo: number;
   estado: string;
-  prenda: Prenda;
-  empleado: Empleado;
+  prendaId: number;
+  empleadoId: number;
 }

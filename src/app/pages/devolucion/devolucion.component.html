@@ -1,0 +1,134 @@
+<div class="page-container">
+  <header class="page-header">
+    <div>
+      <h1>Devoluciones</h1>
+      <p>Registra la recepción de prendas y consulta las devoluciones existentes.</p>
+    </div>
+  </header>
+
+  @if (errorCarga) {
+    <p class="message message-error" role="alert">{{ errorCarga }}</p>
+  }
+
+  <section class="content-card">
+    <h2>Registrar devolución</h2>
+    <form #form="ngForm" (ngSubmit)="guardarDevolucion(form)">
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="fechaDevolucion">Fecha de devolución</label>
+          <input
+            id="fechaDevolucion"
+            type="date"
+            name="fechaDevolucion"
+            [(ngModel)]="nuevaDevolucion.fechaDevolucion"
+            required
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="estadoPrenda">Estado de la prenda</label>
+          <select
+            id="estadoPrenda"
+            name="estadoPrenda"
+            [(ngModel)]="nuevaDevolucion.estadoPrenda"
+            required
+          >
+            <option value="BUENO">Bueno</option>
+            <option value="DANADO">Dañado</option>
+            <option value="INCOMPLETO">Incompleto</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="alquilerId">ID de alquiler</label>
+          <input
+            id="alquilerId"
+            type="number"
+            name="alquilerId"
+            min="1"
+            [(ngModel)]="nuevaDevolucion.alquilerId"
+            required
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="empleadoId">ID de empleado</label>
+          <input
+            id="empleadoId"
+            type="number"
+            name="empleadoId"
+            min="1"
+            [(ngModel)]="nuevaDevolucion.empleadoId"
+            required
+          />
+        </div>
+
+        <div class="form-group form-group-full">
+          <label for="observacion">Observación</label>
+          <textarea
+            id="observacion"
+            name="observacion"
+            rows="3"
+            maxlength="500"
+            [(ngModel)]="nuevaDevolucion.observacion"
+          ></textarea>
+        </div>
+      </div>
+
+      @if (errorGuardar) {
+        <p class="message message-error" role="alert">{{ errorGuardar }}</p>
+      }
+
+      <div class="form-actions">
+        <button type="button" class="btn-secondary" (click)="limpiarFormulario(form)">
+          Limpiar
+        </button>
+        <button type="submit" class="btn-primary" [disabled]="form.invalid || guardando">
+          {{ guardando ? 'Guardando...' : 'Registrar devolución' }}
+        </button>
+      </div>
+    </form>
+  </section>
+
+  <section class="content-card">
+    <div class="table-header">
+      <h2>Devoluciones registradas</h2>
+      <button type="button" class="btn-secondary" (click)="cargarDevoluciones()" [disabled]="cargando">
+        {{ cargando ? 'Actualizando...' : 'Actualizar' }}
+      </button>
+    </div>
+
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Fecha</th>
+            <th>Estado de prenda</th>
+            <th>Observación</th>
+            <th>ID alquiler</th>
+            <th>ID empleado</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (devolucion of listaDevoluciones; track devolucion.idDevolucion) {
+            <tr>
+              <td>{{ devolucion.idDevolucion }}</td>
+              <td>{{ devolucion.fechaDevolucion | date:'yyyy-MM-dd' }}</td>
+              <td>{{ devolucion.estadoPrenda }}</td>
+              <td>{{ devolucion.observacion || '—' }}</td>
+              <td>{{ devolucion.alquilerId }}</td>
+              <td>{{ devolucion.empleadoId }}</td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="6" class="empty-message">
+                {{ cargando ? 'Cargando devoluciones...' : 'No hay devoluciones registradas.' }}
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>

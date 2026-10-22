@@ -1,8 +1,12 @@
 <div class="app-shell">
   <aside class="sidebar">
-    <a class="brand" routerLink="/clientes" aria-label="Proyecto Alquiler, inicio">
-      <span class="brand-mark" aria-hidden="true">PA</span>
-      <span class="brand-name">Proyecto<span>Alquiler</span></span>
+    <a class="brand" routerLink="/" aria-label="Lucy, inicio">
+      <span class="brand-logo">lucy.</span>
+      <span class="brand-sub">ALQUILER DE VESTIMENTAS</span>
+    </a>
+
+    <a class="btn-primary btn-block" routerLink="/alquileres/nuevo">
+      <span aria-hidden="true">+</span> Nuevo alquiler
     </a>
 
     <p class="nav-heading">GESTIÓN</p>
@@ -15,21 +19,45 @@
           [routerLinkActiveOptions]="{ exact: true }"
           ariaCurrentWhenActive="page"
         >
+          <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <path [attr.d]="item.icon" />
+          </svg>
           {{ item.label }}
         </a>
       }
     </nav>
 
-    <div class="sidebar-footer">Sistema de gestión de vestimentas</div>
+    <div class="sidebar-note">
+      <strong>Cada detalle, en su lugar.</strong>
+      <span>Tu boutique, organizada de principio a fin.</span>
+    </div>
+
+    <div class="sidebar-user">
+      <span class="avatar">LM</span>
+      <div>
+        <strong>Lucía Moreno</strong>
+        <span>Administradora</span>
+      </div>
+    </div>
   </aside>
 
   <main class="main-content">
     <header class="topbar">
-      <div>
-        <p class="eyebrow">ADMINISTRACIÓN</p>
-        <h1>Gestión de alquiler de vestimentas</h1>
+      <nav class="breadcrumb" aria-label="Ruta">
+        <span>Lucy</span>
+        <span aria-hidden="true">›</span>
+        <strong>Resumen</strong>
+      </nav>
+
+      <div class="topbar-right">
+        <time class="topbar-date">Jueves, 15 de octubre de 2026</time>
+        <button class="icon-btn" type="button" aria-label="Notificaciones">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10.3 21a1.9 1.9 0 0 0 3.4 0" />
+          </svg>
+        </button>
+        <span class="avatar avatar-sm">LM</span>
       </div>
-      <span class="status-badge"><span aria-hidden="true"></span> Panel de control</span>
     </header>
 
     <section class="page-content" aria-label="Contenido de la página">

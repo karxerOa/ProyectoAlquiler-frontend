@@ -1,0 +1,141 @@
+<div class="page-container">
+  <header class="page-header">
+    <div>
+      <h1>Penalidades</h1>
+      <p>Registra cargos asociados a devoluciones y consulta las penalidades existentes.</p>
+    </div>
+  </header>
+
+  @if (errorCarga) {
+    <p class="message message-error" role="alert">{{ errorCarga }}</p>
+  }
+
+  <section class="content-card">
+    <h2>Registrar penalidad</h2>
+    <form #form="ngForm" (ngSubmit)="guardarPenalidad(form)">
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="tipoPenalidad">Tipo de penalidad</label>
+          <input
+            id="tipoPenalidad"
+            type="text"
+            name="tipo_penalidad"
+            maxlength="100"
+            [(ngModel)]="nuevaPenalidad.tipo_penalidad"
+            required
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="monto">Monto (S/)</label>
+          <input
+            id="monto"
+            type="number"
+            name="monto"
+            min="0"
+            step="0.01"
+            [(ngModel)]="nuevaPenalidad.monto"
+            required
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="fechaPenalidad">Fecha de penalidad</label>
+          <input
+            id="fechaPenalidad"
+            type="date"
+            name="fecha_penalidad"
+            [(ngModel)]="nuevaPenalidad.fecha_penalidad"
+            required
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="devolucionId">ID de devolución</label>
+          <input
+            id="devolucionId"
+            type="number"
+            name="devolucionId"
+            min="1"
+            [(ngModel)]="nuevaPenalidad.devolucionId"
+            required
+          />
+        </div>
+
+        <div class="form-group form-group-full">
+          <label for="descripcion">Descripción</label>
+          <textarea
+            id="descripcion"
+            name="descripcion"
+            rows="3"
+            maxlength="500"
+            [(ngModel)]="nuevaPenalidad.descripcion"
+            required
+          ></textarea>
+        </div>
+
+        <label class="checkbox-field">
+          <input type="checkbox" name="estado" [(ngModel)]="nuevaPenalidad.estado" />
+          Activa / pendiente
+        </label>
+      </div>
+
+      @if (errorGuardar) {
+        <p class="message message-error" role="alert">{{ errorGuardar }}</p>
+      }
+
+      <div class="form-actions">
+        <button type="button" class="btn-secondary" (click)="limpiarFormulario(form)">
+          Limpiar
+        </button>
+        <button type="submit" class="btn-primary" [disabled]="form.invalid || guardando">
+          {{ guardando ? 'Guardando...' : 'Registrar penalidad' }}
+        </button>
+      </div>
+    </form>
+  </section>
+
+  <section class="content-card">
+    <div class="table-header">
+      <h2>Penalidades registradas</h2>
+      <button type="button" class="btn-secondary" (click)="cargarPenalidades()" [disabled]="cargando">
+        {{ cargando ? 'Actualizando...' : 'Actualizar' }}
+      </button>
+    </div>
+
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Tipo</th>
+            <th>Descripción</th>
+            <th>Monto</th>
+            <th>Fecha</th>
+            <th>Estado</th>
+            <th>ID devolución</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (penalidad of listaPenalidades; track penalidad.idPenalidad) {
+            <tr>
+              <td>{{ penalidad.idPenalidad }}</td>
+              <td>{{ penalidad.tipo_penalidad }}</td>
+              <td>{{ penalidad.descripcion }}</td>
+              <td>S/ {{ penalidad.monto | number:'1.2-2' }}</td>
+              <td>{{ penalidad.fecha_penalidad | date:'yyyy-MM-dd' }}</td>
+              <td>{{ penalidad.estado ? 'Activa / pendiente' : 'Resuelta' }}</td>
+              <td>{{ penalidad.devolucionId }}</td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="7" class="empty-message">
+                {{ cargando ? 'Cargando penalidades...' : 'No hay penalidades registradas.' }}
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>
