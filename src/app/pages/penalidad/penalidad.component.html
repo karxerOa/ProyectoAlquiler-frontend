@@ -1,63 +1,111 @@
-<div class="container-fluid p-4">
-  <h2 class="mb-4">Gestión de Penalidades</h2>
-
-  <div class="card mb-4 shadow-sm">
-    <div class="card-header bg-danger text-white">
-      <h5 class="card-title mb-0">Registrar Penalidad</h5>
+<div class="page-container">
+  <header class="page-header">
+    <div>
+      <h1>Penalidades</h1>
+      <p>Registra cargos asociados a devoluciones y consulta las penalidades existentes.</p>
     </div>
-    <div class="card-body">
-      <form (ngSubmit)="guardarPenalidad()">
-        <div class="row g-3">
-          <div class="col-md-4">
-            <label class="form-label">Tipo de Penalidad</label>
-            <input type="text" [(ngModel)]="nuevaPenalidad.tipo_penalidad" name="tipo_penalidad" class="form-control" required />
-          </div>
+  </header>
 
-          <div class="col-md-4">
-            <label class="form-label">Monto (S/)</label>
-            <input type="number" [(ngModel)]="nuevaPenalidad.monto" name="monto" class="form-control" required />
-          </div>
+  @if (errorCarga) {
+    <p class="message message-error" role="alert">{{ errorCarga }}</p>
+  }
 
-          <div class="col-md-4">
-            <label class="form-label">Fecha de Penalidad</label>
-            <input type="date" [(ngModel)]="nuevaPenalidad.fecha_penalidad" name="fecha_penalidad" class="form-control" required />
-          </div>
-
-          <div class="col-md-6">
-            <label class="form-label">Descripción</label>
-            <input type="text" [(ngModel)]="nuevaPenalidad.descripcion" name="descripcion" class="form-control" required />
-          </div>
-
-          <div class="col-md-3">
-            <label class="form-label">ID Devolución</label>
-            <input type="number" [(ngModel)]="nuevaPenalidad.devolucion.idDevolucion" name="idDevolucion" class="form-control" required />
-          </div>
-
-          <div class="col-md-3 d-flex align-items-center">
-            <div class="form-check mt-4">
-              <input class="form-check-input" type="checkbox" [(ngModel)]="nuevaPenalidad.estado" name="estado" id="estadoCheck">
-              <label class="form-check-label" for="estadoCheck">
-                Activo / Pendiente
-              </label>
-            </div>
-          </div>
+  <section class="content-card">
+    <h2>Registrar penalidad</h2>
+    <form #form="ngForm" (ngSubmit)="guardarPenalidad(form)">
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="tipoPenalidad">Tipo de penalidad</label>
+          <input
+            id="tipoPenalidad"
+            type="text"
+            name="tipo_penalidad"
+            maxlength="100"
+            [(ngModel)]="nuevaPenalidad.tipo_penalidad"
+            required
+          />
         </div>
 
-        <div class="mt-3 text-end">
-          <button type="submit" class="btn btn-danger me-2">Guardar Penalidad</button>
-          <button type="button" (click)="limpiarFormulario()" class="btn btn-secondary">Limpiar</button>
+        <div class="form-group">
+          <label for="monto">Monto (S/)</label>
+          <input
+            id="monto"
+            type="number"
+            name="monto"
+            min="0"
+            step="0.01"
+            [(ngModel)]="nuevaPenalidad.monto"
+            required
+          />
         </div>
-      </form>
-    </div>
-  </div>
 
-  <div class="card shadow-sm">
-    <div class="card-header">
-      <h5 class="card-title mb-0">Lista de Penalidades Registradas</h5>
+        <div class="form-group">
+          <label for="fechaPenalidad">Fecha de penalidad</label>
+          <input
+            id="fechaPenalidad"
+            type="date"
+            name="fecha_penalidad"
+            [(ngModel)]="nuevaPenalidad.fecha_penalidad"
+            required
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="devolucionId">ID de devolución</label>
+          <input
+            id="devolucionId"
+            type="number"
+            name="devolucionId"
+            min="1"
+            [(ngModel)]="nuevaPenalidad.devolucionId"
+            required
+          />
+        </div>
+
+        <div class="form-group form-group-full">
+          <label for="descripcion">Descripción</label>
+          <textarea
+            id="descripcion"
+            name="descripcion"
+            rows="3"
+            maxlength="500"
+            [(ngModel)]="nuevaPenalidad.descripcion"
+            required
+          ></textarea>
+        </div>
+
+        <label class="checkbox-field">
+          <input type="checkbox" name="estado" [(ngModel)]="nuevaPenalidad.estado" />
+          Activa / pendiente
+        </label>
+      </div>
+
+      @if (errorGuardar) {
+        <p class="message message-error" role="alert">{{ errorGuardar }}</p>
+      }
+
+      <div class="form-actions">
+        <button type="button" class="btn-secondary" (click)="limpiarFormulario(form)">
+          Limpiar
+        </button>
+        <button type="submit" class="btn-primary" [disabled]="form.invalid || guardando">
+          {{ guardando ? 'Guardando...' : 'Registrar penalidad' }}
+        </button>
+      </div>
+    </form>
+  </section>
+
+  <section class="content-card">
+    <div class="table-header">
+      <h2>Penalidades registradas</h2>
+      <button type="button" class="btn-secondary" (click)="cargarPenalidades()" [disabled]="cargando">
+        {{ cargando ? 'Actualizando...' : 'Actualizar' }}
+      </button>
     </div>
-    <div class="card-body table-responsive">
-      <table class="table table-hover align-middle">
-        <thead class="table-light">
+
+    <div class="table-container">
+      <table>
+        <thead>
           <tr>
             <th>ID</th>
             <th>Tipo</th>
@@ -65,28 +113,29 @@
             <th>Monto</th>
             <th>Fecha</th>
             <th>Estado</th>
-            <th>ID Devolución</th>
+            <th>ID devolución</th>
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let item of listaPenalidades">
-            <td>{{ item.idPenalidad }}</td>
-            <td>{{ item.tipo_penalidad }}</td>
-            <td>{{ item.descripcion }}</td>
-            <td>S/ {{ item.monto }}</td>
-            <td>{{ item.fecha_penalidad }}</td>
-            <td>
-              <span class="badge" [ngClass]="item.estado ? 'bg-warning text-dark' : 'bg-success'">
-                {{ item.estado ? 'Activo' : 'Resuelto' }}
-              </span>
-            </td>
-            <td>{{ item.devolucion?.idDevolucion }}</td>
-          </tr>
-          <tr *ngIf="listaPenalidades.length === 0">
-            <td colspan="7" class="text-center text-muted">No hay penalidades registradas.</td>
-          </tr>
+          @for (penalidad of listaPenalidades; track penalidad.idPenalidad) {
+            <tr>
+              <td>{{ penalidad.idPenalidad }}</td>
+              <td>{{ penalidad.tipo_penalidad }}</td>
+              <td>{{ penalidad.descripcion }}</td>
+              <td>S/ {{ penalidad.monto | number:'1.2-2' }}</td>
+              <td>{{ penalidad.fecha_penalidad | date:'yyyy-MM-dd' }}</td>
+              <td>{{ penalidad.estado ? 'Activa / pendiente' : 'Resuelta' }}</td>
+              <td>{{ penalidad.devolucionId }}</td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="7" class="empty-message">
+                {{ cargando ? 'Cargando penalidades...' : 'No hay penalidades registradas.' }}
+              </td>
+            </tr>
+          }
         </tbody>
       </table>
     </div>
-  </div>
+  </section>
 </div>

@@ -2,17 +2,20 @@ import { HttpClient } from '@angular/common/http';
 import { inject, Service } from '@angular/core';
 import { Observable } from 'rxjs';
 import { Devolucion } from '../model/devolucion';
+import { environment } from '../../environments/environment';
+
+type DevolucionData = Omit<Devolucion, 'idDevolucion'>;
 
 @Service()
 export class DevolucionService {
   private readonly http = inject(HttpClient);
-  private readonly url = 'http://localhost:8080/api/devoluciones';
+  private readonly url = `${environment.apiUrl}/devoluciones`;
 
   listar(): Observable<Devolucion[]> {
     return this.http.get<Devolucion[]>(this.url);
   }
 
-  registrar(devolucion: Devolucion): Observable<Devolucion> {
+  registrar(devolucion: DevolucionData): Observable<Devolucion> {
     return this.http.post<Devolucion>(this.url, devolucion);
   }
 }

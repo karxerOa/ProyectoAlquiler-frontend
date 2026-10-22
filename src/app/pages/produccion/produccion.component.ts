@@ -68,6 +68,7 @@ export class ProduccionComponent implements OnInit {
       fechaProduccion: new Date().toISOString().split('T')[0],
       cantidad: 1,
       costoProduccion: 0,
+      descripcion: '',
       prenda: 1,
       empleado: 1
     });
@@ -82,8 +83,8 @@ export class ProduccionComponent implements OnInit {
       cantidad: prod.cantidad,
       costoProduccion: prod.costoProduccion,
       descripcion: prod.descripcion,
-      prenda: prod.prenda.idPrenda,
-      empleado: prod.empleado.idEmpleado
+      prenda: prod.idPrenda,
+      empleado: prod.idEmpleado
     });
     this.mensajeError.set('');
     this.modalAbierto.set(true);
@@ -97,11 +98,12 @@ export class ProduccionComponent implements OnInit {
 
     const v = this.form.getRawValue();
     const datos = {
-      ...v,
+      fechaProduccion: v.fechaProduccion,
       cantidad: Number(v.cantidad),
       costoProduccion: Number(v.costoProduccion),
-      prenda: { idPrenda: Number(v.prenda) },
-      empleado: { idEmpleado: Number(v.empleado) }
+      descripcion: v.descripcion,
+      idPrenda: Number(v.prenda),
+      idEmpleado: Number(v.empleado)
     };
 
     const id = this.editandoId();
