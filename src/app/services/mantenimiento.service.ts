@@ -39,8 +39,8 @@ export interface EmpleadoSimple {
 
 @Injectable({ providedIn: 'root' })
 export class MantenimientoService {
-  private readonly apiUrl      = 'http://localhost:9494/v1/mantenimientos';
-  private readonly prendaUrl   = 'http://localhost:9494/v1/prendas';
+  private readonly apiUrl = 'http://localhost:9494/v1/mantenimientos';
+  private readonly prendaUrl = 'http://localhost:9494/v1/prendas';
   private readonly empleadoUrl = 'http://localhost:9494/v1/empleados';
   private readonly http = inject(HttpClient);
 

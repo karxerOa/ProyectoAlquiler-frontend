@@ -1,6 +1,5 @@
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { CommonModule } from '@angular/common';
 import {
   MantenimientoService,
   MantenimientoResponse,
@@ -14,7 +13,7 @@ const ESTADOS = ['PENDIENTE', 'EN_PROCESO', 'COMPLETADO', 'CANCELADO'];
 @Component({
   selector: 'app-mantenimiento',
   standalone: true,
-  imports: [ReactiveFormsModule, CommonModule],
+  imports: [ReactiveFormsModule],
   templateUrl: './mantenimiento.component.html',
   styleUrl: './mantenimiento.component.css',
 })

@@ -1,6 +1,5 @@
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { CommonModule } from '@angular/common';
 import {
   PrendaService,
   PrendaResponse,
@@ -13,7 +12,7 @@ const TALLAS   = ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'ÚNICO'];
 @Component({
   selector: 'app-prenda',
   standalone: true,
-  imports: [ReactiveFormsModule, CommonModule],
+  imports: [ReactiveFormsModule],
   templateUrl: './prenda.component.html',
   styleUrl: './prenda.component.css',
 })
