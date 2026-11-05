@@ -1,35 +1,74 @@
 <div class="page-container">
   <div class="page-header">
-    <div><h1>Gestión de alquileres</h1><p>Administra los alquileres y sus fechas de vigencia.</p></div>
+    <div>
+      <h1>Reservas y alquileres</h1>
+      <p>Organiza cada ocasión, desde la reserva hasta la devolución.</p>
+    </div>
     <button class="btn-primary" type="button" (click)="nuevo()">+ Nuevo alquiler</button>
   </div>
 
-  @if (errorCarga()) { <p class="error-box">{{ errorCarga() }}</p> }
-  <div class="stats-card"><div class="stats-icon">📅</div><div><p>Total de alquileres</p><h2>{{ alquileres().length }}</h2></div></div>
+  @if (errorCarga()) {
+    <p class="error-box">{{ errorCarga() }}</p>
+  }
+  <div class="stats-card">
+    <div class="stats-icon">📅</div>
+    <div>
+      <p>Total de alquileres</p>
+      <h2>{{ alquileres().length }}</h2>
+    </div>
+  </div>
 
   <section class="content-card">
     <div class="table-header">
       <h2>Lista de alquileres</h2>
-      <input type="text" placeholder="Buscar por cliente, empleado o estado..." (input)="buscar($any($event.target).value)" />
+      <input
+        type="text"
+        placeholder="Buscar por cliente, empleado o estado..."
+        (input)="buscar($any($event.target).value)"
+      />
     </div>
     <div class="table-container">
       <table>
-        <thead><tr><th>ID</th><th>Cliente</th><th>Empleado</th><th>Fechas</th><th>Estado</th><th>Total</th><th>Acciones</th></tr></thead>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Cliente</th>
+            <th>Empleado</th>
+            <th>Fechas</th>
+            <th>Estado</th>
+            <th>Total</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
         <tbody>
           @for (alquiler of alquileresFiltrados(); track alquiler.idAlquiler) {
             <tr>
               <td>{{ alquiler.idAlquiler }}</td>
-              <td>{{ alquiler.nombreCliente || 'Cliente' }} {{ alquiler.apellidoCliente }} (#{{ alquiler.clienteId }})</td>
+              <td>
+                {{ alquiler.nombreCliente || 'Cliente' }} {{ alquiler.apellidoCliente }} (#{{
+                  alquiler.clienteId
+                }})
+              </td>
               <td>{{ alquiler.nombreEmpleado || 'Empleado' }} (#{{ alquiler.empleadoId }})</td>
               <td>{{ alquiler.fechaInicio }} — {{ alquiler.fechaFin }}</td>
               <td>{{ alquiler.estado }}</td>
               <td>S/ {{ alquiler.total }}</td>
-              <td><div class="acciones">
-                <button class="btn-action" type="button" (click)="editar(alquiler)">Editar</button>
-                <button class="btn-action btn-danger" type="button" (click)="eliminar(alquiler)">Eliminar</button>
-              </div></td>
+              <td>
+                <div class="acciones">
+                  <button class="btn-action" type="button" (click)="editar(alquiler)">
+                    Editar
+                  </button>
+                  <button class="btn-action btn-danger" type="button" (click)="eliminar(alquiler)">
+                    Eliminar
+                  </button>
+                </div>
+              </td>
             </tr>
-          } @empty { <tr><td colspan="7" class="empty-message">No se encontraron alquileres.</td></tr> }
+          } @empty {
+            <tr>
+              <td colspan="7" class="empty-message">No se encontraron alquileres.</td>
+            </tr>
+          }
         </tbody>
       </table>
     </div>
@@ -38,21 +77,102 @@
 
 @if (modalAbierto()) {
   <div class="modal-overlay" (click)="modalAbierto.set(false)">
-    <div class="modal" (click)="$event.stopPropagation()">
+    <div
+      class="modal"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Registro de alquiler"
+      (keydown.escape)="modalAbierto.set(false)"
+      (click)="$event.stopPropagation()"
+    >
       <h2>{{ editandoId() === null ? 'Nuevo alquiler' : 'Editar alquiler' }}</h2>
+      <p>
+        Cliente, fechas e importes. Vincula las prendas desde Detalles de alquiler una vez guardado.
+      </p>
+      @if (errorOpciones()) {
+        <p class="error-box" role="alert">{{ errorOpciones() }}</p>
+      }
       <form [formGroup]="form" (ngSubmit)="guardar()">
         <div class="form-grid">
-          <div class="form-group"><label for="fechaAlquiler">Fecha de registro</label><input id="fechaAlquiler" type="date" formControlName="fechaAlquiler" /></div>
-          <div class="form-group"><label for="fechaInicio">Fecha de inicio</label><input id="fechaInicio" type="date" formControlName="fechaInicio" />@if (campoInvalido('fechaInicio')) { <small class="error">Campo obligatorio.</small> }</div>
-          <div class="form-group"><label for="fechaFin">Fecha de fin</label><input id="fechaFin" type="date" formControlName="fechaFin" />@if (campoInvalido('fechaFin')) { <small class="error">Campo obligatorio.</small> }</div>
-          <div class="form-group"><label for="estado">Estado</label><select id="estado" formControlName="estado"><option value="ACTIVO">ACTIVO</option><option value="INACTIVO">INACTIVO</option><option value="PENDIENTE">PENDIENTE</option></select></div>
-          <div class="form-group"><label for="subtotal">Subtotal (S/)</label><input id="subtotal" type="number" min="0" step="0.01" formControlName="subtotal" /></div>
-          <div class="form-group"><label for="total">Total (S/)</label><input id="total" type="number" min="0" step="0.01" formControlName="total" /></div>
-          <div class="form-group"><label for="clienteId">ID de cliente</label><input id="clienteId" type="number" min="1" formControlName="clienteId" />@if (campoInvalido('clienteId')) { <small class="error">Ingresa un ID válido.</small> }</div>
-          <div class="form-group"><label for="empleadoId">ID de empleado</label><input id="empleadoId" type="number" min="1" formControlName="empleadoId" />@if (campoInvalido('empleadoId')) { <small class="error">Ingresa un ID válido.</small> }</div>
+          <div class="form-group">
+            <label for="fechaAlquiler">Fecha de registro</label
+            ><input id="fechaAlquiler" type="date" formControlName="fechaAlquiler" />
+          </div>
+          <div class="form-group">
+            <label for="fechaInicio">Fecha de inicio</label
+            ><input id="fechaInicio" type="date" formControlName="fechaInicio" />
+            @if (campoInvalido('fechaInicio')) {
+              <small class="error">Campo obligatorio.</small>
+            }
+          </div>
+          <div class="form-group">
+            <label for="fechaFin">Fecha de fin</label
+            ><input id="fechaFin" type="date" formControlName="fechaFin" />
+            @if (campoInvalido('fechaFin')) {
+              <small class="error">Campo obligatorio.</small>
+            }
+          </div>
+          <div class="form-group">
+            <label for="estado">Estado</label
+            ><select id="estado" formControlName="estado">
+              <option value="ACTIVO">ACTIVO</option>
+              <option value="INACTIVO">INACTIVO</option>
+              <option value="PENDIENTE">PENDIENTE</option>
+              <option value="RESERVADO">RESERVADO</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="subtotal">Subtotal (S/)</label
+            ><input id="subtotal" type="number" min="0" step="0.01" formControlName="subtotal" />
+          </div>
+          <div class="form-group">
+            <label for="total">Total (S/)</label
+            ><input id="total" type="number" min="0" step="0.01" formControlName="total" />
+          </div>
+          <div class="form-group">
+            <label for="cliente-busqueda">Buscar cliente por nombre</label
+            ><input
+              id="cliente-busqueda"
+              type="search"
+              [value]="buscarCliente()"
+              (input)="buscarCliente.set($any($event.target).value)"
+              placeholder="Nombre o apellidos"
+            /><label for="clienteId">Cliente</label
+            ><select id="clienteId" formControlName="clienteId">
+              <option value="">Selecciona un cliente</option>
+              @for (c of clientesVisibles(); track c.idCliente) {
+                <option [value]="c.idCliente">
+                  {{ c.nombre }} {{ c.apellidos }} · {{ c.dni }}
+                </option>
+              }
+            </select>
+            @if (campoInvalido('clienteId')) {
+              <small class="error">Ingresa un ID válido.</small>
+            }
+          </div>
+          <div class="form-group">
+            <label for="empleadoId">Empleado responsable</label
+            ><select id="empleadoId" formControlName="empleadoId">
+              <option value="">Selecciona un empleado</option>
+              @for (e of empleados(); track e.idEmpleado) {
+                <option [value]="e.idEmpleado">{{ e.nombres }} {{ e.apellidos }}</option>
+              }
+            </select>
+            @if (campoInvalido('empleadoId')) {
+              <small class="error">Ingresa un ID válido.</small>
+            }
+          </div>
         </div>
-        @if (mensajeError()) { <p class="error-box">{{ mensajeError() }}</p> }
-        <div class="modal-actions"><button type="button" class="btn-secondary" (click)="modalAbierto.set(false)">Cancelar</button><button type="submit" class="btn-primary" [disabled]="guardando()">{{ guardando() ? 'Guardando...' : 'Guardar' }}</button></div>
+        @if (mensajeError()) {
+          <p class="error-box">{{ mensajeError() }}</p>
+        }
+        <div class="modal-actions">
+          <button type="button" class="btn-secondary" (click)="modalAbierto.set(false)">
+            Cancelar</button
+          ><button type="submit" class="btn-primary" [disabled]="guardando()">
+            {{ guardando() ? 'Guardando...' : 'Guardar' }}
+          </button>
+        </div>
       </form>
     </div>
   </div>

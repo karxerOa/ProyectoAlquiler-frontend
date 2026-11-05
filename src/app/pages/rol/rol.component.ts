@@ -8,7 +8,7 @@ import { RolService } from '../../services/rol.service';
   standalone: true,
   imports: [ReactiveFormsModule],
   templateUrl: './rol.component.html',
-  styleUrl: '../cliente/cliente.component.css'
+  styleUrl: '../../shared/gestion.css',
 })
 export class RolComponent {
   private readonly rolService = inject(RolService);
@@ -24,29 +24,36 @@ export class RolComponent {
 
   form = this.fb.nonNullable.group({
     name: ['', [Validators.required, Validators.maxLength(50)]],
-    description: ['', [Validators.required, Validators.maxLength(255)]]
+    description: ['', [Validators.required, Validators.maxLength(255)]],
   });
 
   rolesFiltrados = computed(() => {
     const texto = this.busqueda();
-    return this.roles().filter(rol =>
-      `${rol.name} ${rol.description}`.toLowerCase().includes(texto)
+    return this.roles().filter((rol) =>
+      `${rol.name} ${rol.description}`.toLowerCase().includes(texto),
     );
   });
 
-  constructor() { this.cargar(); }
+  constructor() {
+    this.cargar();
+  }
 
   cargar(): void {
     this.rolService.findAll().subscribe({
-      next: data => { this.rolService.setRolesChange(data); this.errorCarga.set(''); },
+      next: (data) => {
+        this.rolService.setRolesChange(data);
+        this.errorCarga.set('');
+      },
       error: (error: unknown) => {
         console.error('Error al cargar roles:', error);
         this.errorCarga.set('No se pudieron cargar los roles.');
-      }
+      },
     });
   }
 
-  buscar(valor: string): void { this.busqueda.set(valor.trim().toLowerCase()); }
+  buscar(valor: string): void {
+    this.busqueda.set(valor.trim().toLowerCase());
+  }
 
   nuevo(): void {
     this.editandoId.set(null);
@@ -63,19 +70,26 @@ export class RolComponent {
   }
 
   guardar(): void {
-    if (this.form.invalid) { this.form.markAllAsTouched(); return; }
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      return;
+    }
     const data = this.form.getRawValue();
     const id = this.editandoId();
     this.guardando.set(true);
     this.mensajeError.set('');
     const request = id === null ? this.rolService.create(data) : this.rolService.update(id, data);
     request.subscribe({
-      next: () => { this.guardando.set(false); this.modalAbierto.set(false); this.cargar(); },
+      next: () => {
+        this.guardando.set(false);
+        this.modalAbierto.set(false);
+        this.cargar();
+      },
       error: (error: unknown) => {
         console.error('Error al guardar rol:', error);
         this.guardando.set(false);
         this.mensajeError.set('No se pudo guardar el rol.');
-      }
+      },
     });
   }
 
@@ -86,7 +100,7 @@ export class RolComponent {
       error: (error: unknown) => {
         console.error('Error al eliminar rol:', error);
         alert('No se pudo eliminar el rol. Puede tener usuarios asociados.');
-      }
+      },
     });
   }
 

@@ -8,7 +8,7 @@ import { DetalleAlquilerService } from '../../services/detalle-alquiler.service'
   standalone: true,
   imports: [ReactiveFormsModule],
   templateUrl: './detalle-alquiler.component.html',
-  styleUrl: '../cliente/cliente.component.css'
+  styleUrl: '../../shared/gestion.css',
 })
 export class DetalleAlquilerComponent {
   private readonly detalleService = inject(DetalleAlquilerService);
@@ -27,30 +27,38 @@ export class DetalleAlquilerComponent {
     precioUnitario: [0, [Validators.required, Validators.min(0)]],
     subtotal: [0, [Validators.required, Validators.min(0)]],
     alquilerId: ['', [Validators.required, Validators.min(1)]],
-    prendaId: ['', [Validators.required, Validators.min(1)]]
+    prendaId: ['', [Validators.required, Validators.min(1)]],
   });
 
   detallesFiltrados = computed(() => {
     const texto = this.busqueda();
-    return this.detalles().filter(detalle =>
+    return this.detalles().filter((detalle) =>
       `${detalle.idDetalle} ${detalle.alquilerId} ${detalle.prendaId}`
-        .toLowerCase().includes(texto)
+        .toLowerCase()
+        .includes(texto),
     );
   });
 
-  constructor() { this.cargar(); }
+  constructor() {
+    this.cargar();
+  }
 
   cargar(): void {
     this.detalleService.findAll().subscribe({
-      next: data => { this.detalleService.setDetallesChange(data); this.errorCarga.set(''); },
+      next: (data) => {
+        this.detalleService.setDetallesChange(data);
+        this.errorCarga.set('');
+      },
       error: (error: unknown) => {
         console.error('Error al cargar detalles de alquiler:', error);
         this.errorCarga.set('No se pudieron cargar los detalles de alquiler.');
-      }
+      },
     });
   }
 
-  buscar(valor: string): void { this.busqueda.set(valor.trim().toLowerCase()); }
+  buscar(valor: string): void {
+    this.busqueda.set(valor.trim().toLowerCase());
+  }
 
   nuevo(): void {
     this.editandoId.set(null);
@@ -66,27 +74,39 @@ export class DetalleAlquilerComponent {
       precioUnitario: detalle.precioUnitario,
       subtotal: detalle.subtotal,
       alquilerId: String(detalle.alquilerId),
-      prendaId: String(detalle.prendaId)
+      prendaId: String(detalle.prendaId),
     });
     this.mensajeError.set('');
     this.modalAbierto.set(true);
   }
 
   guardar(): void {
-    if (this.form.invalid) { this.form.markAllAsTouched(); return; }
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      return;
+    }
     const value = this.form.getRawValue();
-    const data = { ...value, alquilerId: Number(value.alquilerId), prendaId: Number(value.prendaId) };
+    const data = {
+      ...value,
+      alquilerId: Number(value.alquilerId),
+      prendaId: Number(value.prendaId),
+    };
     const id = this.editandoId();
     this.guardando.set(true);
     this.mensajeError.set('');
-    const request = id === null ? this.detalleService.create(data) : this.detalleService.update(id, data);
+    const request =
+      id === null ? this.detalleService.create(data) : this.detalleService.update(id, data);
     request.subscribe({
-      next: () => { this.guardando.set(false); this.modalAbierto.set(false); this.cargar(); },
+      next: () => {
+        this.guardando.set(false);
+        this.modalAbierto.set(false);
+        this.cargar();
+      },
       error: (error: unknown) => {
         console.error('Error al guardar detalle de alquiler:', error);
         this.guardando.set(false);
         this.mensajeError.set('No se pudo guardar. Verifica los IDs de alquiler y prenda.');
-      }
+      },
     });
   }
 
@@ -97,7 +117,7 @@ export class DetalleAlquilerComponent {
       error: (error: unknown) => {
         console.error('Error al eliminar detalle:', error);
         alert('No se pudo eliminar el detalle de alquiler.');
-      }
+      },
     });
   }
 

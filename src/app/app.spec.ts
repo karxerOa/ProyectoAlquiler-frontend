@@ -8,8 +8,7 @@ describe('App', () => {
     await TestBed.configureTestingModule({
       imports: [App],
       providers: [provideRouter(routes)],
-    })
-      .compileComponents();
+    }).compileComponents();
   });
 
   it('should create the app', () => {
@@ -22,7 +21,7 @@ describe('App', () => {
     const fixture = TestBed.createComponent(App);
     await fixture.whenStable();
     const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('h1')?.textContent).toContain('Gestión de alquiler de vestimentas');
-    expect(compiled.querySelectorAll('nav[aria-label="Navegación principal"] a')).toHaveLength(13);
+    expect(compiled.querySelector('.brand-sub')?.textContent).toContain('ALQUILER DE VESTIMENTAS');
+    expect(compiled.querySelectorAll('nav[aria-label="Navegación principal"] a')).toHaveLength(14);
   });
 });

@@ -1,32 +1,190 @@
 <div class="page-container">
-  <div class="page-header"><div><h1>Gestión de prendas</h1><p>Administra el catálogo de prendas disponibles para alquiler.</p></div><button class="btn-primary" type="button" (click)="nuevo()">+ Nueva prenda</button></div>
-  @if (errorCarga()) { <p class="error-box">{{ errorCarga() }}</p> }
-  <div class="stats-card"><div class="stats-icon">👗</div><div><p>Total de prendas</p><h2>{{ prendas().length }}</h2></div></div>
-  <section class="content-card">
-    <div class="table-header"><h2>Lista de prendas</h2><input type="text" placeholder="Buscar por nombre, talla, color o categoría..." (input)="buscar($any($event.target).value)" /></div>
-    <div class="table-container"><table>
-      <thead><tr><th>Nombre</th><th>Talla</th><th>Color</th><th>Precio alquiler</th><th>Estado</th><th>Categoría</th><th>Acciones</th></tr></thead>
-      <tbody>
+  <header class="page-header">
+    <div>
+      <p class="eyebrow">COLECCIÓN / CATÁLOGO</p>
+      <h1>Encuentra la prenda perfecta</h1>
+      <p>Vestidos, trajes y disfraces para cada ocasión.</p>
+    </div>
+    <button class="btn-primary" type="button" (click)="nuevo()">+ Nueva prenda</button>
+  </header>
+  @if (errorCarga()) {
+    <p class="error-box" role="alert">
+      {{ errorCarga() }} <button type="button" (click)="cargar()">Reintentar</button>
+    </p>
+  }
+  <label class="search-box" for="buscar-prenda"
+    ><span>Buscar por nombre</span
+    ><input
+      id="buscar-prenda"
+      type="search"
+      placeholder="Busca un vestido, traje o disfraz…"
+      [value]="busqueda()"
+      (input)="buscar($any($event.target).value)"
+  /></label>
+  <div class="catalog-layout">
+    <aside class="content-card filters" aria-label="Filtros de vestimenta">
+      <h2>Refina tu búsqueda</h2>
+      <label
+        >Categoría<select
+          [value]="filtros().categoria"
+          (change)="filtrar('categoria', $any($event.target).value)"
+        >
+          <option value="">Todas las categorías</option>
+          @for (categoria of categorias(); track categoria.id) {
+            <option [value]="categoria.id">{{ categoria.nombre }}</option>
+          }
+        </select></label
+      >
+      @for (campo of camposFiltro; track campo) {
+        <label
+          >{{
+            campo === 'genero'
+              ? 'Género'
+              : campo === 'estado'
+                ? 'Disponibilidad'
+                : campo === 'talla'
+                  ? 'Talla'
+                  : 'Color'
+          }}<select [value]="filtros()[campo]" (change)="filtrar(campo, $any($event.target).value)">
+            <option value="">Todos</option>
+            @for (opcion of opciones(campo); track opcion) {
+              <option [value]="opcion">{{ opcion }}</option>
+            }
+          </select></label
+        >
+      }
+      <fieldset>
+        <legend>Precio de alquiler (S/)</legend>
+        <div class="price-range">
+          <label
+            >Desde<input
+              type="number"
+              min="0"
+              [value]="filtros().minimo ?? ''"
+              (input)="filtrar('minimo', $any($event.target).value)" /></label
+          ><label
+            >Hasta<input
+              type="number"
+              min="0"
+              [value]="filtros().maximo ?? ''"
+              (input)="filtrar('maximo', $any($event.target).value)"
+          /></label>
+        </div>
+      </fieldset>
+      <button class="btn-secondary" type="button" (click)="limpiar()">Limpiar filtros</button
+      ><small>El género se muestra solo cuando está informado en el catálogo.</small>
+    </aside>
+    <section aria-label="Resultados del catálogo">
+      <p class="result-count" aria-live="polite">
+        {{ prendasFiltradas().length }} de {{ prendas().length }} prendas
+      </p>
+      <div class="garment-grid">
         @for (prenda of prendasFiltradas(); track prenda.idPrenda) {
-          <tr><td>{{ prenda.nombre }}</td><td>{{ prenda.talla }}</td><td>{{ prenda.color }}</td><td>S/ {{ prenda.precioAlquiler }}</td><td>{{ prenda.estado }}</td><td>{{ prenda.categoriaNombre || prenda.categoriaId }}</td><td><div class="acciones"><button class="btn-action" type="button" (click)="editar(prenda)">Editar</button><button class="btn-action btn-danger" type="button" (click)="eliminar(prenda)">Eliminar</button></div></td></tr>
-        } @empty { <tr><td colspan="7" class="empty-message">No se encontraron prendas.</td></tr> }
-      </tbody>
-    </table></div>
-  </section>
+          <article class="content-card garment-card">
+            <div class="garment-visual">
+              <svg viewBox="0 0 100 100" aria-hidden="true">
+                <path d="M35 15 15 30l10 18 12-7v43h26V41l12 7 10-18-20-15q-15 13-30 0Z" /></svg
+              ><span class="status">{{ prenda.estado }}</span>
+            </div>
+            <p class="eyebrow">{{ prenda.categoriaNombre || 'Categoría ' + prenda.categoriaId }}</p>
+            <h2>{{ prenda.nombre }}</h2>
+            <p>
+              {{ prenda.talla }} · {{ prenda.color }} · {{ prenda.genero || 'Sin especificar' }}
+            </p>
+            <strong class="price">{{
+              prenda.precioAlquiler | currency: 'PEN' : 'S/ ' : '1.2-2'
+            }}</strong>
+            <div class="acciones">
+              <button class="btn-action" type="button" (click)="editar(prenda)">Ver / editar</button
+              ><button class="btn-action btn-danger" type="button" (click)="eliminar(prenda)">
+                Eliminar
+              </button>
+            </div>
+            @if (disponible(prenda)) {
+              <a class="link" routerLink="/alquileres/nuevo">Registrar alquiler →</a>
+            }
+          </article>
+        } @empty {
+          <div class="content-card empty-message">
+            <h2>No hay prendas que mostrar</h2>
+            <p>Prueba otros filtros o registra una nueva prenda.</p>
+            <button class="btn-secondary" type="button" (click)="limpiar()">
+              Restablecer búsqueda
+            </button>
+          </div>
+        }
+      </div>
+    </section>
+  </div>
 </div>
 @if (modalAbierto()) {
-  <div class="modal-overlay" (click)="modalAbierto.set(false)"><div class="modal" (click)="$event.stopPropagation()">
-    <h2>{{ editandoId() === null ? 'Nueva prenda' : 'Editar prenda' }}</h2>
-    <form [formGroup]="form" (ngSubmit)="guardar()"><div class="form-grid">
-      <div class="form-group"><label for="nombre">Nombre</label><input id="nombre" type="text" formControlName="nombre" />@if (campoInvalido('nombre')) { <small class="error">Campo obligatorio.</small> }</div>
-      <div class="form-group"><label for="talla">Talla</label><input id="talla" type="text" formControlName="talla" /></div>
-      <div class="form-group"><label for="color">Color</label><input id="color" type="text" formControlName="color" /></div>
-      <div class="form-group"><label for="precioAlquiler">Precio de alquiler (S/)</label><input id="precioAlquiler" type="number" min="0" step="0.01" formControlName="precioAlquiler" /></div>
-      <div class="form-group"><label for="estado">Estado</label><input id="estado" type="text" formControlName="estado" /></div>
-      <div class="form-group"><label for="categoriaId">ID de categoría</label><input id="categoriaId" type="number" min="1" formControlName="categoriaId" />@if (campoInvalido('categoriaId')) { <small class="error">Ingresa un ID válido.</small> }</div>
-      <div class="form-group full"><label for="descripcion">Descripción</label><textarea id="descripcion" rows="3" formControlName="descripcion"></textarea></div>
+  <div class="modal-overlay" (click)="modalAbierto.set(false)">
+    <div
+      class="modal"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Registro de prenda"
+      (keydown.escape)="modalAbierto.set(false)"
+      (click)="$event.stopPropagation()"
+    >
+      <h2>{{ editandoId() === null ? 'Nueva prenda' : 'Editar prenda' }}</h2>
+      <form [formGroup]="form" (ngSubmit)="guardar()">
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="nombre">Nombre</label
+            ><input id="nombre" type="text" formControlName="nombre" />
+            @if (campoInvalido('nombre')) {
+              <small class="error">Campo obligatorio.</small>
+            }
+          </div>
+          <div class="form-group">
+            <label for="talla">Talla</label><input id="talla" type="text" formControlName="talla" />
+          </div>
+          <div class="form-group">
+            <label for="color">Color</label><input id="color" type="text" formControlName="color" />
+          </div>
+          <div class="form-group">
+            <label for="precioAlquiler">Precio de alquiler (S/)</label
+            ><input
+              id="precioAlquiler"
+              type="number"
+              min="0"
+              step="0.01"
+              formControlName="precioAlquiler"
+            />
+          </div>
+          <div class="form-group">
+            <label for="estado">Estado</label
+            ><input id="estado" type="text" formControlName="estado" />
+          </div>
+          <div class="form-group">
+            <label for="categoriaId">Categoría</label
+            ><select id="categoriaId" formControlName="categoriaId">
+              <option value="">Selecciona una categoría</option>
+              @for (c of categoriasRegistro(); track c.idCategoria) {
+                <option [value]="c.idCategoria">{{ c.nombre }}</option>
+              }
+            </select>
+            @if (campoInvalido('categoriaId')) {
+              <small class="error">Ingresa un ID válido.</small>
+            }
+          </div>
+          <div class="form-group full">
+            <label for="descripcion">Descripción</label
+            ><textarea id="descripcion" rows="3" formControlName="descripcion"></textarea>
+          </div>
+        </div>
+        @if (mensajeError()) {
+          <p class="error-box">{{ mensajeError() }}</p>
+        }
+        <div class="modal-actions">
+          <button type="button" class="btn-secondary" (click)="modalAbierto.set(false)">
+            Cancelar</button
+          ><button type="submit" class="btn-primary" [disabled]="guardando()">
+            {{ guardando() ? 'Guardando...' : 'Guardar' }}
+          </button>
+        </div>
+      </form>
     </div>
-    @if (mensajeError()) { <p class="error-box">{{ mensajeError() }}</p> }
-    <div class="modal-actions"><button type="button" class="btn-secondary" (click)="modalAbierto.set(false)">Cancelar</button><button type="submit" class="btn-primary" [disabled]="guardando()">{{ guardando() ? 'Guardando...' : 'Guardar' }}</button></div></form>
-  </div></div>
+  </div>
 }

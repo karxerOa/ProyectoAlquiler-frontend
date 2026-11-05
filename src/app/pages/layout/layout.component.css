@@ -1,13 +1,13 @@
 .app-shell {
-  --ink: #26304a;
-  --muted: #6f7f95;
-  --plum: #5b4a72;
-  --plum-dark: #4b3c61;
-  --navy: #2f3552;
-  --bg: #d8e7f1;
-  --surface: #e4f1fb;
-  --sidebar: #cddfeb;
-  --line: #bfd3e2;
+  --ink: #233e34;
+  --muted: #68756e;
+  --plum: #285442;
+  --plum-dark: #1d4032;
+  --navy: #233e34;
+  --bg: #f7f6f2;
+  --surface: #ffffff;
+  --sidebar: #eaefe9;
+  --line: #dce2da;
   --serif: 'Lora', Georgia, serif;
 
   display: flex;
@@ -105,7 +105,9 @@
   font-size: 12px;
   font-weight: 500;
   text-decoration: none;
-  transition: color 150ms ease, background 150ms ease;
+  transition:
+    color 150ms ease,
+    background 150ms ease;
 }
 
 .nav-link:hover {

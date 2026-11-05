@@ -1,13 +1,15 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Cliente, ClienteService } from '../../services/cliente.service';
+import { ClienteService } from '../../services/cliente.service';
+import type { Cliente } from '../../model/cliente';
+import { normalizar } from '../../model/catalogo';
 
 @Component({
   selector: 'app-cliente',
   standalone: true,
   imports: [ReactiveFormsModule],
   templateUrl: './cliente.component.html',
-  styleUrl: './cliente.component.css'
+  styleUrl: './cliente.component.css',
 })
 export class ClienteComponent {
   private readonly clienteService = inject(ClienteService);
@@ -32,10 +34,9 @@ export class ClienteComponent {
 
   clientesFiltrados = computed(() => {
     const texto = this.busqueda();
-    return this.clientes().filter(cliente =>
-      `${cliente.nombre} ${cliente.apellidos} ${cliente.dni} ${cliente.telefono} ${cliente.correo}`
-        .toLowerCase()
-        .includes(texto)
+    return this.clientes().filter((cliente) =>
+      normalizar(`${cliente.nombre} ${cliente.apellidos} ${cliente.dni} ${cliente.telefono} ${cliente.correo}`)
+        .includes(texto),
     );
   });
 
@@ -46,12 +47,12 @@ export class ClienteComponent {
   cargarClientes(): void {
     this.clienteService.findAll().subscribe({
       next: (data) => this.clienteService.setClientesChange(data),
-      error: (error) => console.error('Error al cargar clientes:', error)
+      error: (error) => console.error('Error al cargar clientes:', error),
     });
   }
 
   buscar(valor: string): void {
-    this.busqueda.set(valor.trim().toLowerCase());
+    this.busqueda.set(normalizar(valor));
   }
 
   // ---------- NUEVO ----------
@@ -71,7 +72,7 @@ export class ClienteComponent {
       dni: String(cliente.dni),
       telefono: String(cliente.telefono),
       direccion: cliente.direccion,
-      correo: cliente.correo
+      correo: cliente.correo,
     });
     this.mensajeError.set('');
     this.modalAbierto.set(true);
@@ -91,9 +92,8 @@ export class ClienteComponent {
     this.guardando.set(true);
     this.mensajeError.set('');
 
-    const peticion = id === null
-      ? this.clienteService.create(datos)
-      : this.clienteService.update(id, datos);
+    const peticion =
+      id === null ? this.clienteService.create(datos) : this.clienteService.update(id, datos);
 
     peticion.subscribe({
       next: () => {
@@ -105,9 +105,9 @@ export class ClienteComponent {
         console.error('Error al guardar cliente:', error);
         this.guardando.set(false);
         this.mensajeError.set(
-          'No se pudo guardar. Verifica que el DNI, teléfono y correo no estén repetidos.'
+          'No se pudo guardar. Verifica que el DNI, teléfono y correo no estén repetidos.',
         );
-      }
+      },
     });
   }
 
@@ -122,7 +122,7 @@ export class ClienteComponent {
       error: (error) => {
         console.error('Error al eliminar cliente:', error);
         alert('No se pudo eliminar. Puede que el cliente tenga alquileres registrados.');
-      }
+      },
     });
   }
 

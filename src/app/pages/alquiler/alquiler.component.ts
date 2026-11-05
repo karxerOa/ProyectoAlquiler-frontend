@@ -1,5 +1,11 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
+import { ClienteService, Cliente } from '../../services/cliente.service';
+import { EmpleadoService } from '../../services/empleado.service';
+import { Empleado } from '../../model/empleado';
+import { fechaLima } from '../../model/agenda';
+import { normalizar } from '../../model/catalogo';
 import { Alquiler } from '../../model/alquiler';
 import { AlquilerService } from '../../services/alquiler.service';
 
@@ -8,12 +14,24 @@ import { AlquilerService } from '../../services/alquiler.service';
   standalone: true,
   imports: [ReactiveFormsModule],
   templateUrl: './alquiler.component.html',
-  styleUrl: '../cliente/cliente.component.css'
+  styleUrl: '../../shared/gestion.css',
 })
 export class AlquilerComponent {
   private readonly alquilerService = inject(AlquilerService);
   private readonly fb = inject(FormBuilder);
 
+  private readonly clientesServicio = inject(ClienteService);
+  private readonly empleadosServicio = inject(EmpleadoService);
+  private readonly ruta = inject(ActivatedRoute);
+  readonly clientes = signal<Cliente[]>([]);
+  readonly empleados = signal<Empleado[]>([]);
+  readonly buscarCliente = signal('');
+  readonly errorOpciones = signal('');
+  readonly clientesVisibles = computed(() =>
+    this.clientes().filter((c) =>
+      normalizar(`${c.nombre} ${c.apellidos}`).includes(normalizar(this.buscarCliente())),
+    ),
+  );
   busqueda = signal('');
   readonly alquileres = this.alquilerService.$alquileresChange;
   modalAbierto = signal(false);
@@ -23,27 +41,46 @@ export class AlquilerComponent {
   errorCarga = signal('');
 
   form = this.fb.nonNullable.group({
-    fechaAlquiler: [new Date().toISOString().slice(0, 10), Validators.required],
+    fechaAlquiler: [fechaLima(), Validators.required],
     fechaInicio: ['', Validators.required],
     fechaFin: ['', Validators.required],
-    estado: ['ACTIVO', Validators.required],
+    estado: ['PENDIENTE', Validators.required],
     subtotal: ['0', [Validators.required, Validators.min(0)]],
     total: ['0', [Validators.required, Validators.min(0)]],
     empleadoId: ['', [Validators.required, Validators.min(1)]],
-    clienteId: ['', [Validators.required, Validators.min(1)]]
+    clienteId: ['', [Validators.required, Validators.min(1)]],
   });
 
   alquileresFiltrados = computed(() => {
     const texto = this.busqueda();
-    return this.alquileres().filter(alquiler =>
+    return this.alquileres().filter((alquiler) =>
       `${alquiler.idAlquiler} ${alquiler.estado} ${alquiler.nombreCliente ?? ''} ${alquiler.apellidoCliente ?? ''} ${alquiler.nombreEmpleado ?? ''}`
         .toLowerCase()
-        .includes(texto)
+        .includes(texto),
     );
   });
 
   constructor() {
     this.cargarAlquileres();
+    this.clientesServicio
+      .findAll()
+      .subscribe({
+        next: (data) => this.clientes.set(data),
+        error: () =>
+          this.errorOpciones.set(
+            'No se pudieron cargar los clientes. Cierra y vuelve a abrir la página para reintentar.',
+          ),
+      });
+    this.empleadosServicio
+      .findAll()
+      .subscribe({
+        next: (data) => this.empleados.set(data),
+        error: () =>
+          this.errorOpciones.set(
+            'No se pudieron cargar los empleados. Cierra y vuelve a abrir la página para reintentar.',
+          ),
+      });
+    if (this.ruta.snapshot.routeConfig?.path === 'alquileres/nuevo') this.nuevo();
   }
 
   cargarAlquileres(): void {
@@ -55,7 +92,7 @@ export class AlquilerComponent {
       error: (error: unknown) => {
         console.error('Error al cargar alquileres:', error);
         this.errorCarga.set('No se pudieron cargar los alquileres.');
-      }
+      },
     });
   }
 
@@ -64,16 +101,17 @@ export class AlquilerComponent {
   }
 
   nuevo(): void {
+    this.buscarCliente.set('');
     this.editandoId.set(null);
     this.form.reset({
-      fechaAlquiler: new Date().toISOString().slice(0, 10),
+      fechaAlquiler: fechaLima(),
       fechaInicio: '',
       fechaFin: '',
-      estado: 'ACTIVO',
+      estado: 'PENDIENTE',
       subtotal: '0',
       total: '0',
       empleadoId: '',
-      clienteId: ''
+      clienteId: '',
     });
     this.mensajeError.set('');
     this.modalAbierto.set(true);
@@ -89,7 +127,7 @@ export class AlquilerComponent {
       subtotal: String(alquiler.subtotal),
       total: String(alquiler.total),
       empleadoId: String(alquiler.empleadoId),
-      clienteId: String(alquiler.clienteId)
+      clienteId: String(alquiler.clienteId),
     });
     this.mensajeError.set('');
     this.modalAbierto.set(true);
@@ -111,15 +149,14 @@ export class AlquilerComponent {
       subtotal: Number(value.subtotal),
       total: Number(value.total),
       empleadoId: Number(value.empleadoId),
-      clienteId: Number(value.clienteId)
+      clienteId: Number(value.clienteId),
     };
     const id = this.editandoId();
     this.guardando.set(true);
     this.mensajeError.set('');
 
-    const request = id === null
-      ? this.alquilerService.create(data)
-      : this.alquilerService.update(id, data);
+    const request =
+      id === null ? this.alquilerService.create(data) : this.alquilerService.update(id, data);
 
     request.subscribe({
       next: () => {
@@ -130,8 +167,10 @@ export class AlquilerComponent {
       error: (error: unknown) => {
         console.error('Error al guardar alquiler:', error);
         this.guardando.set(false);
-        this.mensajeError.set('No se pudo guardar el alquiler. Verifica los IDs de cliente y empleado.');
-      }
+        this.mensajeError.set(
+          'No se pudo guardar el alquiler. Verifica los IDs de cliente y empleado.',
+        );
+      },
     });
   }
 
@@ -142,7 +181,7 @@ export class AlquilerComponent {
       error: (error: unknown) => {
         console.error('Error al eliminar alquiler:', error);
         alert('No se pudo eliminar el alquiler. Puede tener registros asociados.');
-      }
+      },
     });
   }
 

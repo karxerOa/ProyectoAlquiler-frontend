@@ -10,7 +10,7 @@ import { Rol } from '../../model/rol';
   standalone: true,
   imports: [FormsModule, ReactiveFormsModule],
   templateUrl: './usuario.component.html',
-  styleUrl: '../cliente/cliente.component.css'
+  styleUrl: '../../shared/gestion.css',
 })
 export class UsuarioComponent {
   private readonly usuarioService = inject(UsuarioService);
@@ -30,14 +30,15 @@ export class UsuarioComponent {
     username: ['', [Validators.required, Validators.maxLength(50)]],
     password: ['', [Validators.minLength(6)]],
     enabled: [true],
-    rolId: ['', [Validators.required, Validators.min(1)]]
+    rolId: ['', [Validators.required, Validators.min(1)]],
   });
 
   usuariosFiltrados = computed(() => {
     const texto = this.busqueda();
-    return this.usuarios().filter(usuario =>
+    return this.usuarios().filter((usuario) =>
       `${usuario.username} ${usuario.name ?? ''} ${usuario.rolId} ${usuario.enabled ? 'activo' : 'inactivo'}`
-        .toLowerCase().includes(texto)
+        .toLowerCase()
+        .includes(texto),
     );
   });
 
@@ -48,25 +49,30 @@ export class UsuarioComponent {
 
   cargarUsuarios(): void {
     this.usuarioService.findAll().subscribe({
-      next: data => { this.usuarioService.setUsuariosChange(data); this.errorCarga.set(''); },
+      next: (data) => {
+        this.usuarioService.setUsuariosChange(data);
+        this.errorCarga.set('');
+      },
       error: (error: unknown) => {
         console.error('Error al cargar usuarios:', error);
         this.errorCarga.set('No se pudieron cargar los usuarios.');
-      }
+      },
     });
   }
 
   cargarRoles(): void {
     this.rolService.findAll().subscribe({
-      next: data => this.rolService.setRolesChange(data),
+      next: (data) => this.rolService.setRolesChange(data),
       error: (error: unknown) => {
         console.error('Error al cargar roles para usuarios:', error);
         this.errorCarga.set('No se pudieron cargar los roles para el formulario.');
-      }
+      },
     });
   }
 
-  buscar(valor: string): void { this.busqueda.set(valor.trim().toLowerCase()); }
+  buscar(valor: string): void {
+    this.busqueda.set(valor.trim().toLowerCase());
+  }
 
   nuevo(): void {
     this.editandoId.set(null);
@@ -83,7 +89,7 @@ export class UsuarioComponent {
       username: usuario.username,
       password: '',
       enabled: usuario.enabled,
-      rolId: String(usuario.rolId)
+      rolId: String(usuario.rolId),
     });
     this.form.controls.password.clearValidators();
     this.form.controls.password.setValidators([Validators.minLength(6)]);
@@ -93,28 +99,38 @@ export class UsuarioComponent {
   }
 
   guardar(): void {
-    if (this.form.invalid) { this.form.markAllAsTouched(); return; }
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      return;
+    }
     const value = this.form.getRawValue();
     const data: { username: string; password?: string; enabled: boolean; rolId: number } = {
       username: value.username,
       enabled: value.enabled,
-      rolId: Number(value.rolId)
+      rolId: Number(value.rolId),
     };
     if (value.password) data.password = value.password;
 
     const id = this.editandoId();
     this.guardando.set(true);
     this.mensajeError.set('');
-    const request = id === null
-      ? this.usuarioService.create({ ...data, password: value.password })
-      : this.usuarioService.update(id, data);
+    const request =
+      id === null
+        ? this.usuarioService.create({ ...data, password: value.password })
+        : this.usuarioService.update(id, data);
     request.subscribe({
-      next: () => { this.guardando.set(false); this.modalAbierto.set(false); this.cargarUsuarios(); },
+      next: () => {
+        this.guardando.set(false);
+        this.modalAbierto.set(false);
+        this.cargarUsuarios();
+      },
       error: (error: unknown) => {
         console.error('Error al guardar usuario:', error);
         this.guardando.set(false);
-        this.mensajeError.set('No se pudo guardar el usuario. Verifica que el nombre y el rol sean válidos.');
-      }
+        this.mensajeError.set(
+          'No se pudo guardar el usuario. Verifica que el nombre y el rol sean válidos.',
+        );
+      },
     });
   }
 
@@ -125,7 +141,7 @@ export class UsuarioComponent {
       error: (error: unknown) => {
         console.error('Error al eliminar usuario:', error);
         alert('No se pudo eliminar el usuario.');
-      }
+      },
     });
   }
 

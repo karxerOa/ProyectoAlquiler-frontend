@@ -9,9 +9,15 @@
     "ProyectoAlquiler-Frontend": {
       "projectType": "application",
       "schematics": {
-        "@schematics/angular:component": { "type": "component" }, 
-        "@schematics/angular:service": { "type": "service" }, 
-        "@schematics/angular:module": { "typeSeparator": "." }
+        "@schematics/angular:component": {
+          "type": "component"
+        },
+        "@schematics/angular:service": {
+          "type": "service"
+        },
+        "@schematics/angular:module": {
+          "typeSeparator": "."
+        }
       },
       "root": "",
       "sourceRoot": "src",
@@ -44,7 +50,12 @@
                   "maximumError": "8kB"
                 }
               ],
-              "outputHashing": "all"
+              "outputHashing": "all",
+              "optimization": {
+                "scripts": true,
+                "styles": true,
+                "fonts": false
+              }
             },
             "development": {
               "optimization": false,

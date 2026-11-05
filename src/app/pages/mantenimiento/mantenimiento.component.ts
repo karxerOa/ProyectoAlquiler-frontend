@@ -8,7 +8,7 @@ import { MantenimientoService } from '../../services/mantenimiento.service';
   standalone: true,
   imports: [ReactiveFormsModule],
   templateUrl: './mantenimiento.component.html',
-  styleUrl: '../cliente/cliente.component.css'
+  styleUrl: '../../shared/gestion.css',
 })
 export class MantenimientoComponent {
   private readonly mantenimientoService = inject(MantenimientoService);
@@ -30,30 +30,38 @@ export class MantenimientoComponent {
     costo: [0, [Validators.required, Validators.min(0)]],
     estado: ['EN CURSO', Validators.required],
     prendaId: ['', [Validators.required, Validators.min(1)]],
-    empleadoId: ['', [Validators.required, Validators.min(1)]]
+    empleadoId: ['', [Validators.required, Validators.min(1)]],
   });
 
   mantenimientosFiltrados = computed(() => {
     const texto = this.busqueda();
-    return this.mantenimientos().filter(item =>
+    return this.mantenimientos().filter((item) =>
       `${item.tipoMantenimiento} ${item.descripcion} ${item.estado} ${item.prendaId} ${item.empleadoId}`
-        .toLowerCase().includes(texto)
+        .toLowerCase()
+        .includes(texto),
     );
   });
 
-  constructor() { this.cargar(); }
+  constructor() {
+    this.cargar();
+  }
 
   cargar(): void {
     this.mantenimientoService.findAll().subscribe({
-      next: data => { this.mantenimientoService.setMantenimientosChange(data); this.errorCarga.set(''); },
+      next: (data) => {
+        this.mantenimientoService.setMantenimientosChange(data);
+        this.errorCarga.set('');
+      },
       error: (error: unknown) => {
         console.error('Error al cargar mantenimientos:', error);
         this.errorCarga.set('No se pudieron cargar los mantenimientos.');
-      }
+      },
     });
   }
 
-  buscar(valor: string): void { this.busqueda.set(valor.trim().toLowerCase()); }
+  buscar(valor: string): void {
+    this.busqueda.set(valor.trim().toLowerCase());
+  }
 
   nuevo(): void {
     this.editandoId.set(null);
@@ -65,7 +73,7 @@ export class MantenimientoComponent {
       costo: 0,
       estado: 'EN CURSO',
       prendaId: '',
-      empleadoId: ''
+      empleadoId: '',
     });
     this.mensajeError.set('');
     this.modalAbierto.set(true);
@@ -81,33 +89,45 @@ export class MantenimientoComponent {
       costo: item.costo,
       estado: item.estado,
       prendaId: String(item.prendaId),
-      empleadoId: String(item.empleadoId)
+      empleadoId: String(item.empleadoId),
     });
     this.mensajeError.set('');
     this.modalAbierto.set(true);
   }
 
   guardar(): void {
-    if (this.form.invalid) { this.form.markAllAsTouched(); return; }
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      return;
+    }
     const value = this.form.getRawValue();
     if (value.fechaFin < value.fechaInicio) {
       this.mensajeError.set('La fecha final no puede ser anterior a la fecha inicial.');
       return;
     }
-    const data = { ...value, prendaId: Number(value.prendaId), empleadoId: Number(value.empleadoId) };
+    const data = {
+      ...value,
+      prendaId: Number(value.prendaId),
+      empleadoId: Number(value.empleadoId),
+    };
     const id = this.editandoId();
     this.guardando.set(true);
     this.mensajeError.set('');
-    const request = id === null
-      ? this.mantenimientoService.create(data)
-      : this.mantenimientoService.update(id, data);
+    const request =
+      id === null
+        ? this.mantenimientoService.create(data)
+        : this.mantenimientoService.update(id, data);
     request.subscribe({
-      next: () => { this.guardando.set(false); this.modalAbierto.set(false); this.cargar(); },
+      next: () => {
+        this.guardando.set(false);
+        this.modalAbierto.set(false);
+        this.cargar();
+      },
       error: (error: unknown) => {
         console.error('Error al guardar mantenimiento:', error);
         this.guardando.set(false);
         this.mensajeError.set('No se pudo guardar. Verifica los IDs de prenda y empleado.');
-      }
+      },
     });
   }
 
@@ -118,7 +138,7 @@ export class MantenimientoComponent {
       error: (error: unknown) => {
         console.error('Error al eliminar mantenimiento:', error);
         alert('No se pudo eliminar el mantenimiento.');
-      }
+      },
     });
   }
 
