@@ -4,7 +4,7 @@ import { environment } from '../../environments/environment';
 
 import type { Cliente } from '../model/cliente';
 export type { Cliente } from '../model/cliente';
-type ClienteData = Omit<Cliente, 'idCliente' | 'alquileres'>;
+type ClienteData = Omit<Cliente, 'idCliente'>;
 
 @Service()
 export class ClienteService {

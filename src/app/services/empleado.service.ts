@@ -3,10 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import type { Empleado } from '../model/empleado';
 import { environment } from '../../environments/environment';
 
-type EmpleadoDatos = Omit<
-  Empleado,
-  'idEmpleado' | 'producciones' | 'mantenimientos' | 'alquileres' | 'devoluciones'
->;
+type EmpleadoDatos = Omit<Empleado, 'idEmpleado'>;
 
 @Service()
 export class EmpleadoService {

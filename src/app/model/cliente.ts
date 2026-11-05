@@ -1,5 +1,3 @@
-import type { Alquiler } from './alquiler';
-
 export interface Cliente {
   idCliente: number;
   nombre: string;
@@ -8,5 +6,4 @@ export interface Cliente {
   telefono: number;
   direccion: string;
   correo: string;
-  alquileres?: Alquiler[];
 }

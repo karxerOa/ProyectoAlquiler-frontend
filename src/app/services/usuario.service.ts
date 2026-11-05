@@ -3,7 +3,7 @@ import { inject, Service, signal } from '@angular/core';
 import { Usuario } from '../model/usuario';
 import { environment } from '../../environments/environment';
 
-type UsuarioData = Omit<Usuario, 'idUser' | 'name' | 'password'> & { password?: string };
+type UsuarioData = Omit<Usuario, 'idUser' | 'name'> & { password?: string };
 
 @Service()
 export class UsuarioService {
