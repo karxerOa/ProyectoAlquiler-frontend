@@ -1,9 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Service, signal } from '@angular/core';
-import { Prenda } from '../model/prenda';
+import { Prenda, PrendaData } from '../model/prenda';
 import { environment } from '../../environments/environment';
-
-type PrendaData = Omit<Prenda, 'idPrenda' | 'categoriaNombre'>;
 
 @Service()
 export class PrendaService {

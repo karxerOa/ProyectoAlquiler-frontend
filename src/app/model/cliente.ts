@@ -8,5 +8,5 @@ export interface Cliente {
   telefono: number;
   direccion: string;
   correo: string;
-  alquileres: Alquiler[];
+  alquileres?: Alquiler[];
 }

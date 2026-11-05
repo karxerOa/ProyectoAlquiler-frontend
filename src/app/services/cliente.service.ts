@@ -2,15 +2,9 @@ import { inject, Service, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../environments/environment';
 
-export interface Cliente {
-  idCliente: number;
-  nombre: string;
-  apellidos: string;
-  dni: number;
-  telefono: number;
-  direccion: string;
-  correo: string;
-}
+import type { Cliente } from '../model/cliente';
+export type { Cliente } from '../model/cliente';
+type ClienteData = Omit<Cliente, 'idCliente' | 'alquileres'>;
 
 @Service()
 export class ClienteService {
@@ -28,11 +22,11 @@ export class ClienteService {
     return this.http.get<Cliente>(`${this.apiUrl}/${id}`);
   }
 
-  create(cliente: Omit<Cliente, 'idCliente'>) {
+  create(cliente: ClienteData) {
     return this.http.post<Cliente>(this.apiUrl, cliente);
   }
 
-  update(id: number, cliente: Omit<Cliente, 'idCliente'>) {
+  update(id: number, cliente: ClienteData) {
     return this.http.put<Cliente>(`${this.apiUrl}/${id}`, cliente);
   }
 
