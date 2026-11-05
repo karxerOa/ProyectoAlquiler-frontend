@@ -1,3 +1,6 @@
+import { ActivatedRoute } from '@angular/router';
+import { ReferenciasService } from '../../services/referencias.service';
+import { SelectorReferenciaComponent } from '../../shared/selector-referencia.component';
 import { Component, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Mantenimiento } from '../../model/mantenimiento';
@@ -6,11 +9,37 @@ import { MantenimientoService } from '../../services/mantenimiento.service';
 @Component({
   selector: 'app-mantenimiento',
   standalone: true,
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, SelectorReferenciaComponent],
   templateUrl: './mantenimiento.component.html',
   styleUrl: '../../shared/gestion.css',
 })
 export class MantenimientoComponent {
+  readonly ref = inject(ReferenciasService);
+  private readonly ruta = inject(ActivatedRoute);
+  readonly origen = signal('');
+  readonly origenes = computed(() =>
+    this.ref
+      .devoluciones()
+      .filter((d) => d.idDevolucion != null && d.estadoPrenda !== 'INCOMPLETO')
+      .map((d) => ({ valor: d.idDevolucion!, nombre: this.ref.devolucion(d.idDevolucion!) })),
+  );
+  readonly prendasRecibidas = computed(() => {
+    const d = this.ref.devoluciones().find((d) => d.idDevolucion === Number(this.origen()));
+    return d && d.estadoPrenda !== 'INCOMPLETO'
+      ? this.ref
+          .opcionesPrendas()
+          .filter((p) =>
+            this.ref
+              .detalles()
+              .some((item) => item.alquilerId === d.alquilerId && item.prendaId === p.valor),
+          )
+      : [];
+  });
+  cambiarOrigen(v: string) {
+    this.origen.set(v);
+    this.form.controls.prendaId.setValue('');
+  }
+
   private readonly mantenimientoService = inject(MantenimientoService);
   private readonly fb = inject(FormBuilder);
 
@@ -36,7 +65,7 @@ export class MantenimientoComponent {
   mantenimientosFiltrados = computed(() => {
     const texto = this.busqueda();
     return this.mantenimientos().filter((item) =>
-      `${item.tipoMantenimiento} ${item.descripcion} ${item.estado} ${item.prendaId} ${item.empleadoId}`
+      `${item.tipoMantenimiento} ${item.descripcion} ${item.estado} ${this.ref.prenda(item.prendaId)} ${this.ref.empleado(item.empleadoId)}`
         .toLowerCase()
         .includes(texto),
     );
@@ -44,6 +73,11 @@ export class MantenimientoComponent {
 
   constructor() {
     this.cargar();
+    if (this.ruta.snapshot.queryParamMap.has('devolucion')) {
+      this.nuevo();
+      this.origen.set(this.ruta.snapshot.queryParamMap.get('devolucion') || '');
+      this.form.controls.prendaId.setValue(this.ruta.snapshot.queryParamMap.get('prenda') || '');
+    }
   }
 
   cargar(): void {
@@ -64,6 +98,8 @@ export class MantenimientoComponent {
   }
 
   nuevo(): void {
+    this.form.controls.prendaId.enable();
+    this.origen.set('');
     this.editandoId.set(null);
     this.form.reset({
       fechaInicio: new Date().toISOString().slice(0, 10),
@@ -91,6 +127,7 @@ export class MantenimientoComponent {
       prendaId: String(item.prendaId),
       empleadoId: String(item.empleadoId),
     });
+    this.form.controls.prendaId.disable();
     this.mensajeError.set('');
     this.modalAbierto.set(true);
   }
@@ -100,13 +137,34 @@ export class MantenimientoComponent {
       this.form.markAllAsTouched();
       return;
     }
+    if (
+      this.editandoId() === null &&
+      (!this.origenes().some((o) => o.valor === Number(this.origen())) ||
+        !this.prendasRecibidas().some((p) => p.valor === Number(this.form.controls.prendaId.value)))
+    ) {
+      this.mensajeError.set(
+        'Selecciona una devolución completa y una prenda recibida en ese alquiler.',
+      );
+      return;
+    }
     const value = this.form.getRawValue();
     if (value.fechaFin < value.fechaInicio) {
       this.mensajeError.set('La fecha final no puede ser anterior a la fecha inicial.');
       return;
     }
+    const contexto =
+      this.editandoId() === null
+        ? `Recepción: ${this.ref.devolucion(Number(this.origen()))}. `
+        : '';
+    if ((contexto + value.descripcion).length > 255) {
+      this.mensajeError.set(
+        'Reduce la descripción para guardar también el contexto de recepción (máximo 255 caracteres).',
+      );
+      return;
+    }
     const data = {
       ...value,
+      descripcion: contexto + value.descripcion,
       prendaId: Number(value.prendaId),
       empleadoId: Number(value.empleadoId),
     };
@@ -121,18 +179,19 @@ export class MantenimientoComponent {
       next: () => {
         this.guardando.set(false);
         this.modalAbierto.set(false);
+        this.ref.cargar(true);
         this.cargar();
       },
       error: (error: unknown) => {
         console.error('Error al guardar mantenimiento:', error);
         this.guardando.set(false);
-        this.mensajeError.set('No se pudo guardar. Verifica los IDs de prenda y empleado.');
+        this.mensajeError.set('No se pudo guardar. Revisa la prenda y el empleado seleccionados.');
       },
     });
   }
 
   eliminar(item: Mantenimiento): void {
-    if (!confirm(`¿Eliminar el mantenimiento #${item.idMantenimiento}?`)) return;
+    if (!confirm('¿Eliminar este mantenimiento?')) return;
     this.mantenimientoService.delete(item.idMantenimiento).subscribe({
       next: () => this.cargar(),
       error: (error: unknown) => {

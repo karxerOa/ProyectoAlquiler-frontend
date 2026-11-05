@@ -1,134 +1,84 @@
-<div class="page-container">
-  <header class="page-header">
-    <div>
-      <h1>Devoluciones</h1>
-      <p>Registra la recepción de prendas y consulta las devoluciones existentes.</p>
-    </div>
-  </header>
-
-  @if (errorCarga()) {
-    <p class="message message-error" role="alert">{{ errorCarga() }}</p>
-  }
-
-  <section class="content-card">
-    <h2>Registrar devolución</h2>
-    <form #form="ngForm" (ngSubmit)="guardarDevolucion(form)">
-      <div class="form-grid">
-        <div class="form-group">
-          <label for="fechaDevolucion">Fecha de devolución</label>
-          <input
-            id="fechaDevolucion"
-            type="date"
-            name="fechaDevolucion"
-            [(ngModel)]="nuevaDevolucion.fechaDevolucion"
-            required
-          />
-        </div>
-
-        <div class="form-group">
-          <label for="estadoPrenda">Estado de la prenda</label>
-          <select
-            id="estadoPrenda"
-            name="estadoPrenda"
-            [(ngModel)]="nuevaDevolucion.estadoPrenda"
-            required
-          >
-            <option value="BUENO">Bueno</option>
-            <option value="DANADO">Dañado</option>
-            <option value="INCOMPLETO">Incompleto</option>
-          </select>
-        </div>
-
-        <div class="form-group">
-          <label for="alquilerId">ID de alquiler</label>
-          <input
-            id="alquilerId"
-            type="number"
-            name="alquilerId"
-            min="1"
-            [(ngModel)]="nuevaDevolucion.alquilerId"
-            required
-          />
-        </div>
-
-        <div class="form-group">
-          <label for="empleadoId">ID de empleado</label>
-          <input
-            id="empleadoId"
-            type="number"
-            name="empleadoId"
-            min="1"
-            [(ngModel)]="nuevaDevolucion.empleadoId"
-            required
-          />
-        </div>
-
-        <div class="form-group form-group-full">
-          <label for="observacion">Observación</label>
-          <textarea
-            id="observacion"
-            name="observacion"
-            rows="3"
-            maxlength="500"
-            [(ngModel)]="nuevaDevolucion.observacion"
-          ></textarea>
-        </div>
-      </div>
-
-      @if (errorGuardar()) {
-        <p class="message message-error" role="alert">{{ errorGuardar() }}</p>
+<section class="content-card">
+  <h2>Recepción y devolución</h2>
+  @for (d of devoluciones(); track d.idDevolucion) {
+    <article>
+      <h3>Devolución registrada · {{ d.fechaDevolucion.slice(0, 10) }}</h3>
+      <p>Recibió: {{ ref.empleado(d.empleadoId) }} · Estado: {{ d.estadoPrenda }}</p>
+      <p>{{ d.observacion || 'Sin observaciones' }}</p>
+      <h4>Prendas del alquiler</h4>
+      <ul>
+        @for (prenda of prendas(); track prenda.idDetalle) {
+          <li>
+            {{ ref.prenda(prenda.prendaId) }} · {{ prenda.cantidad }} unidades
+            @if (d.estadoPrenda !== 'INCOMPLETO') {
+              <a
+                routerLink="/mantenimientos"
+                [queryParams]="{ devolucion: d.idDevolucion, prenda: prenda.prendaId }"
+                >Revisar mantenimiento</a
+              >
+            }
+          </li>
+        }
+      </ul>
+      @if (d.estadoPrenda === 'INCOMPLETO') {
+        <p>
+          Recepción incompleta: el servidor no identifica qué prendas faltan. No se consideran todas
+          devueltas.
+        </p>
+      } @else {
+        <p>
+          Recepción del alquiler completo registrada. Revisa cada prenda antes de asignar
+          mantenimiento.
+        </p>
       }
-
-      <div class="form-actions">
-        <button type="button" class="btn-secondary" (click)="limpiarFormulario(form)">
-          Limpiar
-        </button>
-        <button type="submit" class="btn-primary" [disabled]="form.invalid || guardando()">
-          {{ guardando() ? 'Guardando...' : 'Registrar devolución' }}
-        </button>
+    </article>
+  }
+  @if (puedeRecibir()) {
+    <p>
+      Confirma la recepción de todas las prendas del alquiler. Si falta alguna, registra la
+      incidencia como recepción incompleta.
+    </p>
+    <form [formGroup]="form" (ngSubmit)="guardar()">
+      <div class="form-grid">
+        <label>Fecha de recepción<input type="date" formControlName="fechaDevolucion" /></label
+        ><label
+          >Estado al recibir<select formControlName="estadoPrenda">
+            <option value="BUENO">Bueno · sin incidencia de estado</option>
+            <option value="DANADO">Dañado · requiere revisión</option>
+            <option value="INCOMPLETO">Incompleto · faltan prendas</option>
+          </select></label
+        ><app-selector-referencia
+          etiqueta="Empleado que recibe"
+          [opciones]="ref.opcionesEmpleados()"
+          formControlName="empleadoId"
+        /><label
+          >Observaciones<textarea formControlName="observacion" maxlength="500"></textarea>
+        </label>
       </div>
-    </form>
-  </section>
-
-  <section class="content-card">
-    <div class="table-header">
-      <h2>Devoluciones registradas</h2>
-      <button type="button" class="btn-secondary" (click)="cargarDevoluciones()" [disabled]="cargando()">
-        {{ cargando() ? 'Actualizando...' : 'Actualizar' }}
+      <fieldset>
+        <legend>Revisión de cada prenda</legend>
+        @for (p of prendas(); track p.idDetalle) {
+          <label
+            >{{ ref.prenda(p.prendaId) }} · {{ p.cantidad }} unidades<select
+              [value]="revisiones()[p.prendaId] || ''"
+              (change)="revisar(p.prendaId, $any($event.target).value)"
+            >
+              <option value="">Selecciona la revisión</option>
+              <option value="SIN_MANTENIMIENTO">Recibida · no requiere mantenimiento</option>
+              <option value="CON_MANTENIMIENTO">Recibida · requiere mantenimiento</option>
+              <option value="NO_RECIBIDA">Todavía no fue recibida</option>
+            </select></label
+          >
+        }
+      </fieldset>
+      <button class="btn-primary" [disabled]="guardando() || form.invalid">
+        Registrar recepción
       </button>
-    </div>
-
-    <div class="table-container">
-      <table>
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Fecha</th>
-            <th>Estado de prenda</th>
-            <th>Observación</th>
-            <th>ID alquiler</th>
-            <th>ID empleado</th>
-          </tr>
-        </thead>
-        <tbody>
-          @for (devolucion of listaDevoluciones(); track devolucion.idDevolucion) {
-            <tr>
-              <td>{{ devolucion.idDevolucion }}</td>
-              <td>{{ devolucion.fechaDevolucion | date:'yyyy-MM-dd' }}</td>
-              <td>{{ devolucion.estadoPrenda }}</td>
-              <td>{{ devolucion.observacion || '—' }}</td>
-              <td>{{ devolucion.alquilerId }}</td>
-              <td>{{ devolucion.empleadoId }}</td>
-            </tr>
-          } @empty {
-            <tr>
-              <td colspan="6" class="empty-message">
-                {{ cargando() ? 'Cargando devoluciones...' : 'No hay devoluciones registradas.' }}
-              </td>
-            </tr>
-          }
-        </tbody>
-      </table>
-    </div>
-  </section>
-</div>
+    </form>
+  } @else if (!devoluciones().length) {
+    <p>La recepción se registra cuando el alquiler está en curso y tiene prendas vinculadas.</p>
+  }
+  @if (error()) {
+    <p class="error-box" role="alert">{{ error() }}</p>
+  }
+</section>

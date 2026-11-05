@@ -1,3 +1,5 @@
+import { ReferenciasService } from '../../services/referencias.service';
+import { SelectorReferenciaComponent } from '../../shared/selector-referencia.component';
 import { Component, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Pago } from '../../model/pago';
@@ -6,11 +8,12 @@ import { PagoService } from '../../services/pago.service';
 @Component({
   selector: 'app-pago',
   standalone: true,
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, SelectorReferenciaComponent],
   templateUrl: './pago.component.html',
   styleUrl: '../../shared/gestion.css',
 })
 export class PagoComponent {
+  readonly ref = inject(ReferenciasService);
   private readonly pagoService = inject(PagoService);
   private readonly fb = inject(FormBuilder);
 
@@ -32,7 +35,7 @@ export class PagoComponent {
   pagosFiltrados = computed(() => {
     const texto = this.busqueda();
     return this.pagos().filter((pago) =>
-      `${pago.fechaPago} ${pago.metodoPago} ${pago.estado} ${pago.alquilerId}`
+      `${pago.fechaPago} ${pago.metodoPago} ${pago.estado} ${this.ref.alquiler(pago.alquilerId)}`
         .toLowerCase()
         .includes(texto),
     );
@@ -89,7 +92,7 @@ export class PagoComponent {
       error: (error: unknown) => {
         console.error('Error al guardar pago:', error);
         this.guardando.set(false);
-        this.mensajeError.set('No se pudo registrar el pago. Verifica el ID del alquiler.');
+        this.mensajeError.set('No se pudo registrar el pago. Revisa el alquiler seleccionado.');
       },
     });
   }

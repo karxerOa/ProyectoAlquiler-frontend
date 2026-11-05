@@ -1,14 +1,11 @@
 <div class="page-container">
-
   <div class="page-header">
     <div>
       <h1>Gestión de clientes</h1>
       <p>Administra la información de los clientes de Lucy.</p>
     </div>
 
-    <button class="btn-primary" type="button" (click)="nuevo()">
-      + Nuevo cliente
-    </button>
+    <button class="btn-primary" type="button" (click)="nuevo()">+ Nuevo cliente</button>
   </div>
 
   <div class="stats-card">
@@ -50,9 +47,10 @@
               <td>{{ cliente.telefono }}</td>
               <td>{{ cliente.correo }}</td>
               <td class="acciones">
-                <button class="btn-action" type="button" (click)="editar(cliente)">
-                  Editar
+                <button type="button" class="btn-action" (click)="verHistorial(cliente)">
+                  Ver alquileres
                 </button>
+                <button class="btn-action" type="button" (click)="editar(cliente)">Editar</button>
                 <button class="btn-action btn-danger" type="button" (click)="eliminar(cliente)">
                   Eliminar
                 </button>
@@ -60,27 +58,22 @@
             </tr>
           } @empty {
             <tr>
-              <td colspan="6" class="empty-message">
-                No se encontraron clientes.
-              </td>
+              <td colspan="6" class="empty-message">No se encontraron clientes.</td>
             </tr>
           }
         </tbody>
       </table>
     </div>
   </section>
-
 </div>
 
 <!-- MODAL NUEVO / EDITAR -->
 @if (modalAbierto()) {
   <div class="modal-overlay" (click)="cerrarModal()">
     <div class="modal" (click)="$event.stopPropagation()">
-
       <h2>{{ editandoId() === null ? 'Nuevo cliente' : 'Editar cliente' }}</h2>
 
       <form [formGroup]="form" (ngSubmit)="guardar()">
-
         <div class="form-grid">
           <div class="form-group">
             <label for="nombre">Nombre</label>
@@ -108,7 +101,13 @@
 
           <div class="form-group">
             <label for="telefono">Teléfono</label>
-            <input id="telefono" type="text" inputmode="numeric" maxlength="9" formControlName="telefono" />
+            <input
+              id="telefono"
+              type="text"
+              inputmode="numeric"
+              maxlength="9"
+              formControlName="telefono"
+            />
             @if (campoInvalido('telefono')) {
               <small class="error">El teléfono debe tener 9 dígitos.</small>
             }
@@ -136,15 +135,61 @@
         }
 
         <div class="modal-actions">
-          <button type="button" class="btn-secondary" (click)="cerrarModal()">
-            Cancelar
-          </button>
+          <button type="button" class="btn-secondary" (click)="cerrarModal()">Cancelar</button>
           <button type="submit" class="btn-primary" [disabled]="guardando()">
             {{ guardando() ? 'Guardando...' : 'Guardar' }}
           </button>
         </div>
-
       </form>
     </div>
   </div>
+}
+@if (historialCliente(); as c) {
+  <section class="content-card">
+    <div class="page-header">
+      <h2>Alquileres de {{ c.nombre }} {{ c.apellidos }}</h2>
+      <button type="button" class="btn-secondary" (click)="historialCliente.set(null)">
+        Cerrar historial
+      </button>
+    </div>
+    @if (cargandoHistorial()) {
+      <p role="status">Cargando historial…</p>
+    } @else if (errorHistorial()) {
+      <p role="alert">{{ errorHistorial() }}</p>
+      <button type="button" (click)="verHistorial(c)">Reintentar</button>
+    } @else {
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Entrega</th>
+              <th>Devolución prevista</th>
+              <th>Estado</th>
+              <th>Total registrado</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (a of historial(); track a.idAlquiler) {
+              <tr>
+                <td>{{ a.fechaInicio.slice(0, 10) }}</td>
+                <td>{{ a.fechaFin.slice(0, 10) }}</td>
+                <td>{{ a.estado }}</td>
+                <td>S/ {{ a.total }}</td>
+                <td>
+                  <a routerLink="/alquileres" [queryParams]="{ alquiler: a.idAlquiler }"
+                    >Abrir alquiler</a
+                  >
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="5">Este cliente todavía no tiene alquileres.</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </section>
 }

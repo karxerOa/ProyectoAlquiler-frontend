@@ -1,3 +1,7 @@
+import { ReferenciasService } from '../../services/referencias.service';
+import { AlquilerService } from '../../services/alquiler.service';
+import { Alquiler } from '../../model/alquiler';
+import { RouterLink } from '@angular/router';
 import { Component, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ClienteService } from '../../services/cliente.service';
@@ -7,11 +11,40 @@ import { normalizar } from '../../model/catalogo';
 @Component({
   selector: 'app-cliente',
   standalone: true,
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, RouterLink],
   templateUrl: './cliente.component.html',
   styleUrl: './cliente.component.css',
 })
 export class ClienteComponent {
+  readonly ref = inject(ReferenciasService);
+  private readonly alquilerService = inject(AlquilerService);
+  readonly historialCliente = signal<Cliente | null>(null);
+  readonly historial = signal<Alquiler[]>([]);
+  readonly cargandoHistorial = signal(false);
+  readonly errorHistorial = signal('');
+  verHistorial(cliente: Cliente) {
+    this.historialCliente.set(cliente);
+    this.historial.set([]);
+    this.errorHistorial.set('');
+    this.cargandoHistorial.set(true);
+    this.alquilerService.findAll().subscribe({
+      next: (items) => {
+        if (this.historialCliente()?.idCliente !== cliente.idCliente) return;
+        this.historial.set(
+          items
+            .filter((a) => a.clienteId === cliente.idCliente)
+            .sort((a, b) => b.fechaInicio.localeCompare(a.fechaInicio)),
+        );
+        this.cargandoHistorial.set(false);
+      },
+      error: () => {
+        if (this.historialCliente()?.idCliente !== cliente.idCliente) return;
+        this.errorHistorial.set('No se pudo cargar el historial.');
+        this.cargandoHistorial.set(false);
+      },
+    });
+  }
+
   private readonly clienteService = inject(ClienteService);
   private readonly fb = inject(FormBuilder);
 
@@ -35,8 +68,9 @@ export class ClienteComponent {
   clientesFiltrados = computed(() => {
     const texto = this.busqueda();
     return this.clientes().filter((cliente) =>
-      normalizar(`${cliente.nombre} ${cliente.apellidos} ${cliente.dni} ${cliente.telefono} ${cliente.correo}`)
-        .includes(texto),
+      normalizar(
+        `${cliente.nombre} ${cliente.apellidos} ${cliente.dni} ${cliente.telefono} ${cliente.correo}`,
+      ).includes(texto),
     );
   });
 
@@ -46,7 +80,10 @@ export class ClienteComponent {
 
   cargarClientes(): void {
     this.clienteService.findAll().subscribe({
-      next: (data) => this.clienteService.setClientesChange(data),
+      next: (data) => {
+        this.clienteService.setClientesChange(data);
+        this.ref.clientes.set(data);
+      },
       error: (error) => console.error('Error al cargar clientes:', error),
     });
   }

@@ -36,12 +36,8 @@
           @for (a of agenda()[tipo]; track a.idAlquiler) {
             <div class="agenda-row">
               <div>
-                <strong
-                  >{{ a.nombreCliente || 'Cliente #' + a.clienteId }}
-                  {{ a.apellidoCliente }}</strong
-                >
+                <strong>{{ ref.cliente(a.clienteId) }} {{ a.apellidoCliente }}</strong>
                 <p>
-                  AL-{{ a.idAlquiler }} ·
                   {{ tipo === 'entregas' ? a.fechaInicio.slice(0, 10) : a.fechaFin.slice(0, 10) }}
                 </p>
               </div>
@@ -79,7 +75,7 @@
           <tbody>
             @for (a of visibles(); track a.idAlquiler) {
               <tr>
-                <td>{{ a.nombreCliente || 'Cliente #' + a.clienteId }} {{ a.apellidoCliente }}</td>
+                <td>{{ ref.cliente(a.clienteId) }} {{ a.apellidoCliente }}</td>
                 <td>{{ a.fechaInicio.slice(0, 10) }}</td>
                 <td>{{ a.fechaFin.slice(0, 10) }}</td>
                 <td>{{ a.estado }}</td>

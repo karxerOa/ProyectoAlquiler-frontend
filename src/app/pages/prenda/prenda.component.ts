@@ -1,3 +1,5 @@
+import { prendaActiva } from '../../model/flujo';
+import { ReferenciasService } from '../../services/referencias.service';
 import { Component, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CurrencyPipe } from '@angular/common';
@@ -22,6 +24,7 @@ import { PrendaService } from '../../services/prenda.service';
   styleUrls: ['../../shared/gestion.css', './prenda.component.css'],
 })
 export class PrendaComponent {
+  readonly ref = inject(ReferenciasService);
   readonly camposFiltro = ['talla', 'color', 'estado', 'genero'] as const;
   private readonly categoriaService = inject(CategoriaService);
   readonly categoriasRegistro = signal<Categoria[]>([]);
@@ -47,7 +50,11 @@ export class PrendaComponent {
   });
 
   readonly filtros = signal(filtrosIniciales());
-  readonly indice = computed(() => this.prendas().map(indexarPrenda));
+  readonly indice = computed(() =>
+    this.prendas()
+      .filter((p) => prendaActiva(p.estado))
+      .map(indexarPrenda),
+  );
   readonly prendasFiltradas = computed(() =>
     this.indice()
       .filter((item) => coincidePrenda(item, this.busqueda(), this.filtros()))
@@ -55,10 +62,15 @@ export class PrendaComponent {
   );
   readonly categorias = computed(() => [
     ...new Map(
-      this.prendas().map((p) => [
-        p.categoriaId,
-        { id: String(p.categoriaId), nombre: p.categoriaNombre || `Categoría ${p.categoriaId}` },
-      ]),
+      this.prendas()
+        .filter((p) => prendaActiva(p.estado))
+        .map((p) => [
+          p.categoriaId,
+          {
+            id: String(p.categoriaId),
+            nombre: p.categoriaNombre || this.ref.categoria(p.categoriaId),
+          },
+        ]),
     ).values(),
   ]);
   opciones(campo: 'talla' | 'color' | 'estado' | 'genero'): string[] {
@@ -86,21 +98,20 @@ export class PrendaComponent {
 
   constructor() {
     this.cargar();
-    this.categoriaService
-      .findAll()
-      .subscribe({
-        next: (data) => this.categoriasRegistro.set(data),
-        error: () =>
-          this.mensajeError.set(
-            'No se pudieron cargar las categorías. Reabre la página para reintentar.',
-          ),
-      });
+    this.categoriaService.findAll().subscribe({
+      next: (data) => this.categoriasRegistro.set(data),
+      error: () =>
+        this.mensajeError.set(
+          'No se pudieron cargar las categorías. Reabre la página para reintentar.',
+        ),
+    });
   }
 
   cargar(): void {
     this.prendaService.findAll().subscribe({
       next: (data) => {
         this.prendaService.setPrendasChange(data);
+        this.ref.prendas.set(data);
         this.errorCarga.set('');
       },
       error: (error: unknown) => {
@@ -165,7 +176,7 @@ export class PrendaComponent {
       error: (error: unknown) => {
         console.error('Error al guardar prenda:', error);
         this.guardando.set(false);
-        this.mensajeError.set('No se pudo guardar la prenda. Verifica el ID de categoría.');
+        this.mensajeError.set('No se pudo guardar la prenda. Revisa la categoría seleccionada.');
       },
     });
   }

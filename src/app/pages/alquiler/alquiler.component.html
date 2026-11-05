@@ -31,7 +31,6 @@
       <table>
         <thead>
           <tr>
-            <th>ID</th>
             <th>Cliente</th>
             <th>Empleado</th>
             <th>Fechas</th>
@@ -43,22 +42,30 @@
         <tbody>
           @for (alquiler of alquileresFiltrados(); track alquiler.idAlquiler) {
             <tr>
-              <td>{{ alquiler.idAlquiler }}</td>
-              <td>
-                {{ alquiler.nombreCliente || 'Cliente' }} {{ alquiler.apellidoCliente }} (#{{
-                  alquiler.clienteId
-                }})
-              </td>
-              <td>{{ alquiler.nombreEmpleado || 'Empleado' }} (#{{ alquiler.empleadoId }})</td>
+              <td>{{ ref.cliente(alquiler.clienteId) }}</td>
+              <td>{{ ref.empleado(alquiler.empleadoId) }}</td>
               <td>{{ alquiler.fechaInicio }} — {{ alquiler.fechaFin }}</td>
-              <td>{{ alquiler.estado }}</td>
+              <td>{{ devuelto(alquiler) ? 'Devuelto' : alquiler.estado }}</td>
               <td>S/ {{ alquiler.total }}</td>
               <td>
                 <div class="acciones">
-                  <button class="btn-action" type="button" (click)="editar(alquiler)">
+                  <button type="button" class="btn-action" (click)="abrir(alquiler)">
+                    Prendas y devolución
+                  </button>
+                  <button
+                    class="btn-action"
+                    type="button"
+                    [disabled]="tieneRecepcion(alquiler)"
+                    (click)="editar(alquiler)"
+                  >
                     Editar
                   </button>
-                  <button class="btn-action btn-danger" type="button" (click)="eliminar(alquiler)">
+                  <button
+                    class="btn-action btn-danger"
+                    type="button"
+                    [disabled]="tieneRecepcion(alquiler)"
+                    (click)="eliminar(alquiler)"
+                  >
                     Eliminar
                   </button>
                 </div>
@@ -66,7 +73,7 @@
             </tr>
           } @empty {
             <tr>
-              <td colspan="7" class="empty-message">No se encontraron alquileres.</td>
+              <td colspan="6" class="empty-message">No se encontraron alquileres.</td>
             </tr>
           }
         </tbody>
@@ -86,9 +93,7 @@
       (click)="$event.stopPropagation()"
     >
       <h2>{{ editandoId() === null ? 'Nuevo alquiler' : 'Editar alquiler' }}</h2>
-      <p>
-        Cliente, fechas e importes. Vincula las prendas desde Detalles de alquiler una vez guardado.
-      </p>
+      <p>Paso 1: cliente y fechas. Al guardar, podrás añadir las prendas en este mismo alquiler.</p>
       @if (errorOpciones()) {
         <p class="error-box" role="alert">{{ errorOpciones() }}</p>
       }
@@ -130,25 +135,23 @@
             ><input id="total" type="number" min="0" step="0.01" formControlName="total" />
           </div>
           <div class="form-group">
-            <label for="cliente-busqueda">Buscar cliente por nombre</label
+            <label for="dni-cliente">DNI del cliente</label
             ><input
-              id="cliente-busqueda"
-              type="search"
-              [value]="buscarCliente()"
-              (input)="buscarCliente.set($any($event.target).value)"
-              placeholder="Nombre o apellidos"
-            /><label for="clienteId">Cliente</label
-            ><select id="clienteId" formControlName="clienteId">
-              <option value="">Selecciona un cliente</option>
-              @for (c of clientesVisibles(); track c.idCliente) {
-                <option [value]="c.idCliente">
-                  {{ c.nombre }} {{ c.apellidos }} · {{ c.dni }}
-                </option>
-              }
-            </select>
-            @if (campoInvalido('clienteId')) {
-              <small class="error">Ingresa un ID válido.</small>
+              id="dni-cliente"
+              inputmode="numeric"
+              maxlength="8"
+              [value]="dni()"
+              (input)="buscarDni($any($event.target).value)"
+              placeholder="Ingresa los 8 dígitos"
+            />
+            @if (clienteDni(); as c) {
+              <p role="status">{{ c.nombre }} {{ c.apellidos }}</p>
+            } @else if (dni().length === 8) {
+              <p role="status">
+                No se encontró un cliente con ese DNI. Regístralo primero en Clientes.
+              </p>
             }
+            <input type="hidden" formControlName="clienteId" />
           </div>
           <div class="form-group">
             <label for="empleadoId">Empleado responsable</label
@@ -159,7 +162,7 @@
               }
             </select>
             @if (campoInvalido('empleadoId')) {
-              <small class="error">Ingresa un ID válido.</small>
+              <small class="error">Selecciona un registro válido.</small>
             }
           </div>
         </div>
@@ -176,4 +179,25 @@
       </form>
     </div>
   </div>
+}
+
+@if (expediente(); as a) {
+  <section class="rental-file content-card">
+    <div class="page-header">
+      <div>
+        <h2>{{ ref.cliente(a.clienteId) }}</h2>
+        <p>
+          {{ a.fechaInicio.slice(0, 10) }} — {{ a.fechaFin.slice(0, 10) }} ·
+          {{ devuelto(a) ? 'Devuelto' : a.estado }}
+        </p>
+      </div>
+      <button type="button" class="btn-secondary" (click)="expediente.set(null)">
+        Cerrar ficha
+      </button>
+    </div>
+    <app-detalle-alquiler [alquiler]="a" /><app-devolucion
+      [alquiler]="a"
+      (actualizada)="cargarAlquileres()"
+    />
+  </section>
 }

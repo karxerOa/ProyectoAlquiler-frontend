@@ -1,3 +1,4 @@
+import { ReferenciasService } from '../services/referencias.service';
 import { Component, computed, inject, signal } from '@angular/core';
 import { CurrencyPipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
@@ -14,6 +15,7 @@ import { normalizar } from '../model/catalogo';
   templateUrl: './resumen.component.html',
 })
 export class ResumenComponent {
+  readonly ref = inject(ReferenciasService);
   readonly tiposAgenda = ['entregas', 'devoluciones'] as const;
   private readonly servicio = inject(AlquilerService);
   readonly alquileres = signal<Alquiler[]>([]);
@@ -21,7 +23,17 @@ export class ResumenComponent {
   readonly cargando = signal(true);
   readonly busqueda = signal('');
   readonly hoy = fechaLima();
-  readonly agenda = computed(() => agendaAlquileres(this.alquileres(), this.hoy));
+  readonly agenda = computed(() =>
+    agendaAlquileres(
+      this.alquileres().filter(
+        (a) =>
+          !this.ref
+            .devoluciones()
+            .some((d) => d.alquilerId === a.idAlquiler && d.estadoPrenda !== 'INCOMPLETO'),
+      ),
+      this.hoy,
+    ),
+  );
   readonly visibles = computed(() =>
     this.alquileres().filter((a) =>
       normalizar(`${a.nombreCliente ?? ''} ${a.apellidoCliente ?? ''}`).includes(

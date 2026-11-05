@@ -1,128 +1,84 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, inject, input, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { DetalleAlquiler } from '../../model/detalle-alquiler';
+import { Alquiler } from '../../model/alquiler';
 import { DetalleAlquilerService } from '../../services/detalle-alquiler.service';
-
+import { ReferenciasService } from '../../services/referencias.service';
+import { SelectorReferenciaComponent } from '../../shared/selector-referencia.component';
+import { alquilerEditable } from '../../model/flujo';
 @Component({
   selector: 'app-detalle-alquiler',
   standalone: true,
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, SelectorReferenciaComponent],
   templateUrl: './detalle-alquiler.component.html',
   styleUrl: '../../shared/gestion.css',
 })
 export class DetalleAlquilerComponent {
-  private readonly detalleService = inject(DetalleAlquilerService);
+  readonly alquiler = input.required<Alquiler>();
+  readonly ref = inject(ReferenciasService);
+  private readonly servicio = inject(DetalleAlquilerService);
   private readonly fb = inject(FormBuilder);
-
-  busqueda = signal('');
-  readonly detalles = this.detalleService.$detallesChange;
-  modalAbierto = signal(false);
-  editandoId = signal<number | null>(null);
-  guardando = signal(false);
-  mensajeError = signal('');
-  errorCarga = signal('');
-
-  form = this.fb.nonNullable.group({
-    cantidad: [1, [Validators.required, Validators.min(1)]],
+  readonly error = signal('');
+  readonly guardando = signal(false);
+  readonly detalles = computed(() =>
+    this.ref.detalles().filter((d) => d.alquilerId === this.alquiler().idAlquiler),
+  );
+  readonly editable = computed(
+    () =>
+      alquilerEditable(this.alquiler()) &&
+      !this.ref.devoluciones().some((d) => d.alquilerId === this.alquiler().idAlquiler),
+  );
+  readonly opciones = computed(() =>
+    this.ref.opcionesPrendas().filter(
+      (o) =>
+        this.ref
+          .prendas()
+          .find((p) => p.idPrenda === o.valor)
+          ?.estado.trim()
+          .toUpperCase() === 'DISPONIBLE' && !this.detalles().some((d) => d.prendaId === o.valor),
+    ),
+  );
+  readonly form = this.fb.nonNullable.group({
+    prendaId: ['', [Validators.required]],
+    cantidad: [1, [Validators.required, Validators.min(1), Validators.pattern(/^\d+$/)]],
     precioUnitario: [0, [Validators.required, Validators.min(0)]],
     subtotal: [0, [Validators.required, Validators.min(0)]],
-    alquilerId: ['', [Validators.required, Validators.min(1)]],
-    prendaId: ['', [Validators.required, Validators.min(1)]],
   });
-
-  detallesFiltrados = computed(() => {
-    const texto = this.busqueda();
-    return this.detalles().filter((detalle) =>
-      `${detalle.idDetalle} ${detalle.alquilerId} ${detalle.prendaId}`
-        .toLowerCase()
-        .includes(texto),
-    );
-  });
-
-  constructor() {
-    this.cargar();
-  }
-
-  cargar(): void {
-    this.detalleService.findAll().subscribe({
-      next: (data) => {
-        this.detalleService.setDetallesChange(data);
-        this.errorCarga.set('');
-      },
-      error: (error: unknown) => {
-        console.error('Error al cargar detalles de alquiler:', error);
-        this.errorCarga.set('No se pudieron cargar los detalles de alquiler.');
-      },
-    });
-  }
-
-  buscar(valor: string): void {
-    this.busqueda.set(valor.trim().toLowerCase());
-  }
-
-  nuevo(): void {
-    this.editandoId.set(null);
-    this.form.reset({ cantidad: 1, precioUnitario: 0, subtotal: 0, alquilerId: '', prendaId: '' });
-    this.mensajeError.set('');
-    this.modalAbierto.set(true);
-  }
-
-  editar(detalle: DetalleAlquiler): void {
-    this.editandoId.set(detalle.idDetalle);
-    this.form.setValue({
-      cantidad: detalle.cantidad,
-      precioUnitario: detalle.precioUnitario,
-      subtotal: detalle.subtotal,
-      alquilerId: String(detalle.alquilerId),
-      prendaId: String(detalle.prendaId),
-    });
-    this.mensajeError.set('');
-    this.modalAbierto.set(true);
-  }
-
-  guardar(): void {
-    if (this.form.invalid) {
-      this.form.markAllAsTouched();
+  guardar() {
+    if (this.form.invalid || this.guardando() || !this.editable()) return;
+    const v = this.form.getRawValue();
+    if (!this.opciones().some((o) => o.valor === Number(v.prendaId))) {
+      this.error.set('Selecciona una prenda disponible.');
       return;
     }
-    const value = this.form.getRawValue();
-    const data = {
-      ...value,
-      alquilerId: Number(value.alquilerId),
-      prendaId: Number(value.prendaId),
-    };
-    const id = this.editandoId();
     this.guardando.set(true);
-    this.mensajeError.set('');
-    const request =
-      id === null ? this.detalleService.create(data) : this.detalleService.update(id, data);
-    request.subscribe({
+    this.error.set('');
+    this.servicio
+      .create({ ...v, prendaId: Number(v.prendaId), alquilerId: this.alquiler().idAlquiler })
+      .subscribe({
+        next: (d) => {
+          this.ref.detalles.update((items) => [...items, d]);
+          this.form.reset({ prendaId: '', cantidad: 1, precioUnitario: 0, subtotal: 0 });
+          this.guardando.set(false);
+        },
+        error: () => {
+          this.error.set('No se pudo añadir la prenda.');
+          this.guardando.set(false);
+        },
+      });
+  }
+  quitar(id: number) {
+    if (!this.editable() || this.guardando() || !confirm('¿Quitar esta prenda del alquiler?'))
+      return;
+    this.guardando.set(true);
+    this.servicio.delete(id).subscribe({
       next: () => {
+        this.ref.detalles.update((ds) => ds.filter((d) => d.idDetalle !== id));
         this.guardando.set(false);
-        this.modalAbierto.set(false);
-        this.cargar();
       },
-      error: (error: unknown) => {
-        console.error('Error al guardar detalle de alquiler:', error);
+      error: () => {
+        this.error.set('No se pudo quitar la prenda.');
         this.guardando.set(false);
-        this.mensajeError.set('No se pudo guardar. Verifica los IDs de alquiler y prenda.');
       },
     });
-  }
-
-  eliminar(detalle: DetalleAlquiler): void {
-    if (!confirm(`¿Eliminar el detalle #${detalle.idDetalle}?`)) return;
-    this.detalleService.delete(detalle.idDetalle).subscribe({
-      next: () => this.cargar(),
-      error: (error: unknown) => {
-        console.error('Error al eliminar detalle:', error);
-        alert('No se pudo eliminar el detalle de alquiler.');
-      },
-    });
-  }
-
-  campoInvalido(campo: string): boolean {
-    const control = this.form.get(campo);
-    return !!control && control.invalid && control.touched;
   }
 }

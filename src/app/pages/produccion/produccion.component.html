@@ -1,14 +1,11 @@
 <div class="page-container">
-
   <div class="page-header">
     <div>
       <h1>Gestión de producciones</h1>
       <p>Administra los registros de producción del sistema.</p>
     </div>
 
-    <button class="btn-primary" type="button" (click)="nuevo()">
-      + Nueva producción
-    </button>
+    <button class="btn-primary" type="button" (click)="nuevo()">+ Nueva producción</button>
   </div>
 
   @if (errorCarga()) {
@@ -42,8 +39,8 @@
             <th>Cantidad</th>
             <th>Costo Total</th>
             <th>Descripción</th>
-            <th>ID Prenda</th>
-            <th>ID Empleado</th>
+            <th>Prenda</th>
+            <th>Empleado</th>
             <th>Acciones</th>
           </tr>
         </thead>
@@ -55,12 +52,10 @@
               <td>{{ prod.cantidad }}</td>
               <td>S/ {{ prod.costoProduccion }}</td>
               <td>{{ prod.descripcion }}</td>
-              <td>{{ prod.idPrenda }}</td>
-              <td>{{ prod.idEmpleado }}</td>
+              <td>{{ ref.prenda(prod.idPrenda) }}</td>
+              <td>{{ ref.empleado(prod.idEmpleado) }}</td>
               <td class="acciones">
-                <button class="btn-action" type="button" (click)="editar(prod)">
-                  Editar
-                </button>
+                <button class="btn-action" type="button" (click)="editar(prod)">Editar</button>
                 <button class="btn-action btn-danger" type="button" (click)="eliminar(prod)">
                   Eliminar
                 </button>
@@ -68,27 +63,22 @@
             </tr>
           } @empty {
             <tr>
-              <td colspan="7" class="empty-message">
-                No se encontraron registros de producción.
-              </td>
+              <td colspan="7" class="empty-message">No se encontraron registros de producción.</td>
             </tr>
           }
         </tbody>
       </table>
     </div>
   </section>
-
 </div>
 
 <!-- MODAL NUEVO / EDITAR -->
 @if (modalAbierto()) {
   <div class="modal-overlay" (click)="cerrarModal()">
     <div class="modal" (click)="$event.stopPropagation()">
-
       <h2>{{ editandoId() === null ? 'Nueva producción' : 'Editar producción' }}</h2>
 
       <form [formGroup]="form" (ngSubmit)="guardar()">
-
         <div class="form-grid">
           <div class="form-group">
             <label for="fechaProduccion">Fecha de Producción</label>
@@ -108,25 +98,37 @@
 
           <div class="form-group">
             <label for="costoProduccion">Costo de Producción (S/)</label>
-            <input id="costoProduccion" type="number" step="0.01" min="0" formControlName="costoProduccion" />
+            <input
+              id="costoProduccion"
+              type="number"
+              step="0.01"
+              min="0"
+              formControlName="costoProduccion"
+            />
             @if (campoInvalido('costoProduccion')) {
               <small class="error">Ingrese un costo válido.</small>
             }
           </div>
 
           <div class="form-group">
-            <label for="idPrenda">ID Prenda</label>
-            <input id="idPrenda" type="number" min="1" formControlName="prenda" />
+            <app-selector-referencia
+              etiqueta="Prenda"
+              [opciones]="ref.opcionesPrendas()"
+              formControlName="prenda"
+            />
             @if (campoInvalido('prenda')) {
-              <small class="error">El ID de prenda es obligatorio.</small>
+              <small class="error">Selecciona una prenda.</small>
             }
           </div>
 
           <div class="form-group full">
-            <label for="idEmpleado">ID Empleado</label>
-            <input id="idEmpleado" type="number" min="1" formControlName="empleado" />
+            <app-selector-referencia
+              etiqueta="Empleado responsable"
+              [opciones]="ref.opcionesEmpleados()"
+              formControlName="empleado"
+            />
             @if (campoInvalido('empleado')) {
-              <small class="error">El ID de empleado es obligatorio.</small>
+              <small class="error">Selecciona un empleado.</small>
             }
           </div>
 
@@ -144,14 +146,11 @@
         }
 
         <div class="modal-actions">
-          <button type="button" class="btn-secondary" (click)="cerrarModal()">
-            Cancelar
-          </button>
+          <button type="button" class="btn-secondary" (click)="cerrarModal()">Cancelar</button>
           <button type="submit" class="btn-primary" [disabled]="guardando()">
             {{ guardando() ? 'Guardando...' : 'Guardar' }}
           </button>
         </div>
-
       </form>
     </div>
   </div>

@@ -27,6 +27,12 @@
       }
     </nav>
 
+    <details class="admin-nav">
+      <summary>Administración</summary>
+      @for (item of administracion; track item.path) {
+        <a class="nav-link" [routerLink]="item.path">{{ item.label }}</a>
+      }
+    </details>
     <div class="sidebar-note">
       <strong>Cada detalle, en su lugar.</strong>
       <span>Tu boutique, organizada de principio a fin.</span>
@@ -56,6 +62,12 @@
     </header>
 
     <section class="page-content" aria-label="Contenido de la página">
+      @if (ref.errores().length) {
+        <p role="alert">
+          No se pudieron cargar algunas referencias.
+          <button type="button" (click)="ref.cargar(true)">Reintentar</button>
+        </p>
+      }
       <router-outlet></router-outlet>
     </section>
   </main>

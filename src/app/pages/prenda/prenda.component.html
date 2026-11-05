@@ -75,9 +75,7 @@
       ><small>El género se muestra solo cuando está informado en el catálogo.</small>
     </aside>
     <section aria-label="Resultados del catálogo">
-      <p class="result-count" aria-live="polite">
-        {{ prendasFiltradas().length }} de {{ prendas().length }} prendas
-      </p>
+      <p class="result-count" aria-live="polite">{{ prendasFiltradas().length }} prendas activas</p>
       <div class="garment-grid">
         @for (prenda of prendasFiltradas(); track prenda.idPrenda) {
           <article class="content-card garment-card">
@@ -86,7 +84,7 @@
                 <path d="M35 15 15 30l10 18 12-7v43h26V41l12 7 10-18-20-15q-15 13-30 0Z" /></svg
               ><span class="status">{{ prenda.estado }}</span>
             </div>
-            <p class="eyebrow">{{ prenda.categoriaNombre || 'Categoría ' + prenda.categoriaId }}</p>
+            <p class="eyebrow">{{ prenda.categoriaNombre || ref.categoria(prenda.categoriaId) }}</p>
             <h2>{{ prenda.nombre }}</h2>
             <p>
               {{ prenda.talla }} · {{ prenda.color }} · {{ prenda.genero || 'Sin especificar' }}
@@ -166,7 +164,7 @@
               }
             </select>
             @if (campoInvalido('categoriaId')) {
-              <small class="error">Ingresa un ID válido.</small>
+              <small class="error">Selecciona una categoría.</small>
             }
           </div>
           <div class="form-group full">

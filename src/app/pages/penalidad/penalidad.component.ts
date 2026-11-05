@@ -1,3 +1,5 @@
+import { ReferenciasService } from '../../services/referencias.service';
+import { SelectorReferenciaComponent } from '../../shared/selector-referencia.component';
 import { CommonModule } from '@angular/common';
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
@@ -7,11 +9,12 @@ import { PenalidadService } from '../../services/penalidad.service';
 @Component({
   selector: 'app-penalidad',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, SelectorReferenciaComponent],
   templateUrl: './penalidad.component.html',
-  styleUrl: './penalidad.component.css'
+  styleUrl: './penalidad.component.css',
 })
 export class PenalidadComponent {
+  readonly ref = inject(ReferenciasService);
   private readonly penalidadService = inject(PenalidadService);
 
   readonly listaPenalidades = this.penalidadService.$penalidadesChange;
@@ -36,9 +39,11 @@ export class PenalidadComponent {
       },
       error: (error: unknown) => {
         console.error('Error al cargar penalidades:', error);
-        this.errorCarga.set('No se pudieron cargar las penalidades. Verifica la conexión con el servidor.');
+        this.errorCarga.set(
+          'No se pudieron cargar las penalidades. Verifica la conexión con el servidor.',
+        );
         this.cargando.set(false);
-      }
+      },
     });
   }
 
@@ -52,7 +57,7 @@ export class PenalidadComponent {
     this.errorGuardar.set('');
     const datos = {
       ...this.nuevaPenalidad,
-      fecha_penalidad: new Date(this.nuevaPenalidad.fecha_penalidad).toISOString()
+      fecha_penalidad: new Date(this.nuevaPenalidad.fecha_penalidad).toISOString(),
     };
 
     this.penalidadService.registrar(datos).subscribe({
@@ -63,9 +68,11 @@ export class PenalidadComponent {
       },
       error: (error: unknown) => {
         console.error('Error al guardar penalidad:', error);
-        this.errorGuardar.set('No se pudo guardar la penalidad. Revisa los datos e inténtalo nuevamente.');
+        this.errorGuardar.set(
+          'No se pudo guardar la penalidad. Revisa los datos e inténtalo nuevamente.',
+        );
         this.guardando.set(false);
-      }
+      },
     });
   }
 
@@ -82,7 +89,7 @@ export class PenalidadComponent {
       monto: 0,
       fecha_penalidad: new Date().toISOString().slice(0, 10),
       estado: true,
-      devolucionId: 0
+      devolucionId: 0,
     };
   }
 }

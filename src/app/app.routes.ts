@@ -18,11 +18,7 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./pages/cliente/cliente.component').then((m) => m.ClienteComponent),
       },
-      {
-        path: 'devoluciones',
-        loadComponent: () =>
-          import('./pages/devolucion/devolucion.component').then((m) => m.DevolucionComponent),
-      },
+      { path: 'devoluciones', redirectTo: 'alquileres', pathMatch: 'full' },
       {
         path: 'penalidades',
         loadComponent: () =>
@@ -48,13 +44,7 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./pages/alquiler/alquiler.component').then((m) => m.AlquilerComponent),
       },
-      {
-        path: 'detalles-alquiler',
-        loadComponent: () =>
-          import('./pages/detalle-alquiler/detalle-alquiler.component').then(
-            (m) => m.DetalleAlquilerComponent,
-          ),
-      },
+      { path: 'detalles-alquiler', redirectTo: 'alquileres', pathMatch: 'full' },
       {
         path: 'mantenimientos',
         loadComponent: () =>

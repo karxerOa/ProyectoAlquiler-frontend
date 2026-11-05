@@ -51,12 +51,10 @@
         </div>
 
         <div class="form-group">
-          <label for="devolucionId">ID de devolución</label>
-          <input
-            id="devolucionId"
-            type="number"
+          <app-selector-referencia
+            etiqueta="Devolución"
+            [opciones]="ref.opcionesDevoluciones()"
             name="devolucionId"
-            min="1"
             [(ngModel)]="nuevaPenalidad.devolucionId"
             required
           />
@@ -98,7 +96,12 @@
   <section class="content-card">
     <div class="table-header">
       <h2>Penalidades registradas</h2>
-      <button type="button" class="btn-secondary" (click)="cargarPenalidades()" [disabled]="cargando()">
+      <button
+        type="button"
+        class="btn-secondary"
+        (click)="cargarPenalidades()"
+        [disabled]="cargando()"
+      >
         {{ cargando() ? 'Actualizando...' : 'Actualizar' }}
       </button>
     </div>
@@ -107,25 +110,23 @@
       <table>
         <thead>
           <tr>
-            <th>ID</th>
             <th>Tipo</th>
             <th>Descripción</th>
             <th>Monto</th>
             <th>Fecha</th>
             <th>Estado</th>
-            <th>ID devolución</th>
+            <th>Devolución</th>
           </tr>
         </thead>
         <tbody>
           @for (penalidad of listaPenalidades(); track penalidad.idPenalidad) {
             <tr>
-              <td>{{ penalidad.idPenalidad }}</td>
               <td>{{ penalidad.tipo_penalidad }}</td>
               <td>{{ penalidad.descripcion }}</td>
-              <td>S/ {{ penalidad.monto | number:'1.2-2' }}</td>
-              <td>{{ penalidad.fecha_penalidad | date:'yyyy-MM-dd' }}</td>
+              <td>S/ {{ penalidad.monto | number: '1.2-2' }}</td>
+              <td>{{ penalidad.fecha_penalidad | date: 'yyyy-MM-dd' }}</td>
               <td>{{ penalidad.estado ? 'Activa / pendiente' : 'Resuelta' }}</td>
-              <td>{{ penalidad.devolucionId }}</td>
+              <td>{{ ref.devolucion(penalidad.devolucionId) }}</td>
             </tr>
           } @empty {
             <tr>

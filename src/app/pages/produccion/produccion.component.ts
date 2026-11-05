@@ -1,3 +1,5 @@
+import { ReferenciasService } from '../../services/referencias.service';
+import { SelectorReferenciaComponent } from '../../shared/selector-referencia.component';
 import { Component, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Produccion } from '../../model/produccion';
@@ -6,11 +8,12 @@ import { ProduccionService } from '../../services/produccion.service';
 @Component({
   selector: 'app-produccion',
   standalone: true,
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, SelectorReferenciaComponent],
   templateUrl: './produccion.component.html',
-  styleUrl: './produccion.component.css'
+  styleUrl: './produccion.component.css',
 })
 export class ProduccionComponent {
+  readonly ref = inject(ReferenciasService);
   private readonly produccionService = inject(ProduccionService);
   private readonly fb = inject(FormBuilder);
 
@@ -29,15 +32,13 @@ export class ProduccionComponent {
     costoProduccion: [0, [Validators.required, Validators.min(0)]],
     descripcion: ['', [Validators.required, Validators.maxLength(255)]],
     prenda: [1, [Validators.required, Validators.min(1)]],
-    empleado: [1, [Validators.required, Validators.min(1)]]
+    empleado: [1, [Validators.required, Validators.min(1)]],
   });
 
   produccionesFiltradas = computed(() => {
     const texto = this.busqueda();
-    return this.producciones().filter(p =>
-      `${p.descripcion} ${p.fechaProduccion}`
-        .toLowerCase()
-        .includes(texto)
+    return this.producciones().filter((p) =>
+      `${p.descripcion} ${p.fechaProduccion}`.toLowerCase().includes(texto),
     );
   });
 
@@ -53,8 +54,10 @@ export class ProduccionComponent {
       },
       error: (error: unknown) => {
         console.error('Error al cargar producciones:', error);
-        this.errorCarga.set('No se pudieron cargar las producciones. Verifica la conexión con el servidor.');
-      }
+        this.errorCarga.set(
+          'No se pudieron cargar las producciones. Verifica la conexión con el servidor.',
+        );
+      },
     });
   }
 
@@ -70,7 +73,7 @@ export class ProduccionComponent {
       costoProduccion: 0,
       descripcion: '',
       prenda: 1,
-      empleado: 1
+      empleado: 1,
     });
     this.mensajeError.set('');
     this.modalAbierto.set(true);
@@ -84,7 +87,7 @@ export class ProduccionComponent {
       costoProduccion: prod.costoProduccion,
       descripcion: prod.descripcion,
       prenda: prod.idPrenda,
-      empleado: prod.idEmpleado
+      empleado: prod.idEmpleado,
     });
     this.mensajeError.set('');
     this.modalAbierto.set(true);
@@ -103,7 +106,7 @@ export class ProduccionComponent {
       costoProduccion: Number(v.costoProduccion),
       descripcion: v.descripcion,
       idPrenda: Number(v.prenda),
-      idEmpleado: Number(v.empleado)
+      idEmpleado: Number(v.empleado),
     };
 
     const id = this.editandoId();
@@ -111,9 +114,8 @@ export class ProduccionComponent {
     this.guardando.set(true);
     this.mensajeError.set('');
 
-    const peticion = id === null
-      ? this.produccionService.create(datos)
-      : this.produccionService.update(id, datos);
+    const peticion =
+      id === null ? this.produccionService.create(datos) : this.produccionService.update(id, datos);
 
     peticion.subscribe({
       next: () => {
@@ -125,7 +127,7 @@ export class ProduccionComponent {
         console.error('Error al guardar producción:', error);
         this.guardando.set(false);
         this.mensajeError.set('No se pudo guardar la producción.');
-      }
+      },
     });
   }
 
@@ -139,7 +141,7 @@ export class ProduccionComponent {
       error: (error) => {
         console.error('Error al eliminar producción:', error);
         alert('No se pudo eliminar el registro de producción.');
-      }
+      },
     });
   }
 

@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import { ReferenciasService } from '../../services/referencias.service';
+import { Component, inject } from '@angular/core';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 
 // Rutas SVG simples (estilo Lucide, viewBox 24x24)
@@ -29,6 +30,14 @@ const ICON = {
   templateUrl: './layout.component.html',
 })
 export class LayoutComponent {
+  readonly ref = inject(ReferenciasService);
+  constructor() {
+    this.ref.cargar();
+  }
+  readonly administracion = [
+    { label: 'Roles', path: '/roles' },
+    { label: 'Usuarios', path: '/usuarios' },
+  ];
   readonly fecha = new Intl.DateTimeFormat('es-PE', {
     dateStyle: 'full',
     timeZone: 'America/Lima',
@@ -39,14 +48,10 @@ export class LayoutComponent {
     { label: 'Catálogo', path: '/prendas', icon: ICON.shirt },
     { label: 'Categorías', path: '/categorias', icon: ICON.tag },
     { label: 'Clientes', path: '/clientes', icon: ICON.users },
-    { label: 'Detalles de alquiler', path: '/detalles-alquiler', icon: ICON.list },
-    { label: 'Devoluciones', path: '/devoluciones', icon: ICON.undo },
     { label: 'Pagos', path: '/pagos', icon: ICON.card },
     { label: 'Penalidades', path: '/penalidades', icon: ICON.alert },
     { label: 'Mantenimientos', path: '/mantenimientos', icon: ICON.tool },
     { label: 'Producción', path: '/producciones', icon: ICON.factory },
     { label: 'Empleados', path: '/empleados', icon: ICON.user },
-    { label: 'Roles', path: '/roles', icon: ICON.shield },
-    { label: 'Usuarios', path: '/usuarios', icon: ICON.users },
   ];
 }

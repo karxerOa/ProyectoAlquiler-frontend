@@ -32,3 +32,40 @@ button:disabled {
   opacity: 0.6;
   cursor: wait;
 }
+
+.rental-file {
+  display: grid;
+  gap: 24px;
+  padding: 24px;
+  margin-top: 24px;
+}
+.rental-file > .content-card {
+  padding: 20px;
+  border: 1px solid var(--line);
+}
+.form-grid > label {
+  display: grid;
+  gap: 8px;
+  font-size: 12px;
+}
+.form-grid > label input,
+.form-grid > label select,
+.form-grid > label textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  font: inherit;
+}
+app-selector-referencia {
+  display: block;
+  min-width: 0;
+}
+.admin-nav {
+  padding: 16px 10px;
+  font-size: 12px;
+  color: var(--muted);
+}
+.admin-nav summary {
+  cursor: pointer;
+}
