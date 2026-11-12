@@ -1,3 +1,5 @@
+import { UiService } from '../../shared/ui.service';
+import { MATERIAL } from '../../shared/material';
 import { prendaActiva } from '../../model/flujo';
 import { ReferenciasService } from '../../services/referencias.service';
 import { Component, computed, inject, signal } from '@angular/core';
@@ -19,11 +21,12 @@ import { PrendaService } from '../../services/prenda.service';
 @Component({
   selector: 'app-prenda',
   standalone: true,
-  imports: [ReactiveFormsModule, CurrencyPipe, RouterLink],
+  imports: [...MATERIAL, ReactiveFormsModule, CurrencyPipe, RouterLink],
   templateUrl: './prenda.component.html',
   styleUrls: ['../../shared/gestion.css', './prenda.component.css'],
 })
 export class PrendaComponent {
+  private readonly ui = inject(UiService);
   readonly ref = inject(ReferenciasService);
   readonly camposFiltro = ['talla', 'color', 'estado', 'genero'] as const;
   private readonly categoriaService = inject(CategoriaService);
@@ -181,13 +184,13 @@ export class PrendaComponent {
     });
   }
 
-  eliminar(prenda: Prenda): void {
-    if (!confirm(`¿Eliminar la prenda "${prenda.nombre}"?`)) return;
+  async eliminar(prenda: Prenda): Promise<void> {
+    if (!(await this.ui.confirm(`¿Eliminar la prenda "${prenda.nombre}"?`))) return;
     this.prendaService.delete(prenda.idPrenda).subscribe({
       next: () => this.cargar(),
       error: (error: unknown) => {
         console.error('Error al eliminar prenda:', error);
-        alert('No se pudo eliminar la prenda. Puede tener registros asociados.');
+        this.ui.notify('No se pudo eliminar la prenda. Puede tener registros asociados.');
       },
     });
   }

@@ -1,3 +1,5 @@
+import { UiService } from '../../shared/ui.service';
+import { MATERIAL } from '../../shared/material';
 import { Component, computed, inject, input, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Alquiler } from '../../model/alquiler';
@@ -8,11 +10,12 @@ import { alquilerEditable } from '../../model/flujo';
 @Component({
   selector: 'app-detalle-alquiler',
   standalone: true,
-  imports: [ReactiveFormsModule, SelectorReferenciaComponent],
+  imports: [...MATERIAL, ReactiveFormsModule, SelectorReferenciaComponent],
   templateUrl: './detalle-alquiler.component.html',
   styleUrl: '../../shared/gestion.css',
 })
 export class DetalleAlquilerComponent {
+  private readonly ui = inject(UiService);
   readonly alquiler = input.required<Alquiler>();
   readonly ref = inject(ReferenciasService);
   private readonly servicio = inject(DetalleAlquilerService);
@@ -66,8 +69,12 @@ export class DetalleAlquilerComponent {
         },
       });
   }
-  quitar(id: number) {
-    if (!this.editable() || this.guardando() || !confirm('¿Quitar esta prenda del alquiler?'))
+  async quitar(id: number): Promise<void> {
+    if (
+      !this.editable() ||
+      this.guardando() ||
+      !(await this.ui.confirm('¿Quitar esta prenda del alquiler?'))
+    )
       return;
     this.guardando.set(true);
     this.servicio.delete(id).subscribe({

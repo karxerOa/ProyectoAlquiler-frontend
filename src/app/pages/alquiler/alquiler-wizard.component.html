@@ -1,0 +1,238 @@
+<header class="page-header">
+  <div>
+    <p class="eyebrow">GESTIÓN DE VESTIMENTAS</p>
+    <h1>Un nuevo momento, un nuevo alquiler.</h1>
+    <p>Un proceso simple. Cuatro pasos. Todo bajo control.</p>
+  </div>
+  <a mat-stroked-button routerLink="/alquileres" [disabled]="guardando()">{{
+    creado() ? 'Volver a alquileres' : 'Cancelar'
+  }}</a>
+</header>
+@if (!auth.canWrite()) {
+  <p role="alert">Tu cuenta tiene acceso de lectura.</p>
+} @else {
+  @if (ref.pendientes()) {
+    <mat-progress-bar mode="indeterminate" aria-label="Cargando opciones" />
+  }
+  @if (cantidadesInvalidas().length) {
+    <p class="error-box" role="alert">Las cantidades deben ser números enteros entre 1 y 100.</p>
+  }
+  @if (error()) {
+    <p class="error-box" role="alert">
+      {{ error() }}
+      @if (incertidumbre()) {
+        <a mat-button routerLink="/alquileres">Revisar alquileres</a>
+      }
+    </p>
+  }
+  <div class="wizard-layout">
+    <mat-stepper
+      #steps
+      linear
+      [orientation]="'horizontal'"
+      class="wizard"
+      [class.saving]="guardando()"
+    >
+      <mat-step label="Cliente" [completed]="!!cliente()" [editable]="!creado() && !guardando()"
+        ><h2>¿Para quién es este alquiler?</h2>
+        <p>Busca al cliente por su nombre o número de DNI.</p>
+        <div class="search-row">
+          <mat-form-field appearance="outline" subscriptSizing="dynamic"
+            ><mat-icon matPrefix fontSet="material-symbols-outlined">search</mat-icon
+            ><input
+              matInput
+              aria-label="Buscar cliente"
+              placeholder="Escribe un nombre o DNI…"
+              (input)="buscarCliente.set($any($event.target).value)" /></mat-form-field
+          ><a mat-stroked-button routerLink="/clientes">Registrar cliente</a>
+        </div>
+        <div class="client-list">
+          @for (c of clientes(); track c.idCliente) {
+            <button
+              mat-button
+              class="client"
+              [class.chosen]="cliente()?.idCliente === c.idCliente"
+              (click)="cliente.set(c)"
+            >
+              <span class="initials">{{ c.nombre.slice(0, 1) }}{{ c.apellidos.slice(0, 1) }}</span
+              ><span
+                ><strong>{{ c.nombre }} {{ c.apellidos }}</strong
+                ><small>DNI {{ c.dni }} · {{ c.telefono }}</small></span
+              ><mat-icon fontSet="material-symbols-outlined">{{
+                cliente()?.idCliente === c.idCliente
+                  ? 'radio_button_checked'
+                  : 'radio_button_unchecked'
+              }}</mat-icon>
+            </button>
+          } @empty {
+            <p>No se encontraron clientes.</p>
+          }
+        </div>
+        <div class="step-actions">
+          <span>Los datos de tus clientes están protegidos.</span
+          ><button mat-flat-button matStepperNext [disabled]="!cliente()">Continuar →</button>
+        </div></mat-step
+      >
+      <mat-step
+        label="Vestimentas"
+        [completed]="lineas().length > 0"
+        [editable]="!creado() && !guardando()"
+        ><h2>Elige las prendas perfectas</h2>
+        <p>Prendas marcadas como disponibles en el catálogo.</p>
+        <mat-form-field appearance="outline" subscriptSizing="dynamic"
+          ><mat-label>Buscar vestimenta</mat-label
+          ><input matInput (input)="buscarPrenda.set($any($event.target).value)"
+        /></mat-form-field>
+        <div class="garments">
+          @for (prenda of prendas(); track prenda.idPrenda) {
+            <mat-card appearance="outlined"
+              ><div class="garment-placeholder">
+                <mat-icon fontSet="material-symbols-outlined">checkroom</mat-icon
+                ><small>Sin fotografía registrada</small>
+              </div>
+              <small>VT-{{ prenda.idPrenda }} · Talla {{ prenda.talla }}</small>
+              <h3>{{ prenda.nombre }}</h3>
+              <p>{{ ref.categoria(prenda.categoriaId) }} · {{ prenda.color }}</p>
+              <strong>{{ prenda.precioAlquiler | currency: 'PEN' : 'S/ ' }} / alquiler</strong
+              ><button
+                mat-stroked-button
+                [disabled]="seleccionada(prenda.idPrenda)"
+                (click)="agregar(prenda)"
+              >
+                {{ seleccionada(prenda.idPrenda) ? 'Agregada' : '+ Agregar' }}
+              </button></mat-card
+            >
+          } @empty {
+            <p>No hay prendas disponibles para esta búsqueda.</p>
+          }
+        </div>
+        <div class="step-actions">
+          <button mat-button matStepperPrevious>Atrás</button
+          ><button mat-flat-button matStepperNext [disabled]="!lineas().length">Continuar →</button>
+        </div></mat-step
+      >
+      <mat-step
+        label="Fechas e importe"
+        [completed]="fechasValidas()"
+        [editable]="!creado() && !guardando()"
+        ><h2>Define las fechas y el importe</h2>
+        <p>El precio registrado corresponde al alquiler de cada prenda.</p>
+        <form [formGroup]="form">
+          <div class="date-grid">
+            <mat-form-field appearance="outline"
+              ><mat-label>Fecha de entrega</mat-label
+              ><input matInput type="date" formControlName="fechaInicio" /></mat-form-field
+            ><mat-form-field appearance="outline"
+              ><mat-label>Fecha de devolución</mat-label
+              ><input
+                matInput
+                type="date"
+                formControlName="fechaFin"
+                [min]="form.controls.fechaInicio.value"
+            /></mat-form-field>
+          </div>
+          <mat-form-field appearance="outline"
+            ><mat-label>Empleado responsable</mat-label
+            ><mat-select formControlName="empleadoId">
+              @for (e of ref.empleados(); track e.idEmpleado) {
+                <mat-option [value]="'' + e.idEmpleado"
+                  >{{ e.nombres }} {{ e.apellidos }}</mat-option
+                >
+              }
+            </mat-select></mat-form-field
+          >
+        </form>
+        @if (form.controls.fechaFin.value < form.controls.fechaInicio.value) {
+          <p class="error-box">La devolución no puede ser anterior a la entrega.</p>
+        }
+        @for (l of lineas(); track l.prenda.idPrenda) {
+          <div class="price-line">
+            <span>{{ l.prenda.nombre }} × {{ l.cantidad }}</span
+            ><strong>{{ l.prenda.precioAlquiler * l.cantidad | currency: 'PEN' : 'S/ ' }}</strong>
+          </div>
+        }
+        <div class="price-line total">
+          <span>Importe total</span><strong>{{ total() | currency: 'PEN' : 'S/ ' }}</strong>
+        </div>
+        <div class="step-actions">
+          <button mat-button matStepperPrevious>Atrás</button
+          ><button mat-flat-button matStepperNext [disabled]="!fechasValidas()">Continuar →</button>
+        </div></mat-step
+      >
+      <mat-step label="Confirmación"
+        ><h2>Todo listo para una nueva ocasión</h2>
+        <p>Verifica los datos antes de registrar la reserva.</p>
+        <mat-card appearance="outlined" class="confirmation"
+          ><h3>{{ cliente()?.nombre }} {{ cliente()?.apellidos }}</h3>
+          <p>Entrega: {{ form.controls.fechaInicio.value }}</p>
+          <p>Devolución: {{ form.controls.fechaFin.value }}</p>
+          <p>{{ lineas().length }} tipos de prenda seleccionados</p>
+          <strong>Total: {{ total() | currency: 'PEN' : 'S/ ' }}</strong>
+          <p>
+            Se registrará como PENDIENTE. Podrás gestionar la entrega y los pagos desde su ficha.
+          </p></mat-card
+        >
+        @if (guardando()) {
+          <mat-progress-bar mode="indeterminate" aria-label="Guardando reserva" />
+        }
+        <div class="step-actions">
+          <button mat-button matStepperPrevious [disabled]="guardando() || !!creado()">Atrás</button
+          ><button
+            mat-flat-button
+            (click)="guardar()"
+            [disabled]="guardando() || incertidumbre() || cantidadesInvalidas().length > 0"
+          >
+            {{
+              guardando() ? 'Guardando…' : creado() ? 'Completar registro' : 'Confirmar alquiler'
+            }}
+          </button>
+        </div></mat-step
+      > </mat-stepper
+    ><mat-card appearance="outlined" class="summary"
+      ><h3>Resumen del alquiler</h3>
+      <p>Todo en un solo lugar.</p>
+      <div class="summary-client">
+        <mat-icon fontSet="material-symbols-outlined">person_outline</mat-icon
+        >{{ cliente() ? cliente()!.nombre + ' ' + cliente()!.apellidos : 'Selecciona un cliente' }}
+      </div>
+      @for (l of lineas(); track l.prenda.idPrenda) {
+        <div class="summary-item">
+          <strong>{{ l.prenda.nombre }}</strong
+          ><small>Talla {{ l.prenda.talla }} · VT-{{ l.prenda.idPrenda }}</small>
+          <div>
+            <mat-form-field appearance="outline" subscriptSizing="dynamic"
+              ><mat-label>Cantidad</mat-label
+              ><input
+                matInput
+                type="number"
+                min="1"
+                max="100"
+                [disabled]="!!creado() || guardando()"
+                [value]="l.cantidad"
+                (change)="cantidad(l.prenda.idPrenda, $any($event.target).value)" /></mat-form-field
+            ><button
+              mat-icon-button
+              [disabled]="!!creado() || guardando()"
+              [attr.aria-label]="'Quitar ' + l.prenda.nombre"
+              (click)="quitar(l.prenda.idPrenda)"
+            >
+              <mat-icon fontSet="material-symbols-outlined">close</mat-icon>
+            </button>
+          </div>
+        </div>
+      } @empty {
+        <div class="empty">
+          <mat-icon fontSet="material-symbols-outlined">checkroom</mat-icon>
+          <p>Aquí aparecerán tus prendas seleccionadas.</p>
+        </div>
+      }
+      <div class="price-line">
+        <span>Subtotal</span><strong>{{ total() | currency: 'PEN' : 'S/ ' }}</strong>
+      </div>
+      <div class="price-line total">
+        <span>Total estimado</span><strong>{{ total() | currency: 'PEN' : 'S/ ' }}</strong>
+      </div>
+      <small>Registro seguro y sin complicaciones</small></mat-card
+    >
+  </div>
+}

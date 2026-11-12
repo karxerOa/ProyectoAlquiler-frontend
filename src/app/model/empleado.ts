@@ -2,8 +2,8 @@ export interface Empleado {
   idEmpleado: number;
   nombres: string;
   apellidos: string;
-  dni: number;
-  telefono: number;
+  dni: string;
+  telefono: string;
   cargo: string;
   estado: string;
 }

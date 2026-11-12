@@ -1,12 +1,11 @@
 <div class="page-container">
-
   <div class="page-header">
     <div>
       <h1>Gestión de categorías</h1>
       <p>Administra las categorías de las prendas y alquileres.</p>
     </div>
 
-    <button class="btn-primary" type="button" (click)="nuevo()">
+    <button appSoloEscritura mat-flat-button class="btn-primary" type="button" (click)="nuevo()">
       + Nueva categoría
     </button>
   </div>
@@ -18,23 +17,25 @@
     <p class="success-box" role="status">{{ mensajeExito() }}</p>
   }
 
-  <div class="stats-card">
+  <mat-card appearance="outlined" class="stats-card">
     <div class="stats-icon">🏷️</div>
     <div>
       <p>Total de categorías</p>
       <h2>{{ categorias().length }}</h2>
     </div>
-  </div>
+  </mat-card>
 
-  <section class="content-card">
+  <mat-card appearance="outlined" class="content-card">
     <div class="table-header">
       <h2>Lista de categorías</h2>
 
-      <input
-        type="text"
-        placeholder="Buscar por nombre o descripción..."
-        (input)="buscar($any($event.target).value)"
-      />
+      <mat-form-field appearance="outline" subscriptSizing="dynamic"
+        ><input
+          matInput
+          type="text"
+          placeholder="Buscar por nombre o descripción..."
+          (input)="buscar($any($event.target).value)"
+      /></mat-form-field>
     </div>
 
     <div class="table-container">
@@ -55,41 +56,49 @@
               <td>{{ categoria.descripcion }}</td>
               <td>{{ categoria.estado }}</td>
               <td class="acciones">
-                <button class="btn-action" type="button" (click)="editar(categoria)">
+                <button
+                  appSoloEscritura
+                  mat-button
+                  class="btn-action"
+                  type="button"
+                  (click)="editar(categoria)"
+                >
                   Editar
                 </button>
-                <button class="btn-action btn-danger" type="button" (click)="eliminar(categoria)">
+                <button
+                  appSoloEscritura
+                  mat-button
+                  class="btn-action btn-danger"
+                  type="button"
+                  (click)="eliminar(categoria)"
+                >
                   Eliminar
                 </button>
               </td>
             </tr>
           } @empty {
             <tr>
-              <td colspan="4" class="empty-message">
-                No se encontraron categorías.
-              </td>
+              <td colspan="4" class="empty-message">No se encontraron categorías.</td>
             </tr>
           }
         </tbody>
       </table>
     </div>
-  </section>
-
+  </mat-card>
 </div>
 
-
 @if (modalAbierto()) {
-  <div class="modal-overlay" (click)="cerrarModal()">
+  <ng-template appModal (closed)="cerrarModal()">
     <div class="modal" (click)="$event.stopPropagation()">
-
       <h2>{{ editandoId() === null ? 'Nueva categoría' : 'Editar categoría' }}</h2>
 
       <form [formGroup]="form" (ngSubmit)="guardar()">
-
         <div class="form-grid">
           <div class="form-group full">
             <label for="nombre">Nombre</label>
-            <input id="nombre" type="text" formControlName="nombre" />
+            <mat-form-field appearance="outline" subscriptSizing="dynamic"
+              ><input matInput id="nombre" type="text" formControlName="nombre"
+            /></mat-form-field>
             @if (campoInvalido('nombre')) {
               <small class="error">El nombre es obligatorio.</small>
             }
@@ -97,7 +106,9 @@
 
           <div class="form-group full">
             <label for="descripcion">Descripción</label>
-            <input id="descripcion" type="text" formControlName="descripcion" />
+            <mat-form-field appearance="outline" subscriptSizing="dynamic"
+              ><input matInput id="descripcion" type="text" formControlName="descripcion"
+            /></mat-form-field>
             @if (campoInvalido('descripcion')) {
               <small class="error">La descripción es obligatoria.</small>
             }
@@ -105,10 +116,12 @@
 
           <div class="form-group full">
             <label for="estado">Estado</label>
-            <select id="estado" formControlName="estado">
-              <option value="ACTIVO">ACTIVO</option>
-              <option value="INACTIVO">INACTIVO</option>
-            </select>
+            <mat-form-field appearance="outline" subscriptSizing="dynamic"
+              ><select matNativeControl id="estado" formControlName="estado">
+                <option value="ACTIVO">ACTIVO</option>
+                <option value="INACTIVO">INACTIVO</option>
+              </select></mat-form-field
+            >
             @if (campoInvalido('estado')) {
               <small class="error">El estado es obligatorio.</small>
             }
@@ -120,15 +133,20 @@
         }
 
         <div class="modal-actions">
-          <button type="button" class="btn-secondary" (click)="cerrarModal()">
+          <button mat-button type="button" class="btn-secondary" (click)="cerrarModal()">
             Cancelar
           </button>
-          <button type="submit" class="btn-primary" [disabled]="guardando()">
+          <button
+            appSoloEscritura
+            mat-flat-button
+            type="submit"
+            class="btn-primary"
+            [disabled]="guardando()"
+          >
             {{ guardando() ? 'Guardando...' : 'Guardar' }}
           </button>
         </div>
-
       </form>
     </div>
-  </div>
+  </ng-template>
 }

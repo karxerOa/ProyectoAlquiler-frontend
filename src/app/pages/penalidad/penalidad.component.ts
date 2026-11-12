@@ -1,3 +1,4 @@
+import { MATERIAL } from '../../shared/material';
 import { ReferenciasService } from '../../services/referencias.service';
 import { SelectorReferenciaComponent } from '../../shared/selector-referencia.component';
 import { CommonModule } from '@angular/common';
@@ -9,7 +10,7 @@ import { PenalidadService } from '../../services/penalidad.service';
 @Component({
   selector: 'app-penalidad',
   standalone: true,
-  imports: [CommonModule, FormsModule, SelectorReferenciaComponent],
+  imports: [...MATERIAL, CommonModule, FormsModule, SelectorReferenciaComponent],
   templateUrl: './penalidad.component.html',
   styleUrl: './penalidad.component.css',
 })
@@ -57,7 +58,7 @@ export class PenalidadComponent {
     this.errorGuardar.set('');
     const datos = {
       ...this.nuevaPenalidad,
-      fecha_penalidad: new Date(this.nuevaPenalidad.fecha_penalidad).toISOString(),
+      fecha_penalidad: this.nuevaPenalidad.fecha_penalidad + 'T00:00:00',
     };
 
     this.penalidadService.registrar(datos).subscribe({

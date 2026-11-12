@@ -1,3 +1,5 @@
+import { UiService } from '../../shared/ui.service';
+import { MATERIAL } from '../../shared/material';
 import { ActivatedRoute } from '@angular/router';
 import { ReferenciasService } from '../../services/referencias.service';
 import { SelectorReferenciaComponent } from '../../shared/selector-referencia.component';
@@ -9,11 +11,12 @@ import { MantenimientoService } from '../../services/mantenimiento.service';
 @Component({
   selector: 'app-mantenimiento',
   standalone: true,
-  imports: [ReactiveFormsModule, SelectorReferenciaComponent],
+  imports: [...MATERIAL, ReactiveFormsModule, SelectorReferenciaComponent],
   templateUrl: './mantenimiento.component.html',
   styleUrl: '../../shared/gestion.css',
 })
 export class MantenimientoComponent {
+  private readonly ui = inject(UiService);
   readonly ref = inject(ReferenciasService);
   private readonly ruta = inject(ActivatedRoute);
   readonly origen = signal('');
@@ -190,13 +193,13 @@ export class MantenimientoComponent {
     });
   }
 
-  eliminar(item: Mantenimiento): void {
-    if (!confirm('¿Eliminar este mantenimiento?')) return;
+  async eliminar(item: Mantenimiento): Promise<void> {
+    if (!(await this.ui.confirm('¿Eliminar este mantenimiento?'))) return;
     this.mantenimientoService.delete(item.idMantenimiento).subscribe({
       next: () => this.cargar(),
       error: (error: unknown) => {
         console.error('Error al eliminar mantenimiento:', error);
-        alert('No se pudo eliminar el mantenimiento.');
+        this.ui.notify('No se pudo eliminar el mantenimiento.');
       },
     });
   }

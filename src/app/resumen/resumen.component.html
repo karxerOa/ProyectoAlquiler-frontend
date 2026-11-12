@@ -1,95 +1,212 @@
 <div class="page-container">
   <header class="page-header">
     <div>
-      <p class="eyebrow">OPERACIÓN DIARIA</p>
-      <h1>Cada ocasión, bajo control</h1>
-      <p>Tus entregas y devoluciones pendientes, en un solo lugar.</p>
+      <p class="eyebrow">TU DÍA, BAJO CONTROL</p>
+      <h1>Un buen día empieza en orden.</h1>
+      <p>Hola, {{ auth.username() }}. Esto es lo que sucede hoy en tu tienda.</p>
     </div>
-    <a class="btn-primary" routerLink="/alquileres/nuevo">+ Nuevo alquiler</a>
+    <button mat-stroked-button disabled>
+      <mat-icon fontSet="material-symbols-outlined">calendar_today</mat-icon>{{ fecha }}
+    </button>
   </header>
   @if (error()) {
     <p class="error-box" role="alert">
-      {{ error() }} <button type="button" (click)="cargar()">Reintentar</button>
+      {{ error() }} <button mat-button (click)="cargar()">Reintentar</button>
     </p>
   }
   @if (cargando()) {
-    <p role="status">Cargando agenda…</p>
-  } @else if (!error()) {
-    <section class="operation-metrics" aria-label="Indicadores operativos">
-      <article class="content-card">
-        <p>Entregas pendientes</p>
-        <strong>{{ agenda().entregas.length }}</strong>
-      </article>
-      <article class="content-card">
-        <p>Devoluciones pendientes</p>
-        <strong>{{ agenda().devoluciones.length }}</strong>
-      </article>
-      <article class="content-card">
-        <p>Devoluciones vencidas</p>
-        <strong>{{ agenda().vencidos.length }}</strong>
-      </article>
-    </section>
-    <section class="operation-agenda">
-      @for (tipo of tiposAgenda; track tipo) {
-        <article class="content-card">
-          <h2>{{ tipo === 'entregas' ? 'Próximas entregas' : 'Próximas devoluciones' }}</h2>
-          @for (a of agenda()[tipo]; track a.idAlquiler) {
-            <div class="agenda-row">
-              <div>
-                <strong>{{ ref.cliente(a.clienteId) }} {{ a.apellidoCliente }}</strong>
-                <p>
-                  {{ tipo === 'entregas' ? a.fechaInicio.slice(0, 10) : a.fechaFin.slice(0, 10) }}
-                </p>
-              </div>
-              <span>{{
-                tipo === 'devoluciones' && a.fechaFin.slice(0, 10) < hoy ? 'Vencida' : a.estado
-              }}</span>
-            </div>
-          } @empty {
-            <p>No hay {{ tipo }} pendientes.</p>
-          }
-        </article>
-      }
-    </section>
-    <section class="content-card">
-      <div class="table-header">
-        <h2>Alquileres y reservas</h2>
-        <input
-          type="search"
-          aria-label="Buscar alquileres por nombre del cliente"
-          placeholder="Buscar por nombre del cliente…"
-          (input)="busqueda.set($any($event.target).value)"
-        />
-      </div>
-      <div class="table-container">
-        <table>
-          <thead>
-            <tr>
-              <th>Cliente</th>
-              <th>Entrega</th>
-              <th>Devolución</th>
-              <th>Estado</th>
-              <th>Total</th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (a of visibles(); track a.idAlquiler) {
-              <tr>
-                <td>{{ ref.cliente(a.clienteId) }} {{ a.apellidoCliente }}</td>
-                <td>{{ a.fechaInicio.slice(0, 10) }}</td>
-                <td>{{ a.fechaFin.slice(0, 10) }}</td>
-                <td>{{ a.estado }}</td>
-                <td>{{ a.total | currency: 'PEN' : 'S/ ' }}</td>
-              </tr>
-            } @empty {
-              <tr>
-                <td colspan="5">No hay alquileres que mostrar.</td>
-              </tr>
-            }
-          </tbody>
-        </table>
-      </div>
-      <p><a routerLink="/alquileres">Gestionar alquileres →</a></p>
-    </section>
+    <mat-progress-bar mode="indeterminate" aria-label="Cargando resumen" />
   }
+  <section class="quick-actions">
+    @if (auth.canWrite()) {
+      <a mat-flat-button routerLink="/alquileres/nuevo" class="quick primary"
+        ><span class="quick-icon">＋</span
+        ><span
+          ><strong>Nuevo alquiler</strong
+          ><small>De la elección a la entrega, en minutos.</small></span
+        ><span>→</span></a
+      >
+    }
+    <a mat-button routerLink="/devoluciones" class="quick"
+      ><mat-icon fontSet="material-symbols-outlined">undo</mat-icon
+      ><span
+        ><strong>Registrar devolución</strong
+        ><small>Recibe, verifica y deja todo listo.</small></span
+      ><span>→</span></a
+    ><a mat-button routerLink="/reportes" class="quick"
+      ><mat-icon fontSet="material-symbols-outlined">bar_chart</mat-icon
+      ><span><strong>Resumen del día</strong><small>Tu operación, de un vistazo.</small></span
+      ><span>→</span></a
+    >
+  </section>
+  <section class="metrics" aria-label="Indicadores operativos">
+    <mat-card appearance="outlined"
+      ><span
+        >Alquileres activos <mat-icon fontSet="material-symbols-outlined">checkroom</mat-icon></span
+      ><strong>{{ agenda().devoluciones.length }}</strong
+      ><small>Operaciones pendientes de devolución</small></mat-card
+    >
+    <mat-card appearance="outlined"
+      ><span
+        >Devoluciones para hoy <mat-icon fontSet="material-symbols-outlined">undo</mat-icon></span
+      ><strong>{{ devolverHoy().length }}</strong
+      ><small>{{ agenda().vencidos.length }} devoluciones vencidas</small></mat-card
+    >
+    <mat-card appearance="outlined"
+      ><span
+        >Ingresos del día
+        <mat-icon fontSet="material-symbols-outlined">account_balance_wallet</mat-icon></span
+      ><strong>{{ ingresos() | currency: 'PEN' : 'S/ ' }}</strong
+      ><small>Pagos registrados en la fecha de hoy</small></mat-card
+    >
+    <mat-card appearance="outlined"
+      ><span
+        >Vestimentas disponibles <mat-icon fontSet="material-symbols-outlined">done</mat-icon></span
+      ><strong>{{ disponibles() }}</strong
+      ><small>de {{ ref.prendas().length }} prendas del catálogo</small></mat-card
+    >
+  </section>
+  <section class="dashboard-middle">
+    <mat-card appearance="outlined" class="activity"
+      ><div class="card-heading">
+        <div>
+          <h2>Actividad de alquileres</h2>
+          <p>Un vistazo al movimiento de tu negocio</p>
+        </div>
+        <mat-form-field appearance="outline" subscriptSizing="dynamic"
+          ><mat-select
+            aria-label="Periodo de actividad"
+            [value]="periodo()"
+            (selectionChange)="periodo.set($event.value)"
+            ><mat-option [value]="7">Últimos 7 días</mat-option
+            ><mat-option [value]="14">Últimos 14 días</mat-option></mat-select
+          ></mat-form-field
+        >
+      </div>
+      <div class="chart-summary">
+        <strong>{{ totalPeriodo() }}</strong> alquileres en total
+        <span>● Alquileres　<span class="muted">● Devoluciones</span></span>
+      </div>
+      <div class="chart" role="img" aria-label="Actividad diaria de alquileres y devoluciones">
+        @for (day of series(); track day.date) {
+          <div
+            class="day"
+            [attr.title]="
+              day.label +
+              ': ' +
+              day.alquileres +
+              ' alquileres, ' +
+              day.devoluciones +
+              ' devoluciones'
+            "
+          >
+            <div class="bars">
+              <span [style.height.%]="day.height"></span
+              ><span class="returns" [style.height.%]="day.returnsHeight"></span>
+            </div>
+            <small>{{ day.label }}</small>
+          </div>
+        }
+      </div>
+      <footer>
+        Datos de las operaciones registradas <span>Últimos {{ periodo() }} días</span>
+      </footer></mat-card
+    >
+    <mat-card appearance="outlined" class="attention"
+      ><h2>Requieren tu atención</h2>
+      <p>Pequeñas acciones que hacen la diferencia</p>
+      <a mat-button routerLink="/devoluciones"
+        ><mat-icon fontSet="material-symbols-outlined">schedule</mat-icon
+        ><span
+          ><strong>{{ agenda().vencidos.length }} alquileres vencidos</strong
+          ><small>Coordina la devolución con tus clientes.</small><em>Ver devoluciones →</em></span
+        ></a
+      ><a mat-button routerLink="/pagos"
+        ><mat-icon fontSet="material-symbols-outlined">payments</mat-icon
+        ><span
+          ><strong>Control de pagos</strong><small>Consulta los cobros de tus alquileres.</small
+          ><em>Revisar pagos →</em></span
+        ></a
+      ><a mat-button routerLink="/mantenimientos"
+        ><mat-icon fontSet="material-symbols-outlined">build</mat-icon
+        ><span
+          ><strong>{{ mantenimiento() }} prendas en mantenimiento</strong
+          ><small>Revisa su estado antes de alquilarlas.</small><em>Ver mantenimientos →</em></span
+        ></a
+      ></mat-card
+    >
+  </section>
+  <mat-card appearance="outlined" class="recent"
+    ><div class="card-heading">
+      <div>
+        <h2>Alquileres recientes</h2>
+        <p>Las últimas operaciones de tu tienda</p>
+      </div>
+      <a mat-button routerLink="/alquileres">Ver todos los alquileres →</a>
+    </div>
+    <div class="table-tools">
+      <div class="tabs">
+        <button mat-button [class.selected]="filtro() === 'todos'" (click)="filtro.set('todos')">
+          Todos los alquileres</button
+        ><button mat-button [class.selected]="filtro() === 'hoy'" (click)="filtro.set('hoy')">
+          Por devolver hoy {{ devolverHoy().length }}</button
+        ><button
+          mat-button
+          [class.selected]="filtro() === 'vencidos'"
+          (click)="filtro.set('vencidos')"
+        >
+          Vencidos {{ agenda().vencidos.length }}
+        </button>
+      </div>
+      <mat-form-field appearance="outline" subscriptSizing="dynamic"
+        ><mat-icon matPrefix fontSet="material-symbols-outlined">search</mat-icon
+        ><input
+          matInput
+          aria-label="Buscar alquiler o cliente"
+          placeholder="Buscar alquiler o cliente"
+          (input)="busqueda.set($any($event.target).value)"
+      /></mat-form-field>
+    </div>
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Alquiler / Cliente</th>
+            <th>Vestimentas</th>
+            <th>Devolución</th>
+            <th>Importe</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (a of visibles(); track a.idAlquiler) {
+            <tr>
+              <td>
+                <strong>{{ ref.cliente(a.clienteId) }}</strong
+                ><small>ALQ-{{ a.idAlquiler }}</small>
+              </td>
+              <td>{{ prendas(a) }} prendas</td>
+              <td>{{ a.fechaFin.slice(0, 10) }}</td>
+              <td>{{ a.total | currency: 'PEN' : 'S/ ' }}</td>
+              <td>
+                <span class="state" [class.late]="estado(a) === 'Vencido'">{{ estado(a) }}</span>
+              </td>
+              <td>
+                <a mat-button routerLink="/alquileres" [queryParams]="{ alquiler: a.idAlquiler }"
+                  >Ver detalle</a
+                >
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="6">No hay alquileres para este filtro.</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    <footer>Mostrando {{ visibles().length }} operaciones recientes</footer></mat-card
+  >
+  <p class="closing">Una tienda organizada. Una experiencia extraordinaria.</p>
 </div>

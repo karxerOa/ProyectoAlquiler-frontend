@@ -1,3 +1,5 @@
+import { UiService } from '../../shared/ui.service';
+import { MATERIAL } from '../../shared/material';
 import { ReferenciasService } from '../../services/referencias.service';
 import { SelectorReferenciaComponent } from '../../shared/selector-referencia.component';
 import { Component, computed, inject, signal } from '@angular/core';
@@ -8,11 +10,12 @@ import { ProduccionService } from '../../services/produccion.service';
 @Component({
   selector: 'app-produccion',
   standalone: true,
-  imports: [ReactiveFormsModule, SelectorReferenciaComponent],
+  imports: [...MATERIAL, ReactiveFormsModule, SelectorReferenciaComponent],
   templateUrl: './produccion.component.html',
   styleUrl: './produccion.component.css',
 })
 export class ProduccionComponent {
+  private readonly ui = inject(UiService);
   readonly ref = inject(ReferenciasService);
   private readonly produccionService = inject(ProduccionService);
   private readonly fb = inject(FormBuilder);
@@ -131,8 +134,12 @@ export class ProduccionComponent {
     });
   }
 
-  eliminar(prod: Produccion): void {
-    if (!confirm(`¿Eliminar el registro de producción de la fecha ${prod.fechaProduccion}?`)) {
+  async eliminar(prod: Produccion): Promise<void> {
+    if (
+      !(await this.ui.confirm(
+        `¿Eliminar el registro de producción de la fecha ${prod.fechaProduccion}?`,
+      ))
+    ) {
       return;
     }
 
@@ -140,7 +147,7 @@ export class ProduccionComponent {
       next: () => this.cargarProducciones(),
       error: (error) => {
         console.error('Error al eliminar producción:', error);
-        alert('No se pudo eliminar el registro de producción.');
+        this.ui.notify('No se pudo eliminar el registro de producción.');
       },
     });
   }

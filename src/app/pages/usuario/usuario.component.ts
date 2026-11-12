@@ -1,3 +1,5 @@
+import { UiService } from '../../shared/ui.service';
+import { MATERIAL } from '../../shared/material';
 import { Component, computed, inject, signal } from '@angular/core';
 import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RolService } from '../../services/rol.service';
@@ -8,11 +10,12 @@ import { Rol } from '../../model/rol';
 @Component({
   selector: 'app-usuario',
   standalone: true,
-  imports: [FormsModule, ReactiveFormsModule],
+  imports: [...MATERIAL, FormsModule, ReactiveFormsModule],
   templateUrl: './usuario.component.html',
   styleUrl: '../../shared/gestion.css',
 })
 export class UsuarioComponent {
+  private readonly ui = inject(UiService);
   private readonly usuarioService = inject(UsuarioService);
   private readonly rolService = inject(RolService);
   private readonly fb = inject(FormBuilder);
@@ -27,8 +30,8 @@ export class UsuarioComponent {
   errorCarga = signal('');
 
   form = this.fb.nonNullable.group({
-    username: ['', [Validators.required, Validators.maxLength(50)]],
-    password: ['', [Validators.minLength(6)]],
+    username: ['', [Validators.required, Validators.maxLength(20)]],
+    password: ['', [Validators.minLength(8)]],
     enabled: [true],
     rolId: ['', [Validators.required, Validators.min(1)]],
   });
@@ -77,7 +80,7 @@ export class UsuarioComponent {
   nuevo(): void {
     this.editandoId.set(null);
     this.form.reset({ username: '', password: '', enabled: true, rolId: '' });
-    this.form.controls.password.setValidators([Validators.required, Validators.minLength(6)]);
+    this.form.controls.password.setValidators([Validators.required, Validators.minLength(8)]);
     this.form.controls.password.updateValueAndValidity();
     this.mensajeError.set('');
     this.modalAbierto.set(true);
@@ -92,7 +95,7 @@ export class UsuarioComponent {
       rolId: String(usuario.rolId),
     });
     this.form.controls.password.clearValidators();
-    this.form.controls.password.setValidators([Validators.minLength(6)]);
+    this.form.controls.password.setValidators([Validators.minLength(8)]);
     this.form.controls.password.updateValueAndValidity();
     this.mensajeError.set('');
     this.modalAbierto.set(true);
@@ -134,13 +137,13 @@ export class UsuarioComponent {
     });
   }
 
-  eliminar(usuario: Usuario): void {
-    if (!confirm(`¿Eliminar el usuario "${usuario.username}"?`)) return;
+  async eliminar(usuario: Usuario): Promise<void> {
+    if (!(await this.ui.confirm(`¿Eliminar el usuario "${usuario.username}"?`))) return;
     this.usuarioService.delete(usuario.idUser).subscribe({
       next: () => this.cargarUsuarios(),
       error: (error: unknown) => {
         console.error('Error al eliminar usuario:', error);
-        alert('No se pudo eliminar el usuario.');
+        this.ui.notify('No se pudo eliminar el usuario.');
       },
     });
   }

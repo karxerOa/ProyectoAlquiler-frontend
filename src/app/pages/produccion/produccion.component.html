@@ -5,30 +5,34 @@
       <p>Administra los registros de producción del sistema.</p>
     </div>
 
-    <button class="btn-primary" type="button" (click)="nuevo()">+ Nueva producción</button>
+    <button appSoloEscritura mat-flat-button class="btn-primary" type="button" (click)="nuevo()">
+      + Nueva producción
+    </button>
   </div>
 
   @if (errorCarga()) {
     <p class="error-box">{{ errorCarga() }}</p>
   }
 
-  <div class="stats-card">
+  <mat-card appearance="outlined" class="stats-card">
     <div class="stats-icon">📦</div>
     <div>
       <p>Total de producciones</p>
       <h2>{{ producciones().length }}</h2>
     </div>
-  </div>
+  </mat-card>
 
-  <section class="content-card">
+  <mat-card appearance="outlined" class="content-card">
     <div class="table-header">
       <h2>Lista de producciones</h2>
 
-      <input
-        type="text"
-        placeholder="Buscar por descripción, prenda o empleado..."
-        (input)="buscar($any($event.target).value)"
-      />
+      <mat-form-field appearance="outline" subscriptSizing="dynamic"
+        ><input
+          matInput
+          type="text"
+          placeholder="Buscar por descripción, prenda o empleado..."
+          (input)="buscar($any($event.target).value)"
+      /></mat-form-field>
     </div>
 
     <div class="table-container">
@@ -55,8 +59,22 @@
               <td>{{ ref.prenda(prod.idPrenda) }}</td>
               <td>{{ ref.empleado(prod.idEmpleado) }}</td>
               <td class="acciones">
-                <button class="btn-action" type="button" (click)="editar(prod)">Editar</button>
-                <button class="btn-action btn-danger" type="button" (click)="eliminar(prod)">
+                <button
+                  appSoloEscritura
+                  mat-button
+                  class="btn-action"
+                  type="button"
+                  (click)="editar(prod)"
+                >
+                  Editar
+                </button>
+                <button
+                  appSoloEscritura
+                  mat-button
+                  class="btn-action btn-danger"
+                  type="button"
+                  (click)="eliminar(prod)"
+                >
                   Eliminar
                 </button>
               </td>
@@ -69,12 +87,12 @@
         </tbody>
       </table>
     </div>
-  </section>
+  </mat-card>
 </div>
 
 <!-- MODAL NUEVO / EDITAR -->
 @if (modalAbierto()) {
-  <div class="modal-overlay" (click)="cerrarModal()">
+  <ng-template appModal (closed)="cerrarModal()">
     <div class="modal" (click)="$event.stopPropagation()">
       <h2>{{ editandoId() === null ? 'Nueva producción' : 'Editar producción' }}</h2>
 
@@ -82,7 +100,9 @@
         <div class="form-grid">
           <div class="form-group">
             <label for="fechaProduccion">Fecha de Producción</label>
-            <input id="fechaProduccion" type="date" formControlName="fechaProduccion" />
+            <mat-form-field appearance="outline" subscriptSizing="dynamic"
+              ><input matInput id="fechaProduccion" type="date" formControlName="fechaProduccion"
+            /></mat-form-field>
             @if (campoInvalido('fechaProduccion')) {
               <small class="error">La fecha es obligatoria.</small>
             }
@@ -90,7 +110,9 @@
 
           <div class="form-group">
             <label for="cantidad">Cantidad</label>
-            <input id="cantidad" type="number" min="1" formControlName="cantidad" />
+            <mat-form-field appearance="outline" subscriptSizing="dynamic"
+              ><input matInput id="cantidad" type="number" min="1" formControlName="cantidad"
+            /></mat-form-field>
             @if (campoInvalido('cantidad')) {
               <small class="error">Ingrese una cantidad válida.</small>
             }
@@ -98,13 +120,15 @@
 
           <div class="form-group">
             <label for="costoProduccion">Costo de Producción (S/)</label>
-            <input
-              id="costoProduccion"
-              type="number"
-              step="0.01"
-              min="0"
-              formControlName="costoProduccion"
-            />
+            <mat-form-field appearance="outline" subscriptSizing="dynamic"
+              ><input
+                matInput
+                id="costoProduccion"
+                type="number"
+                step="0.01"
+                min="0"
+                formControlName="costoProduccion"
+            /></mat-form-field>
             @if (campoInvalido('costoProduccion')) {
               <small class="error">Ingrese un costo válido.</small>
             }
@@ -134,7 +158,9 @@
 
           <div class="form-group full">
             <label for="descripcion">Descripción</label>
-            <input id="descripcion" type="text" formControlName="descripcion" />
+            <mat-form-field appearance="outline" subscriptSizing="dynamic"
+              ><input matInput id="descripcion" type="text" formControlName="descripcion"
+            /></mat-form-field>
             @if (campoInvalido('descripcion')) {
               <small class="error">La descripción es obligatoria.</small>
             }
@@ -146,12 +172,20 @@
         }
 
         <div class="modal-actions">
-          <button type="button" class="btn-secondary" (click)="cerrarModal()">Cancelar</button>
-          <button type="submit" class="btn-primary" [disabled]="guardando()">
+          <button mat-button type="button" class="btn-secondary" (click)="cerrarModal()">
+            Cancelar
+          </button>
+          <button
+            appSoloEscritura
+            mat-flat-button
+            type="submit"
+            class="btn-primary"
+            [disabled]="guardando()"
+          >
             {{ guardando() ? 'Guardando...' : 'Guardar' }}
           </button>
         </div>
       </form>
     </div>
-  </div>
+  </ng-template>
 }

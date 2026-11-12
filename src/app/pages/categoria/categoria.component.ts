@@ -1,3 +1,5 @@
+import { UiService } from '../../shared/ui.service';
+import { MATERIAL } from '../../shared/material';
 import { Component, computed, effect, inject, signal, untracked } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Categoria } from '../../model/categoria';
@@ -6,11 +8,12 @@ import { CategoriaService } from '../../services/categoria.service';
 @Component({
   selector: 'app-categoria',
   standalone: true,
-  imports: [ReactiveFormsModule],
+  imports: [...MATERIAL, ReactiveFormsModule],
   templateUrl: './categoria.component.html',
-  styleUrl: './categoria.component.css'
+  styleUrl: './categoria.component.css',
 })
 export class CategoriaComponent {
+  private readonly ui = inject(UiService);
   private categoriaService = inject(CategoriaService);
   private fb = inject(FormBuilder);
 
@@ -27,15 +30,13 @@ export class CategoriaComponent {
   form = this.fb.nonNullable.group({
     nombre: ['', [Validators.required, Validators.maxLength(100)]],
     descripcion: ['', [Validators.required, Validators.maxLength(255)]],
-    estado: ['ACTIVO', [Validators.required]]
+    estado: ['ACTIVO', [Validators.required]],
   });
 
   categoriasFiltradas = computed(() => {
     const texto = this.busqueda();
-    return this.categorias().filter(cat =>
-      `${cat.nombre} ${cat.descripcion} ${cat.estado}`
-        .toLowerCase()
-        .includes(texto)
+    return this.categorias().filter((cat) =>
+      `${cat.nombre} ${cat.descripcion} ${cat.estado}`.toLowerCase().includes(texto),
     );
   });
 
@@ -58,8 +59,10 @@ export class CategoriaComponent {
       },
       error: (error: unknown) => {
         console.error('Error al cargar categorías:', error);
-        this.errorCarga.set('No se pudieron cargar las categorías. Verifica la conexión con el servidor.');
-      }
+        this.errorCarga.set(
+          'No se pudieron cargar las categorías. Verifica la conexión con el servidor.',
+        );
+      },
     });
   }
 
@@ -80,7 +83,7 @@ export class CategoriaComponent {
     this.form.setValue({
       nombre: categoria.nombre,
       descripcion: categoria.descripcion,
-      estado: categoria.estado
+      estado: categoria.estado,
     });
     this.mensajeError.set('');
     this.mensajeExito.set('');
@@ -99,16 +102,15 @@ export class CategoriaComponent {
     this.guardando.set(true);
     this.mensajeError.set('');
 
-    const peticion = id === null
-      ? this.categoriaService.create(datos)
-      : this.categoriaService.update(id, datos);
+    const peticion =
+      id === null ? this.categoriaService.create(datos) : this.categoriaService.update(id, datos);
 
     peticion.subscribe({
       next: () => {
         this.guardando.set(false);
         this.cerrarModal();
         this.categoriaService.setMessageChange(
-          id === null ? 'Categoría creada correctamente.' : 'Categoría actualizada correctamente.'
+          id === null ? 'Categoría creada correctamente.' : 'Categoría actualizada correctamente.',
         );
         this.cargarCategorias();
       },
@@ -116,12 +118,12 @@ export class CategoriaComponent {
         console.error('Error al guardar categoría:', error);
         this.guardando.set(false);
         this.mensajeError.set('No se pudo guardar la categoría.');
-      }
+      },
     });
   }
 
-  eliminar(categoria: Categoria): void {
-    if (!confirm(`¿Eliminar la categoría "${categoria.nombre}"?`)) {
+  async eliminar(categoria: Categoria): Promise<void> {
+    if (!(await this.ui.confirm(`¿Eliminar la categoría "${categoria.nombre}"?`))) {
       return;
     }
 
@@ -132,8 +134,8 @@ export class CategoriaComponent {
       },
       error: (error) => {
         console.error('Error al eliminar categoría:', error);
-        alert('No se pudo eliminar la categoría.');
-      }
+        this.ui.notify('No se pudo eliminar la categoría.');
+      },
     });
   }
 

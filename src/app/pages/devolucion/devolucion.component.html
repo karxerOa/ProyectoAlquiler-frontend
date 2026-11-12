@@ -1,4 +1,4 @@
-<section class="content-card">
+<mat-card appearance="outlined" class="content-card">
   <h2>Recepción y devolución</h2>
   @for (d of devoluciones(); track d.idDevolucion) {
     <article>
@@ -40,38 +40,52 @@
     </p>
     <form [formGroup]="form" (ngSubmit)="guardar()">
       <div class="form-grid">
-        <label>Fecha de recepción<input type="date" formControlName="fechaDevolucion" /></label
+        <label
+          >Fecha de recepción<mat-form-field appearance="outline" subscriptSizing="dynamic"
+            ><input
+              matInput
+              type="date"
+              formControlName="fechaDevolucion" /></mat-form-field></label
         ><label
-          >Estado al recibir<select formControlName="estadoPrenda">
-            <option value="BUENO">Bueno · sin incidencia de estado</option>
-            <option value="DANADO">Dañado · requiere revisión</option>
-            <option value="INCOMPLETO">Incompleto · faltan prendas</option>
-          </select></label
+          >Estado al recibir<mat-form-field appearance="outline" subscriptSizing="dynamic"
+            ><select matNativeControl formControlName="estadoPrenda">
+              <option value="BUENO">Bueno · sin incidencia de estado</option>
+              <option value="DANADO">Dañado · requiere revisión</option>
+              <option value="INCOMPLETO">Incompleto · faltan prendas</option>
+            </select></mat-form-field
+          ></label
         ><app-selector-referencia
           etiqueta="Empleado que recibe"
           [opciones]="ref.opcionesEmpleados()"
           formControlName="empleadoId"
         /><label
-          >Observaciones<textarea formControlName="observacion" maxlength="500"></textarea>
+          >Observaciones<mat-form-field appearance="outline" subscriptSizing="dynamic">
+            <textarea matInput formControlName="observacion" maxlength="500"></textarea>
+          </mat-form-field>
         </label>
       </div>
       <fieldset>
         <legend>Revisión de cada prenda</legend>
         @for (p of prendas(); track p.idDetalle) {
           <label
-            >{{ ref.prenda(p.prendaId) }} · {{ p.cantidad }} unidades<select
-              [value]="revisiones()[p.prendaId] || ''"
-              (change)="revisar(p.prendaId, $any($event.target).value)"
-            >
-              <option value="">Selecciona la revisión</option>
-              <option value="SIN_MANTENIMIENTO">Recibida · no requiere mantenimiento</option>
-              <option value="CON_MANTENIMIENTO">Recibida · requiere mantenimiento</option>
-              <option value="NO_RECIBIDA">Todavía no fue recibida</option>
-            </select></label
+            >{{ ref.prenda(p.prendaId) }} · {{ p.cantidad }} unidades<mat-form-field
+              appearance="outline"
+              subscriptSizing="dynamic"
+              ><select
+                matNativeControl
+                [value]="revisiones()[p.prendaId] || ''"
+                (change)="revisar(p.prendaId, $any($event.target).value)"
+              >
+                <option value="">Selecciona la revisión</option>
+                <option value="SIN_MANTENIMIENTO">Recibida · no requiere mantenimiento</option>
+                <option value="CON_MANTENIMIENTO">Recibida · requiere mantenimiento</option>
+                <option value="NO_RECIBIDA">Todavía no fue recibida</option>
+              </select></mat-form-field
+            ></label
           >
         }
       </fieldset>
-      <button class="btn-primary" [disabled]="guardando() || form.invalid">
+      <button mat-flat-button class="btn-primary" [disabled]="guardando() || form.invalid">
         Registrar recepción
       </button>
     </form>
@@ -81,4 +95,4 @@
   @if (error()) {
     <p class="error-box" role="alert">{{ error() }}</p>
   }
-</section>
+</mat-card>

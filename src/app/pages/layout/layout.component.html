@@ -1,74 +1,129 @@
 <div class="app-shell">
-  <aside class="sidebar">
-    <a class="brand" routerLink="/" aria-label="Lucy, inicio">
-      <span class="brand-logo">lucy.</span>
-      <span class="brand-sub">ALQUILER DE VESTIMENTAS</span>
-    </a>
-
-    <a class="btn-primary btn-block" routerLink="/alquileres/nuevo">
-      <span aria-hidden="true">+</span> Nuevo alquiler
-    </a>
-
-    <p class="nav-heading">GESTIÓN</p>
-    <nav class="main-nav" aria-label="Navegación principal">
-      @for (item of navigation; track item.path) {
-        <a
-          class="nav-link"
-          [routerLink]="item.path"
-          routerLinkActive="active"
-          [routerLinkActiveOptions]="{ exact: true }"
-          ariaCurrentWhenActive="page"
-        >
-          <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true">
-            <path [attr.d]="item.icon" />
-          </svg>
-          {{ item.label }}
-        </a>
+  @if (mobile()) {
+    <button
+      class="mobile-shade"
+      aria-label="Cerrar navegación"
+      (click)="mobile.set(false)"
+    ></button>
+  }
+  <aside class="sidebar" [class.open]="mobile()">
+    <a class="brand" routerLink="/resumen"
+      ><span class="brand-mark"
+        ><mat-icon fontSet="material-symbols-outlined">checkroom</mat-icon></span
+      ><span
+        ><small>Alquiler de vestimentas</small><strong>Lucy<span>.</span></strong></span
+      ></a
+    >
+    <mat-card appearance="outlined" class="store"
+      ><mat-icon fontSet="material-symbols-outlined">checkroom</mat-icon>
+      <div>
+        <strong>Alquiler de<br />vestimentas Lucy</strong><small>Sede principal</small>
+      </div></mat-card
+    >
+    <nav aria-label="Navegación principal">
+      @for (group of groups; track group.label) {
+        <p class="nav-heading">{{ group.label }}</p>
+        @for (item of group.items; track item.path) {
+          @if (visible(item.path)) {
+            <a
+              mat-button
+              class="nav-link"
+              [routerLink]="item.path"
+              routerLinkActive="active"
+              [routerLinkActiveOptions]="{ exact: true }"
+              ariaCurrentWhenActive="page"
+              ><mat-icon fontSet="material-symbols-outlined">{{ item.icon }}</mat-icon
+              >{{ item.label }}</a
+            >
+          }
+        }
       }
     </nav>
-
-    <details class="admin-nav">
-      <summary>Administración</summary>
-      @for (item of administracion; track item.path) {
-        <a class="nav-link" [routerLink]="item.path">{{ item.label }}</a>
-      }
-    </details>
-    <div class="sidebar-note">
-      <strong>Cada detalle, en su lugar.</strong>
-      <span>Tu boutique, organizada de principio a fin.</span>
-    </div>
-
-    <div class="sidebar-user">
-      <span class="avatar">LM</span>
-      <div>
-        <strong>Equipo Lucy</strong>
-        <span>Gestión de alquileres</span>
-      </div>
-    </div>
+    <button mat-button class="settings" (click)="settings.set(true)">
+      <mat-icon fontSet="material-symbols-outlined">settings</mat-icon>Configuración
+    </button>
+    <div class="system"><span>● Sesión activa</span><small>v.1.0</small></div>
   </aside>
-
   <main class="main-content">
     <header class="topbar">
+      <button
+        mat-icon-button
+        class="menu-toggle"
+        aria-label="Abrir navegación"
+        (click)="mobile.set(!mobile())"
+      >
+        <mat-icon fontSet="material-symbols-outlined">menu</mat-icon>
+      </button>
       <nav class="breadcrumb" aria-label="Ruta">
-        <span>Lucy</span>
-        <span aria-hidden="true">›</span>
-        <strong>Gestión de vestimentas</strong>
+        <span>Espacio de trabajo</span
+        ><mat-icon fontSet="material-symbols-outlined">chevron_right</mat-icon
+        ><strong>{{ title() }}</strong>
       </nav>
-
       <div class="topbar-right">
-        <time class="topbar-date">{{ fecha }}</time>
-        <span class="avatar avatar-sm">LM</span>
+        <div class="global-search">
+          <mat-form-field appearance="outline" subscriptSizing="dynamic"
+            ><mat-icon matPrefix fontSet="material-symbols-outlined">search</mat-icon
+            ><input
+              matInput
+              aria-label="Buscar página en el sistema"
+              placeholder="Buscar en el sistema…"
+              [value]="query()"
+              (input)="query.set($any($event.target).value)"
+          /></mat-form-field>
+          @if (query()) {
+            <mat-card class="search-results">
+              @for (item of results(); track item.path) {
+                <a mat-button [routerLink]="item.path">{{ item.label }}</a>
+              } @empty {
+                <p>No hay páginas coincidentes.</p>
+              }
+            </mat-card>
+          }
+        </div>
+        <button mat-icon-button [matMenuTriggerFor]="notifications" aria-label="Notificaciones">
+          <mat-icon fontSet="material-symbols-outlined">notifications</mat-icon></button
+        ><mat-menu #notifications="matMenu"
+          ><a mat-menu-item routerLink="/devoluciones">Revisar devoluciones pendientes</a
+          ><a mat-menu-item routerLink="/pagos">Consultar pagos registrados</a></mat-menu
+        >
+        <button mat-button [matMenuTriggerFor]="account" class="profile">
+          <span class="avatar">{{ auth.username().slice(0, 2) }}</span
+          ><span class="profile-label"
+            ><strong>{{ auth.username() }}</strong
+            ><small>{{
+              auth.isAdmin() ? 'Administrador' : auth.canWrite() ? 'Empleado' : 'Usuario'
+            }}</small></span
+          ><mat-icon fontSet="material-symbols-outlined">expand_more</mat-icon></button
+        ><mat-menu #account="matMenu"
+          ><button mat-menu-item (click)="settings.set(true)">Mi sesión</button
+          ><button mat-menu-item (click)="auth.logout()">Cerrar sesión</button></mat-menu
+        >
       </div>
     </header>
-
     <section class="page-content" aria-label="Contenido de la página">
       @if (ref.errores().length) {
-        <p role="alert">
+        <p class="error-box" role="alert">
           No se pudieron cargar algunas referencias.
-          <button type="button" (click)="ref.cargar(true)">Reintentar</button>
+          <button mat-button (click)="ref.cargar(true)">Reintentar</button>
         </p>
       }
-      <router-outlet></router-outlet>
+      <router-outlet />
     </section>
   </main>
 </div>
+@if (settings()) {
+  <ng-template appModal (closed)="settings.set(false)"
+    ><div class="modal">
+      <h2>Configuración de la sesión</h2>
+      <p>
+        Usuario: <strong>{{ auth.username() }}</strong>
+      </p>
+      <p>Los permisos se administran desde Usuarios y Roles.</p>
+      <p>Moneda: soles (PEN) · Zona horaria: Lima</p>
+      <div class="modal-actions">
+        <button mat-button (click)="auth.logout()">Cerrar sesión</button
+        ><button mat-flat-button (click)="settings.set(false)">Listo</button>
+      </div>
+    </div></ng-template
+  >
+}

@@ -69,3 +69,135 @@ app-selector-referencia {
 .admin-nav summary {
   cursor: pointer;
 }
+
+:root {
+  --ink: #263445;
+  --muted: #85909d;
+  --plum: #1976cd;
+  --plum-dark: #1264b2;
+  --navy: #263445;
+  --bg: #f5f6fa;
+  --surface: #fff;
+  --sidebar: #fff;
+  --line: #e5e8ee;
+  --serif: Inter, Arial, sans-serif;
+  --mat-sys-primary: #1976cd;
+  --mat-sys-on-primary: #fff;
+  --mat-sys-surface: #fff;
+  --mat-sys-on-surface: #263445;
+  --mat-sys-outline: #dce1e8;
+  --mat-sys-outline-variant: #e5e8ee;
+  --mat-sys-body-medium-font: Inter;
+  --mat-sys-label-large-font: Inter;
+}
+body {
+  font-family: Inter, Arial, sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+}
+mat-form-field {
+  max-width: 100%;
+  --mat-form-field-container-height: 44px;
+  --mat-form-field-container-vertical-padding: 11px;
+  font-size: 12px;
+}
+.mat-mdc-form-field input,
+.mat-mdc-form-field textarea,
+.mat-mdc-form-field select {
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  padding: 0 !important;
+  box-shadow: none !important;
+  height: auto !important;
+}
+.mat-mdc-form-field {
+  font-family: inherit !important;
+}
+.mat-mdc-form-field label {
+  margin: 0 !important;
+}
+.form-grid > label mat-form-field,
+.form-group mat-form-field {
+  width: 100%;
+}
+button.mat-mdc-button,
+button.mat-mdc-unelevated-button,
+a.mat-mdc-unelevated-button {
+  border-radius: 6px;
+  font-size: 12px;
+  letter-spacing: 0;
+}
+.lucy-dialog .mat-mdc-dialog-surface {
+  border-radius: 14px !important;
+  background: #fff !important;
+}
+.lucy-dialog .modal {
+  padding: 28px;
+  width: 100%;
+  max-width: 100%;
+  max-height: none;
+  overflow: visible;
+  background: #fff;
+  color: var(--ink);
+  box-shadow: none;
+}
+.lucy-dialog h2 {
+  font-size: 21px;
+  margin-top: 0;
+}
+.lucy-dialog form {
+  margin-top: 20px;
+}
+.modal-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 24px;
+}
+.error-box {
+  padding: 12px 16px;
+  background: #fff0ed;
+  color: #a34235;
+  border-radius: 8px;
+  font-size: 12px;
+}
+.content-card {
+  box-shadow: none !important;
+}
+h1 {
+  font-weight: 650 !important;
+}
+h2 {
+  font-weight: 600 !important;
+}
+button:disabled {
+  cursor: not-allowed;
+}
+table {
+  font-size: 12px;
+}
+th {
+  font-weight: 500 !important;
+  background: #f9fafc !important;
+  color: #88929f !important;
+  text-transform: none !important;
+  font-size: 11px !important;
+}
+td {
+  padding: 20px 16px !important;
+}
+a {
+  color: var(--plum);
+}
+.page-header {
+  margin-bottom: 10px;
+}
+.status,
+.estado-badge {
+  border-radius: 5px !important;
+}
+.eyebrow {
+  font-size: 9px !important;
+  letter-spacing: 1.6px;
+}

@@ -5,7 +5,7 @@ describe('Identificación y disponibilidad', () => {
     expect(dniTexto(123456)).toBe('00123456');
   });
   it('encuentra por DNI exacto y nunca por coincidencia parcial', () => {
-    const c = { idCliente: 50, nombre: 'Ana', apellidos: 'Ríos', dni: 123456 } as Cliente;
+    const c = { idCliente: 50, nombre: 'Ana', apellidos: 'Ríos', dni: '00123456' } as Cliente;
     expect(clientePorDni([c], '00123456')).toBe(c);
     expect(clientePorDni([c], '123456')).toBeUndefined();
   });

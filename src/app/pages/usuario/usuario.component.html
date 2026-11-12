@@ -4,26 +4,30 @@
       <h1>Gestión de usuarios</h1>
       <p>Administra las cuentas de acceso y sus roles.</p>
     </div>
-    <button class="btn-primary" type="button" (click)="nuevo()">+ Nuevo usuario</button>
+    <button appSoloEscritura mat-flat-button class="btn-primary" type="button" (click)="nuevo()">
+      + Nuevo usuario
+    </button>
   </div>
   @if (errorCarga()) {
     <p class="error-box">{{ errorCarga() }}</p>
   }
-  <div class="stats-card">
+  <mat-card appearance="outlined" class="stats-card">
     <div class="stats-icon">👤</div>
     <div>
       <p>Total de usuarios</p>
       <h2>{{ usuarios().length }}</h2>
     </div>
-  </div>
-  <section class="content-card">
+  </mat-card>
+  <mat-card appearance="outlined" class="content-card">
     <div class="table-header">
       <h2>Lista de usuarios</h2>
-      <input
-        type="text"
-        placeholder="Buscar por usuario o rol..."
-        (input)="buscar($any($event.target).value)"
-      />
+      <mat-form-field appearance="outline" subscriptSizing="dynamic"
+        ><input
+          matInput
+          type="text"
+          placeholder="Buscar por usuario o rol..."
+          (input)="buscar($any($event.target).value)"
+      /></mat-form-field>
     </div>
     <div class="table-container">
       <table>
@@ -47,8 +51,21 @@
               </td>
               <td>
                 <div class="acciones">
-                  <button class="btn-action" type="button" (click)="editar(usuario)">Editar</button
-                  ><button class="btn-action btn-danger" type="button" (click)="eliminar(usuario)">
+                  <button
+                    appSoloEscritura
+                    mat-button
+                    class="btn-action"
+                    type="button"
+                    (click)="editar(usuario)"
+                  >
+                    Editar</button
+                  ><button
+                    appSoloEscritura
+                    mat-button
+                    class="btn-action btn-danger"
+                    type="button"
+                    (click)="eliminar(usuario)"
+                  >
                     Eliminar
                   </button>
                 </div>
@@ -62,17 +79,24 @@
         </tbody>
       </table>
     </div>
-  </section>
+  </mat-card>
 </div>
 @if (modalAbierto()) {
-  <div class="modal-overlay" (click)="cerrarModal()">
+  <ng-template appModal (closed)="cerrarModal()">
     <div class="modal" (click)="$event.stopPropagation()">
       <h2>{{ editandoId() === null ? 'Nuevo usuario' : 'Editar usuario' }}</h2>
       <form [formGroup]="form" (ngSubmit)="guardar()">
         <div class="form-grid">
           <div class="form-group full">
             <label for="username">Nombre de usuario</label
-            ><input id="username" type="text" autocomplete="username" formControlName="username" />
+            ><mat-form-field appearance="outline" subscriptSizing="dynamic"
+              ><input
+                matInput
+                id="username"
+                type="text"
+                autocomplete="username"
+                formControlName="username"
+            /></mat-form-field>
             @if (campoInvalido('username')) {
               <small class="error">El usuario es obligatorio.</small>
             }
@@ -81,12 +105,14 @@
             <label for="password">{{
               editandoId() === null ? 'Contraseña' : 'Nueva contraseña (opcional)'
             }}</label
-            ><input
-              id="password"
-              type="password"
-              autocomplete="new-password"
-              formControlName="password"
-            />
+            ><mat-form-field appearance="outline" subscriptSizing="dynamic"
+              ><input
+                matInput
+                id="password"
+                type="password"
+                autocomplete="new-password"
+                formControlName="password"
+            /></mat-form-field>
             @if (campoInvalido('password')) {
               <small class="error">La contraseña debe tener al menos 6 caracteres.</small>
             }
@@ -96,34 +122,45 @@
           </div>
           <div class="form-group">
             <label for="rolId">Rol</label
-            ><select id="rolId" formControlName="rolId">
-              <option value="">Selecciona un rol</option>
-              @for (rol of roles(); track rol.idRol) {
-                <option [value]="rol.idRol">{{ rol.name }}</option>
-              }
-            </select>
+            ><mat-form-field appearance="outline" subscriptSizing="dynamic"
+              ><select matNativeControl id="rolId" formControlName="rolId">
+                <option value="">Selecciona un rol</option>
+                @for (rol of roles(); track rol.idRol) {
+                  <option [value]="rol.idRol">{{ rol.name }}</option>
+                }
+              </select></mat-form-field
+            >
             @if (campoInvalido('rolId')) {
               <small class="error">Selecciona un rol válido.</small>
             }
           </div>
           <div class="form-group">
             <label for="enabled">Estado</label
-            ><select id="enabled" formControlName="enabled">
-              <option [ngValue]="true">Activo</option>
-              <option [ngValue]="false">Inactivo</option>
-            </select>
+            ><mat-form-field appearance="outline" subscriptSizing="dynamic"
+              ><select matNativeControl id="enabled" formControlName="enabled">
+                <option [ngValue]="true">Activo</option>
+                <option [ngValue]="false">Inactivo</option>
+              </select></mat-form-field
+            >
           </div>
         </div>
         @if (mensajeError()) {
           <p class="error-box">{{ mensajeError() }}</p>
         }
         <div class="modal-actions">
-          <button type="button" class="btn-secondary" (click)="cerrarModal()">Cancelar</button
-          ><button type="submit" class="btn-primary" [disabled]="guardando()">
+          <button mat-button type="button" class="btn-secondary" (click)="cerrarModal()">
+            Cancelar</button
+          ><button
+            appSoloEscritura
+            mat-flat-button
+            type="submit"
+            class="btn-primary"
+            [disabled]="guardando()"
+          >
             {{ guardando() ? 'Guardando...' : 'Guardar' }}
           </button>
         </div>
       </form>
     </div>
-  </div>
+  </ng-template>
 }

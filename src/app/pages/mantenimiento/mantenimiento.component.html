@@ -4,26 +4,30 @@
       <h1>Gestión de mantenimientos</h1>
       <p>Registra y controla los trabajos realizados en las prendas.</p>
     </div>
-    <button class="btn-primary" type="button" (click)="nuevo()">+ Desde devolución</button>
+    <button appSoloEscritura mat-flat-button class="btn-primary" type="button" (click)="nuevo()">
+      + Desde devolución
+    </button>
   </div>
   @if (errorCarga()) {
     <p class="error-box">{{ errorCarga() }}</p>
   }
-  <div class="stats-card">
+  <mat-card appearance="outlined" class="stats-card">
     <div class="stats-icon">🛠️</div>
     <div>
       <p>Total de mantenimientos</p>
       <h2>{{ mantenimientos().length }}</h2>
     </div>
-  </div>
-  <section class="content-card">
+  </mat-card>
+  <mat-card appearance="outlined" class="content-card">
     <div class="table-header">
       <h2>Lista de mantenimientos</h2>
-      <input
-        type="text"
-        placeholder="Buscar por prenda, tipo o estado…"
-        (input)="buscar($any($event.target).value)"
-      />
+      <mat-form-field appearance="outline" subscriptSizing="dynamic"
+        ><input
+          matInput
+          type="text"
+          placeholder="Buscar por prenda, tipo o estado…"
+          (input)="buscar($any($event.target).value)"
+      /></mat-form-field>
     </div>
     <div class="table-container">
       <table>
@@ -51,8 +55,21 @@
               <td>{{ ref.empleado(item.empleadoId) }}</td>
               <td>
                 <div class="acciones">
-                  <button class="btn-action" type="button" (click)="editar(item)">Editar</button
-                  ><button class="btn-action btn-danger" type="button" (click)="eliminar(item)">
+                  <button
+                    appSoloEscritura
+                    mat-button
+                    class="btn-action"
+                    type="button"
+                    (click)="editar(item)"
+                  >
+                    Editar</button
+                  ><button
+                    appSoloEscritura
+                    mat-button
+                    class="btn-action btn-danger"
+                    type="button"
+                    (click)="eliminar(item)"
+                  >
                     Eliminar
                   </button>
                 </div>
@@ -66,24 +83,27 @@
         </tbody>
       </table>
     </div>
-  </section>
+  </mat-card>
 </div>
 @if (modalAbierto()) {
-  <div class="modal-overlay" (click)="modalAbierto.set(false)">
+  <ng-template appModal (closed)="modalAbierto.set(false)">
     <div class="modal" (click)="$event.stopPropagation()">
       <h2>{{ editandoId() === null ? 'Nuevo mantenimiento' : 'Editar mantenimiento' }}</h2>
       <form [formGroup]="form" (ngSubmit)="guardar()">
         @if (editandoId() === null) {
           <label
-            >Devolución de origen<select
-              [value]="origen()"
-              (change)="cambiarOrigen($any($event.target).value)"
-            >
-              <option value="">Selecciona una recepción completa</option>
-              @for (o of origenes(); track o.valor) {
-                <option [value]="o.valor">{{ o.nombre }}</option>
-              }
-            </select></label
+            >Devolución de origen<mat-form-field appearance="outline" subscriptSizing="dynamic"
+              ><select
+                matNativeControl
+                [value]="origen()"
+                (change)="cambiarOrigen($any($event.target).value)"
+              >
+                <option value="">Selecciona una recepción completa</option>
+                @for (o of origenes(); track o.valor) {
+                  <option [value]="o.valor">{{ o.nombre }}</option>
+                }
+              </select></mat-form-field
+            ></label
           >
           <p>
             Solo se muestran prendas de esta devolución. El contexto se conservará en la descripción
@@ -93,30 +113,44 @@
         <div class="form-grid">
           <div class="form-group">
             <label for="fechaInicio">Fecha de inicio</label
-            ><input id="fechaInicio" type="date" formControlName="fechaInicio" />
+            ><mat-form-field appearance="outline" subscriptSizing="dynamic"
+              ><input matInput id="fechaInicio" type="date" formControlName="fechaInicio"
+            /></mat-form-field>
           </div>
           <div class="form-group">
             <label for="fechaFin">Fecha de fin</label
-            ><input id="fechaFin" type="date" formControlName="fechaFin" />
+            ><mat-form-field appearance="outline" subscriptSizing="dynamic"
+              ><input matInput id="fechaFin" type="date" formControlName="fechaFin"
+            /></mat-form-field>
           </div>
           <div class="form-group">
             <label for="tipoMantenimiento">Tipo</label
-            ><input id="tipoMantenimiento" type="text" formControlName="tipoMantenimiento" />
+            ><mat-form-field appearance="outline" subscriptSizing="dynamic"
+              ><input
+                matInput
+                id="tipoMantenimiento"
+                type="text"
+                formControlName="tipoMantenimiento"
+            /></mat-form-field>
             @if (campoInvalido('tipoMantenimiento')) {
               <small class="error">Campo obligatorio.</small>
             }
           </div>
           <div class="form-group">
             <label for="costo">Costo (S/)</label
-            ><input id="costo" type="number" min="0" step="0.01" formControlName="costo" />
+            ><mat-form-field appearance="outline" subscriptSizing="dynamic"
+              ><input matInput id="costo" type="number" min="0" step="0.01" formControlName="costo"
+            /></mat-form-field>
           </div>
           <div class="form-group">
             <label for="estado">Estado</label
-            ><select id="estado" formControlName="estado">
-              <option value="EN CURSO">EN CURSO</option>
-              <option value="PENDIENTE">PENDIENTE</option>
-              <option value="FINALIZADO">FINALIZADO</option>
-            </select>
+            ><mat-form-field appearance="outline" subscriptSizing="dynamic"
+              ><select matNativeControl id="estado" formControlName="estado">
+                <option value="EN CURSO">EN CURSO</option>
+                <option value="PENDIENTE">PENDIENTE</option>
+                <option value="FINALIZADO">FINALIZADO</option>
+              </select></mat-form-field
+            >
           </div>
           <div class="form-group">
             <app-selector-referencia
@@ -134,20 +168,28 @@
           </div>
           <div class="form-group full">
             <label for="descripcion">Descripción</label
-            ><textarea id="descripcion" rows="3" formControlName="descripcion"></textarea>
+            ><mat-form-field appearance="outline" subscriptSizing="dynamic">
+              <textarea matInput id="descripcion" rows="3" formControlName="descripcion"></textarea>
+            </mat-form-field>
           </div>
         </div>
         @if (mensajeError()) {
           <p class="error-box">{{ mensajeError() }}</p>
         }
         <div class="modal-actions">
-          <button type="button" class="btn-secondary" (click)="modalAbierto.set(false)">
+          <button mat-button type="button" class="btn-secondary" (click)="modalAbierto.set(false)">
             Cancelar</button
-          ><button type="submit" class="btn-primary" [disabled]="guardando()">
+          ><button
+            appSoloEscritura
+            mat-flat-button
+            type="submit"
+            class="btn-primary"
+            [disabled]="guardando()"
+          >
             {{ guardando() ? 'Guardando...' : 'Guardar' }}
           </button>
         </div>
       </form>
     </div>
-  </div>
+  </ng-template>
 }

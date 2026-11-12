@@ -1,3 +1,5 @@
+import { UiService } from '../../shared/ui.service';
+import { MATERIAL } from '../../shared/material';
 import { ReferenciasService } from '../../services/referencias.service';
 import { AlquilerService } from '../../services/alquiler.service';
 import { Alquiler } from '../../model/alquiler';
@@ -11,11 +13,12 @@ import { normalizar } from '../../model/catalogo';
 @Component({
   selector: 'app-cliente',
   standalone: true,
-  imports: [ReactiveFormsModule, RouterLink],
+  imports: [...MATERIAL, ReactiveFormsModule, RouterLink],
   templateUrl: './cliente.component.html',
   styleUrl: './cliente.component.css',
 })
 export class ClienteComponent {
+  private readonly ui = inject(UiService);
   readonly ref = inject(ReferenciasService);
   private readonly alquilerService = inject(AlquilerService);
   readonly historialCliente = signal<Cliente | null>(null);
@@ -123,7 +126,7 @@ export class ClienteComponent {
     }
 
     const v = this.form.getRawValue();
-    const datos = { ...v, dni: Number(v.dni), telefono: Number(v.telefono) };
+    const datos = { ...v, dni: v.dni.trim(), telefono: v.telefono.trim() };
     const id = this.editandoId();
 
     this.guardando.set(true);
@@ -149,8 +152,8 @@ export class ClienteComponent {
   }
 
   // ---------- ELIMINAR ----------
-  eliminar(cliente: Cliente): void {
-    if (!confirm(`¿Eliminar a ${cliente.nombre} ${cliente.apellidos}?`)) {
+  async eliminar(cliente: Cliente): Promise<void> {
+    if (!(await this.ui.confirm(`¿Eliminar a ${cliente.nombre} ${cliente.apellidos}?`))) {
       return;
     }
 
@@ -158,7 +161,7 @@ export class ClienteComponent {
       next: () => this.cargarClientes(),
       error: (error) => {
         console.error('Error al eliminar cliente:', error);
-        alert('No se pudo eliminar. Puede que el cliente tenga alquileres registrados.');
+        this.ui.notify('No se pudo eliminar. Puede que el cliente tenga alquileres registrados.');
       },
     });
   }

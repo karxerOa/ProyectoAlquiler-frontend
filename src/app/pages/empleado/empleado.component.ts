@@ -1,3 +1,5 @@
+import { UiService } from '../../shared/ui.service';
+import { MATERIAL } from '../../shared/material';
 import { Component, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Empleado } from '../../model/empleado';
@@ -6,11 +8,12 @@ import { EmpleadoService } from '../../services/empleado.service';
 @Component({
   selector: 'app-empleado',
   standalone: true,
-  imports: [ReactiveFormsModule],
+  imports: [...MATERIAL, ReactiveFormsModule],
   templateUrl: './empleado.component.html',
-  styleUrl: './empleado.component.css'
+  styleUrl: './empleado.component.css',
 })
 export class EmpleadoComponent {
+  private readonly ui = inject(UiService);
   private readonly empleadoService = inject(EmpleadoService);
   private readonly fb = inject(FormBuilder);
 
@@ -33,10 +36,10 @@ export class EmpleadoComponent {
 
   empleadosFiltrados = computed(() => {
     const texto = this.busqueda();
-    return this.empleados().filter(empleado =>
+    return this.empleados().filter((empleado) =>
       `${empleado.nombres} ${empleado.apellidos} ${empleado.dni} ${empleado.telefono} ${empleado.cargo}`
         .toLowerCase()
-        .includes(texto)
+        .includes(texto),
     );
   });
 
@@ -47,7 +50,7 @@ export class EmpleadoComponent {
   cargarEmpleados(): void {
     this.empleadoService.findAll().subscribe({
       next: (data) => this.empleadoService.setEmpleadosChange(data),
-      error: (error) => console.error('Error al cargar empleados:', error)
+      error: (error) => console.error('Error al cargar empleados:', error),
     });
   }
 
@@ -86,15 +89,14 @@ export class EmpleadoComponent {
     }
 
     const v = this.form.getRawValue();
-    const datos = { ...v, dni: Number(v.dni), telefono: Number(v.telefono) };
+    const datos = { ...v, dni: v.dni.trim(), telefono: v.telefono.trim() };
     const id = this.editandoId();
 
     this.guardando.set(true);
     this.mensajeError.set('');
 
-    const peticion = id === null
-      ? this.empleadoService.create(datos)
-      : this.empleadoService.update(id, datos);
+    const peticion =
+      id === null ? this.empleadoService.create(datos) : this.empleadoService.update(id, datos);
 
     peticion.subscribe({
       next: () => {
@@ -106,15 +108,15 @@ export class EmpleadoComponent {
         console.error('Error al guardar empleado:', error);
         this.guardando.set(false);
         this.mensajeError.set(
-          'No se pudo guardar. Verifica que el DNI o el teléfono no estén repetidos.'
+          'No se pudo guardar. Verifica que el DNI o el teléfono no estén repetidos.',
         );
-      }
+      },
     });
   }
 
   // ---------- ELIMINAR ----------
-  eliminar(empleado: Empleado): void {
-    if (!confirm(`¿Eliminar a ${empleado.nombres} ${empleado.apellidos}?`)) {
+  async eliminar(empleado: Empleado): Promise<void> {
+    if (!(await this.ui.confirm(`¿Eliminar a ${empleado.nombres} ${empleado.apellidos}?`))) {
       return;
     }
 
@@ -122,8 +124,8 @@ export class EmpleadoComponent {
       next: () => this.cargarEmpleados(),
       error: (error) => {
         console.error('Error al eliminar empleado:', error);
-        alert('No se pudo eliminar. Puede que el empleado tenga registros asociados.');
-      }
+        this.ui.notify('No se pudo eliminar. Puede que el empleado tenga registros asociados.');
+      },
     });
   }
 

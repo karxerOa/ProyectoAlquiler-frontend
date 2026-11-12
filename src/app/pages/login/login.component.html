@@ -1,0 +1,62 @@
+<main class="login-page">
+  <section class="welcome" aria-label="Lucy, alquiler de vestimentas">
+    <a class="brand" href="/login">lucy.</a>
+    <div>
+      <p class="eyebrow">ALQUILER DE VESTIMENTAS</p>
+      <h1>Cada ocasión,<br />bien organizada.</h1>
+      <p>Prendas, reservas y devoluciones.<br />Todo en un mismo lugar.</p>
+    </div>
+    <small>Gestión de tu boutique</small>
+  </section>
+  <section class="access">
+    <mat-card appearance="outlined">
+      @if (pending()) {
+        <mat-progress-bar mode="indeterminate" aria-label="Iniciando sesión" />
+      }
+      <mat-card-header
+        ><mat-card-title>Bienvenido de nuevo</mat-card-title
+        ><mat-card-subtitle>Ingresa a tu espacio de trabajo.</mat-card-subtitle></mat-card-header
+      >
+      <mat-card-content>
+        @if (expired) {
+          <p role="status">Tu sesión terminó. Ingresa nuevamente para continuar.</p>
+        }
+        <form [formGroup]="form" (ngSubmit)="submit()" [attr.aria-busy]="pending()">
+          <mat-form-field appearance="outline"
+            ><mat-label>Usuario</mat-label
+            ><input matInput formControlName="username" autocomplete="username" required />
+            @if (form.controls.username.hasError('required')) {
+              <mat-error>Escribe tu usuario.</mat-error>
+            }
+          </mat-form-field>
+          <mat-form-field appearance="outline"
+            ><mat-label>Contraseña</mat-label
+            ><input
+              matInput
+              formControlName="password"
+              [type]="showPassword() ? 'text' : 'password'"
+              autocomplete="current-password"
+              required
+            /><button
+              mat-button
+              matSuffix
+              type="button"
+              (click)="showPassword.set(!showPassword())"
+              [attr.aria-pressed]="showPassword()"
+            >
+              {{ showPassword() ? 'Ocultar' : 'Mostrar' }}</button
+            ><mat-error>Escribe tu contraseña.</mat-error></mat-form-field
+          >
+          @if (error()) {
+            <p class="error" role="alert">{{ error() }}</p>
+          }
+          <button mat-flat-button type="submit" [disabled]="pending()">
+            {{ pending() ? 'Ingresando…' : 'Iniciar sesión' }}
+          </button>
+        </form>
+        <p class="help">¿Necesitas acceso? Contacta al administrador de tu boutique.</p>
+      </mat-card-content>
+    </mat-card>
+    <small>Tu próxima ocasión empieza con una buena organización.</small>
+  </section>
+</main>

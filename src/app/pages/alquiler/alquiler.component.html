@@ -4,28 +4,32 @@
       <h1>Reservas y alquileres</h1>
       <p>Organiza cada ocasión, desde la reserva hasta la devolución.</p>
     </div>
-    <button class="btn-primary" type="button" (click)="nuevo()">+ Nuevo alquiler</button>
+    <button appSoloEscritura mat-flat-button class="btn-primary" type="button" (click)="nuevo()">
+      + Nuevo alquiler
+    </button>
   </div>
 
   @if (errorCarga()) {
     <p class="error-box">{{ errorCarga() }}</p>
   }
-  <div class="stats-card">
+  <mat-card appearance="outlined" class="stats-card">
     <div class="stats-icon">📅</div>
     <div>
       <p>Total de alquileres</p>
       <h2>{{ alquileres().length }}</h2>
     </div>
-  </div>
+  </mat-card>
 
-  <section class="content-card">
+  <mat-card appearance="outlined" class="content-card">
     <div class="table-header">
       <h2>Lista de alquileres</h2>
-      <input
-        type="text"
-        placeholder="Buscar por cliente, empleado o estado..."
-        (input)="buscar($any($event.target).value)"
-      />
+      <mat-form-field appearance="outline" subscriptSizing="dynamic"
+        ><input
+          matInput
+          type="text"
+          placeholder="Buscar por cliente, empleado o estado..."
+          (input)="buscar($any($event.target).value)"
+      /></mat-form-field>
     </div>
     <div class="table-container">
       <table>
@@ -49,10 +53,12 @@
               <td>S/ {{ alquiler.total }}</td>
               <td>
                 <div class="acciones">
-                  <button type="button" class="btn-action" (click)="abrir(alquiler)">
+                  <button mat-button type="button" class="btn-action" (click)="abrir(alquiler)">
                     Prendas y devolución
                   </button>
                   <button
+                    appSoloEscritura
+                    mat-button
                     class="btn-action"
                     type="button"
                     [disabled]="tieneRecepcion(alquiler)"
@@ -61,6 +67,8 @@
                     Editar
                   </button>
                   <button
+                    appSoloEscritura
+                    mat-button
                     class="btn-action btn-danger"
                     type="button"
                     [disabled]="tieneRecepcion(alquiler)"
@@ -79,11 +87,11 @@
         </tbody>
       </table>
     </div>
-  </section>
+  </mat-card>
 </div>
 
 @if (modalAbierto()) {
-  <div class="modal-overlay" (click)="modalAbierto.set(false)">
+  <ng-template appModal (closed)="modalAbierto.set(false)">
     <div
       class="modal"
       role="dialog"
@@ -101,49 +109,69 @@
         <div class="form-grid">
           <div class="form-group">
             <label for="fechaAlquiler">Fecha de registro</label
-            ><input id="fechaAlquiler" type="date" formControlName="fechaAlquiler" />
+            ><mat-form-field appearance="outline" subscriptSizing="dynamic"
+              ><input matInput id="fechaAlquiler" type="date" formControlName="fechaAlquiler"
+            /></mat-form-field>
           </div>
           <div class="form-group">
             <label for="fechaInicio">Fecha de inicio</label
-            ><input id="fechaInicio" type="date" formControlName="fechaInicio" />
+            ><mat-form-field appearance="outline" subscriptSizing="dynamic"
+              ><input matInput id="fechaInicio" type="date" formControlName="fechaInicio"
+            /></mat-form-field>
             @if (campoInvalido('fechaInicio')) {
               <small class="error">Campo obligatorio.</small>
             }
           </div>
           <div class="form-group">
             <label for="fechaFin">Fecha de fin</label
-            ><input id="fechaFin" type="date" formControlName="fechaFin" />
+            ><mat-form-field appearance="outline" subscriptSizing="dynamic"
+              ><input matInput id="fechaFin" type="date" formControlName="fechaFin"
+            /></mat-form-field>
             @if (campoInvalido('fechaFin')) {
               <small class="error">Campo obligatorio.</small>
             }
           </div>
           <div class="form-group">
             <label for="estado">Estado</label
-            ><select id="estado" formControlName="estado">
-              <option value="ACTIVO">ACTIVO</option>
-              <option value="INACTIVO">INACTIVO</option>
-              <option value="PENDIENTE">PENDIENTE</option>
-              <option value="RESERVADO">RESERVADO</option>
-            </select>
+            ><mat-form-field appearance="outline" subscriptSizing="dynamic"
+              ><select matNativeControl id="estado" formControlName="estado">
+                <option value="ACTIVO">ACTIVO</option>
+                <option value="INACTIVO">INACTIVO</option>
+                <option value="PENDIENTE">PENDIENTE</option>
+                <option value="RESERVADO">RESERVADO</option>
+              </select></mat-form-field
+            >
           </div>
           <div class="form-group">
             <label for="subtotal">Subtotal (S/)</label
-            ><input id="subtotal" type="number" min="0" step="0.01" formControlName="subtotal" />
+            ><mat-form-field appearance="outline" subscriptSizing="dynamic"
+              ><input
+                matInput
+                id="subtotal"
+                type="number"
+                min="0"
+                step="0.01"
+                formControlName="subtotal"
+            /></mat-form-field>
           </div>
           <div class="form-group">
             <label for="total">Total (S/)</label
-            ><input id="total" type="number" min="0" step="0.01" formControlName="total" />
+            ><mat-form-field appearance="outline" subscriptSizing="dynamic"
+              ><input matInput id="total" type="number" min="0" step="0.01" formControlName="total"
+            /></mat-form-field>
           </div>
           <div class="form-group">
             <label for="dni-cliente">DNI del cliente</label
-            ><input
-              id="dni-cliente"
-              inputmode="numeric"
-              maxlength="8"
-              [value]="dni()"
-              (input)="buscarDni($any($event.target).value)"
-              placeholder="Ingresa los 8 dígitos"
-            />
+            ><mat-form-field appearance="outline" subscriptSizing="dynamic"
+              ><input
+                matInput
+                id="dni-cliente"
+                inputmode="numeric"
+                maxlength="8"
+                [value]="dni()"
+                (input)="buscarDni($any($event.target).value)"
+                placeholder="Ingresa los 8 dígitos"
+            /></mat-form-field>
             @if (clienteDni(); as c) {
               <p role="status">{{ c.nombre }} {{ c.apellidos }}</p>
             } @else if (dni().length === 8) {
@@ -155,12 +183,14 @@
           </div>
           <div class="form-group">
             <label for="empleadoId">Empleado responsable</label
-            ><select id="empleadoId" formControlName="empleadoId">
-              <option value="">Selecciona un empleado</option>
-              @for (e of empleados(); track e.idEmpleado) {
-                <option [value]="e.idEmpleado">{{ e.nombres }} {{ e.apellidos }}</option>
-              }
-            </select>
+            ><mat-form-field appearance="outline" subscriptSizing="dynamic"
+              ><select matNativeControl id="empleadoId" formControlName="empleadoId">
+                <option value="">Selecciona un empleado</option>
+                @for (e of empleados(); track e.idEmpleado) {
+                  <option [value]="e.idEmpleado">{{ e.nombres }} {{ e.apellidos }}</option>
+                }
+              </select></mat-form-field
+            >
             @if (campoInvalido('empleadoId')) {
               <small class="error">Selecciona un registro válido.</small>
             }
@@ -170,19 +200,25 @@
           <p class="error-box">{{ mensajeError() }}</p>
         }
         <div class="modal-actions">
-          <button type="button" class="btn-secondary" (click)="modalAbierto.set(false)">
+          <button mat-button type="button" class="btn-secondary" (click)="modalAbierto.set(false)">
             Cancelar</button
-          ><button type="submit" class="btn-primary" [disabled]="guardando()">
+          ><button
+            appSoloEscritura
+            mat-flat-button
+            type="submit"
+            class="btn-primary"
+            [disabled]="guardando()"
+          >
             {{ guardando() ? 'Guardando...' : 'Guardar' }}
           </button>
         </div>
       </form>
     </div>
-  </div>
+  </ng-template>
 }
 
 @if (expediente(); as a) {
-  <section class="rental-file content-card">
+  <mat-card appearance="outlined" class="rental-file content-card">
     <div class="page-header">
       <div>
         <h2>{{ ref.cliente(a.clienteId) }}</h2>
@@ -191,7 +227,7 @@
           {{ devuelto(a) ? 'Devuelto' : a.estado }}
         </p>
       </div>
-      <button type="button" class="btn-secondary" (click)="expediente.set(null)">
+      <button mat-button type="button" class="btn-secondary" (click)="expediente.set(null)">
         Cerrar ficha
       </button>
     </div>
@@ -199,5 +235,5 @@
       [alquiler]="a"
       (actualizada)="cargarAlquileres()"
     />
-  </section>
+  </mat-card>
 }

@@ -3,7 +3,10 @@ import { inject, Service, signal } from '@angular/core';
 import { Alquiler } from '../model/alquiler';
 import { environment } from '../../environments/environment';
 
-type AlquilerData = Omit<Alquiler, 'idAlquiler' | 'nombreEmpleado' | 'nombreCliente' | 'apellidoCliente'>;
+type AlquilerData = Omit<
+  Alquiler,
+  'idAlquiler' | 'nombreEmpleado' | 'nombreCliente' | 'apellidoCliente'
+>;
 
 @Service()
 export class AlquilerService {

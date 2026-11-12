@@ -1,3 +1,4 @@
+import { MATERIAL } from '../../shared/material';
 import { Component, computed, inject, input, signal, output } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Alquiler } from '../../model/alquiler';
@@ -10,7 +11,7 @@ import { RouterLink } from '@angular/router';
 @Component({
   selector: 'app-devolucion',
   standalone: true,
-  imports: [ReactiveFormsModule, SelectorReferenciaComponent, RouterLink],
+  imports: [...MATERIAL, ReactiveFormsModule, SelectorReferenciaComponent, RouterLink],
   templateUrl: './devolucion.component.html',
   styleUrl: '../../shared/gestion.css',
 })
@@ -98,7 +99,7 @@ export class DevolucionComponent {
       .registrar({
         ...v,
         observacion,
-        fechaDevolucion: v.fechaDevolucion + 'T00:00:00-05:00',
+        fechaDevolucion: v.fechaDevolucion + 'T00:00:00',
         empleadoId: Number(v.empleadoId),
         alquilerId: this.alquiler().idAlquiler,
       })

@@ -1,30 +1,34 @@
 <div class="page-container">
   <div class="page-header">
     <div>
-      <h1>Gestión de clientes</h1>
-      <p>Administra la información de los clientes de Lucy.</p>
+      <h1>Las personas detrás de cada ocasión.</h1>
+      <p>Conoce a tus clientes y acompaña sus próximas ocasiones.</p>
     </div>
 
-    <button class="btn-primary" type="button" (click)="nuevo()">+ Nuevo cliente</button>
+    <button appSoloEscritura mat-flat-button class="btn-primary" type="button" (click)="nuevo()">
+      + Nuevo cliente
+    </button>
   </div>
 
-  <div class="stats-card">
+  <mat-card appearance="outlined" class="stats-card">
     <div class="stats-icon">👥</div>
     <div>
       <p>Total de clientes</p>
       <h2>{{ clientes().length }}</h2>
     </div>
-  </div>
+  </mat-card>
 
-  <section class="content-card">
+  <mat-card appearance="outlined" class="content-card">
     <div class="table-header">
       <h2>Lista de clientes</h2>
 
-      <input
-        type="text"
-        placeholder="Buscar por nombre, DNI o teléfono..."
-        (input)="buscar($any($event.target).value)"
-      />
+      <mat-form-field appearance="outline" subscriptSizing="dynamic"
+        ><input
+          matInput
+          type="text"
+          placeholder="Buscar por nombre, DNI o teléfono..."
+          (input)="buscar($any($event.target).value)"
+      /></mat-form-field>
     </div>
 
     <div class="table-container">
@@ -47,11 +51,25 @@
               <td>{{ cliente.telefono }}</td>
               <td>{{ cliente.correo }}</td>
               <td class="acciones">
-                <button type="button" class="btn-action" (click)="verHistorial(cliente)">
+                <button mat-button type="button" class="btn-action" (click)="verHistorial(cliente)">
                   Ver alquileres
                 </button>
-                <button class="btn-action" type="button" (click)="editar(cliente)">Editar</button>
-                <button class="btn-action btn-danger" type="button" (click)="eliminar(cliente)">
+                <button
+                  appSoloEscritura
+                  mat-button
+                  class="btn-action"
+                  type="button"
+                  (click)="editar(cliente)"
+                >
+                  Editar
+                </button>
+                <button
+                  appSoloEscritura
+                  mat-button
+                  class="btn-action btn-danger"
+                  type="button"
+                  (click)="eliminar(cliente)"
+                >
                   Eliminar
                 </button>
               </td>
@@ -64,12 +82,12 @@
         </tbody>
       </table>
     </div>
-  </section>
+  </mat-card>
 </div>
 
 <!-- MODAL NUEVO / EDITAR -->
 @if (modalAbierto()) {
-  <div class="modal-overlay" (click)="cerrarModal()">
+  <ng-template appModal (closed)="cerrarModal()">
     <div class="modal" (click)="$event.stopPropagation()">
       <h2>{{ editandoId() === null ? 'Nuevo cliente' : 'Editar cliente' }}</h2>
 
@@ -77,7 +95,9 @@
         <div class="form-grid">
           <div class="form-group">
             <label for="nombre">Nombre</label>
-            <input id="nombre" type="text" formControlName="nombre" />
+            <mat-form-field appearance="outline" subscriptSizing="dynamic"
+              ><input matInput id="nombre" type="text" formControlName="nombre"
+            /></mat-form-field>
             @if (campoInvalido('nombre')) {
               <small class="error">El nombre es obligatorio.</small>
             }
@@ -85,7 +105,9 @@
 
           <div class="form-group">
             <label for="apellidos">Apellidos</label>
-            <input id="apellidos" type="text" formControlName="apellidos" />
+            <mat-form-field appearance="outline" subscriptSizing="dynamic"
+              ><input matInput id="apellidos" type="text" formControlName="apellidos"
+            /></mat-form-field>
             @if (campoInvalido('apellidos')) {
               <small class="error">Los apellidos son obligatorios.</small>
             }
@@ -93,7 +115,15 @@
 
           <div class="form-group">
             <label for="dni">DNI</label>
-            <input id="dni" type="text" inputmode="numeric" maxlength="8" formControlName="dni" />
+            <mat-form-field appearance="outline" subscriptSizing="dynamic"
+              ><input
+                matInput
+                id="dni"
+                type="text"
+                inputmode="numeric"
+                maxlength="8"
+                formControlName="dni"
+            /></mat-form-field>
             @if (campoInvalido('dni')) {
               <small class="error">El DNI debe tener 8 dígitos.</small>
             }
@@ -101,13 +131,15 @@
 
           <div class="form-group">
             <label for="telefono">Teléfono</label>
-            <input
-              id="telefono"
-              type="text"
-              inputmode="numeric"
-              maxlength="9"
-              formControlName="telefono"
-            />
+            <mat-form-field appearance="outline" subscriptSizing="dynamic"
+              ><input
+                matInput
+                id="telefono"
+                type="text"
+                inputmode="numeric"
+                maxlength="9"
+                formControlName="telefono"
+            /></mat-form-field>
             @if (campoInvalido('telefono')) {
               <small class="error">El teléfono debe tener 9 dígitos.</small>
             }
@@ -115,7 +147,9 @@
 
           <div class="form-group full">
             <label for="direccion">Dirección</label>
-            <input id="direccion" type="text" formControlName="direccion" />
+            <mat-form-field appearance="outline" subscriptSizing="dynamic"
+              ><input matInput id="direccion" type="text" formControlName="direccion"
+            /></mat-form-field>
             @if (campoInvalido('direccion')) {
               <small class="error">La dirección es obligatoria.</small>
             }
@@ -123,7 +157,9 @@
 
           <div class="form-group full">
             <label for="correo">Correo</label>
-            <input id="correo" type="email" formControlName="correo" />
+            <mat-form-field appearance="outline" subscriptSizing="dynamic"
+              ><input matInput id="correo" type="email" formControlName="correo"
+            /></mat-form-field>
             @if (campoInvalido('correo')) {
               <small class="error">Ingresa un correo válido.</small>
             }
@@ -135,20 +171,28 @@
         }
 
         <div class="modal-actions">
-          <button type="button" class="btn-secondary" (click)="cerrarModal()">Cancelar</button>
-          <button type="submit" class="btn-primary" [disabled]="guardando()">
+          <button mat-button type="button" class="btn-secondary" (click)="cerrarModal()">
+            Cancelar
+          </button>
+          <button
+            appSoloEscritura
+            mat-flat-button
+            type="submit"
+            class="btn-primary"
+            [disabled]="guardando()"
+          >
             {{ guardando() ? 'Guardando...' : 'Guardar' }}
           </button>
         </div>
       </form>
     </div>
-  </div>
+  </ng-template>
 }
 @if (historialCliente(); as c) {
-  <section class="content-card">
+  <mat-card appearance="outlined" class="content-card">
     <div class="page-header">
       <h2>Alquileres de {{ c.nombre }} {{ c.apellidos }}</h2>
-      <button type="button" class="btn-secondary" (click)="historialCliente.set(null)">
+      <button mat-button type="button" class="btn-secondary" (click)="historialCliente.set(null)">
         Cerrar historial
       </button>
     </div>
@@ -156,7 +200,7 @@
       <p role="status">Cargando historial…</p>
     } @else if (errorHistorial()) {
       <p role="alert">{{ errorHistorial() }}</p>
-      <button type="button" (click)="verHistorial(c)">Reintentar</button>
+      <button mat-button type="button" (click)="verHistorial(c)">Reintentar</button>
     } @else {
       <div class="table-container">
         <table>
@@ -191,5 +235,5 @@
         </table>
       </div>
     }
-  </section>
+  </mat-card>
 }

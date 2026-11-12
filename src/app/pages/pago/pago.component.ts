@@ -1,3 +1,4 @@
+import { MATERIAL } from '../../shared/material';
 import { ReferenciasService } from '../../services/referencias.service';
 import { SelectorReferenciaComponent } from '../../shared/selector-referencia.component';
 import { Component, computed, inject, signal } from '@angular/core';
@@ -8,7 +9,7 @@ import { PagoService } from '../../services/pago.service';
 @Component({
   selector: 'app-pago',
   standalone: true,
-  imports: [ReactiveFormsModule, SelectorReferenciaComponent],
+  imports: [...MATERIAL, ReactiveFormsModule, SelectorReferenciaComponent],
   templateUrl: './pago.component.html',
   styleUrl: '../../shared/gestion.css',
 })

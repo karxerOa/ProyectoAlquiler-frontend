@@ -1,4 +1,4 @@
-<section class="content-card">
+<mat-card appearance="outlined" class="content-card">
   <h2>Prendas de este alquiler</h2>
   <div class="table-container">
     <table>
@@ -21,6 +21,8 @@
             <td>
               @if (editable()) {
                 <button
+                  appSoloEscritura
+                  mat-button
                   type="button"
                   class="btn-action"
                   [disabled]="guardando()"
@@ -47,26 +49,41 @@
           etiqueta="Prenda"
           [opciones]="opciones()"
           formControlName="prendaId"
-        /><label>Cantidad<input type="number" min="1" step="1" formControlName="cantidad" /></label
+        /><label
+          >Cantidad<mat-form-field appearance="outline" subscriptSizing="dynamic"
+            ><input
+              matInput
+              type="number"
+              min="1"
+              step="1"
+              formControlName="cantidad" /></mat-form-field></label
         ><label
-          >Precio unitario acordado (S/)<input
-            type="number"
-            min="0"
-            step="0.01"
-            formControlName="precioUnitario" /></label
+          >Precio unitario acordado (S/)<mat-form-field
+            appearance="outline"
+            subscriptSizing="dynamic"
+            ><input
+              matInput
+              type="number"
+              min="0"
+              step="0.01"
+              formControlName="precioUnitario" /></mat-form-field></label
         ><label
-          >Subtotal registrado (S/)<input
-            type="number"
-            min="0"
-            step="0.01"
-            formControlName="subtotal"
-        /></label>
+          >Subtotal registrado (S/)<mat-form-field appearance="outline" subscriptSizing="dynamic"
+            ><input
+              matInput
+              type="number"
+              min="0"
+              step="0.01"
+              formControlName="subtotal" /></mat-form-field
+        ></label>
       </div>
       <p>Los importes se conservan tal como los registra el servidor.</p>
-      <button class="btn-primary" [disabled]="form.invalid || guardando()">Añadir prenda</button>
+      <button mat-flat-button class="btn-primary" [disabled]="form.invalid || guardando()">
+        Añadir prenda
+      </button>
     </form>
   }
   @if (error()) {
     <p role="alert" class="error-box">{{ error() }}</p>
   }
-</section>
+</mat-card>

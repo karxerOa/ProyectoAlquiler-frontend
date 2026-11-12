@@ -1,10 +1,12 @@
+import { UiService } from '../../shared/ui.service';
+import { MATERIAL } from '../../shared/material';
 import { ReferenciasService } from '../../services/referencias.service';
 import { clientePorDni, dniTexto } from '../../model/flujo';
 import { DetalleAlquilerComponent } from '../detalle-alquiler/detalle-alquiler.component';
 import { DevolucionComponent } from '../devolucion/devolucion.component';
 import { Component, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { ClienteService, Cliente } from '../../services/cliente.service';
 import { EmpleadoService } from '../../services/empleado.service';
 import { Empleado } from '../../model/empleado';
@@ -16,11 +18,12 @@ import { AlquilerService } from '../../services/alquiler.service';
 @Component({
   selector: 'app-alquiler',
   standalone: true,
-  imports: [ReactiveFormsModule, DetalleAlquilerComponent, DevolucionComponent],
+  imports: [...MATERIAL, ReactiveFormsModule, DetalleAlquilerComponent, DevolucionComponent],
   templateUrl: './alquiler.component.html',
   styleUrl: '../../shared/gestion.css',
 })
 export class AlquilerComponent {
+  private readonly ui = inject(UiService);
   readonly ref = inject(ReferenciasService);
   readonly expediente = signal<Alquiler | null>(null);
   tieneRecepcion(a: Alquiler) {
@@ -48,6 +51,7 @@ export class AlquilerComponent {
   private readonly clientesServicio = inject(ClienteService);
   private readonly empleadosServicio = inject(EmpleadoService);
   private readonly ruta = inject(ActivatedRoute);
+  private readonly router = inject(Router);
   readonly clientes = signal<Cliente[]>([]);
   readonly empleados = signal<Empleado[]>([]);
   readonly errorOpciones = signal('');
@@ -120,20 +124,7 @@ export class AlquilerComponent {
   }
 
   nuevo(): void {
-    this.dni.set('');
-    this.editandoId.set(null);
-    this.form.reset({
-      fechaAlquiler: fechaLima(),
-      fechaInicio: '',
-      fechaFin: '',
-      estado: 'PENDIENTE',
-      subtotal: '0',
-      total: '0',
-      empleadoId: '',
-      clienteId: '',
-    });
-    this.mensajeError.set('');
-    this.modalAbierto.set(true);
+    void this.router.navigate(['/alquileres/nuevo']);
   }
 
   editar(alquiler: Alquiler): void {
@@ -220,17 +211,17 @@ export class AlquilerComponent {
     });
   }
 
-  eliminar(alquiler: Alquiler): void {
+  async eliminar(alquiler: Alquiler): Promise<void> {
     if (this.ref.devoluciones().some((d) => d.alquilerId === alquiler.idAlquiler)) {
-      alert('Este alquiler tiene una recepción registrada y forma parte del historial.');
+      this.ui.notify('Este alquiler tiene una recepción registrada y forma parte del historial.');
       return;
     }
-    if (!confirm('¿Eliminar este alquiler y sus datos asociados?')) return;
+    if (!(await this.ui.confirm('¿Eliminar este alquiler y sus datos asociados?'))) return;
     this.alquilerService.delete(alquiler.idAlquiler).subscribe({
       next: () => this.cargarAlquileres(),
       error: (error: unknown) => {
         console.error('Error al eliminar alquiler:', error);
-        alert('No se pudo eliminar el alquiler. Puede tener registros asociados.');
+        this.ui.notify('No se pudo eliminar el alquiler. Puede tener registros asociados.');
       },
     });
   }

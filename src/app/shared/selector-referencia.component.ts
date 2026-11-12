@@ -1,10 +1,12 @@
 import { Component, computed, forwardRef, input, signal } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+import { MATERIAL } from './material';
 import { OpcionReferencia } from '../services/referencias.service';
 import { normalizar } from '../model/catalogo';
 @Component({
   selector: 'app-selector-referencia',
   standalone: true,
+  imports: [...MATERIAL],
   providers: [
     {
       provide: NG_VALUE_ACCESSOR,
@@ -12,32 +14,33 @@ import { normalizar } from '../model/catalogo';
       multi: true,
     },
   ],
-  template: `<label
-    >{{ etiqueta()
-    }}<input
-      type="search"
-      [attr.aria-label]="'Buscar ' + etiqueta()"
-      placeholder="Buscar por nombre…"
-      [disabled]="deshabilitado()"
-      [value]="busqueda()"
-      (input)="busqueda.set($any($event.target).value)"
-      (blur)="tocar()"
-    /><select
-      [attr.aria-label]="etiqueta()"
-      [disabled]="deshabilitado()"
-      [value]="valor()"
-      (change)="elegir($any($event.target).value)"
-      (blur)="tocar()"
+  template: `<div class="selector">
+    <mat-form-field appearance="outline" subscriptSizing="dynamic"
+      ><mat-label>Buscar {{ etiqueta() }}</mat-label
+      ><input
+        matInput
+        type="search"
+        [disabled]="deshabilitado()"
+        [value]="busqueda()"
+        (input)="busqueda.set($any($event.target).value)"
+        (blur)="tocar()" /></mat-form-field
+    ><mat-form-field appearance="outline" subscriptSizing="dynamic"
+      ><mat-label>{{ etiqueta() }}</mat-label
+      ><mat-select
+        [disabled]="deshabilitado()"
+        [value]="valor()"
+        (selectionChange)="elegir($event.value)"
+        (closed)="tocar()"
+        ><mat-option value="">Selecciona una opción</mat-option>
+        @for (o of visibles(); track o.valor) {
+          <mat-option [value]="'' + o.valor">{{ o.nombre }}</mat-option>
+        }
+      </mat-select></mat-form-field
     >
-      <option value="">Selecciona una opción</option>
-      @for (o of visibles(); track o.valor) {
-        <option [value]="o.valor">{{ o.nombre }}</option>
-      }
-    </select></label
-  >`,
+  </div>`,
   styles: [
     `
-      label {
+      .selector {
         display: grid;
         gap: 8px;
         font-size: 12px;

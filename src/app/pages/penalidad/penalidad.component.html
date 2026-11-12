@@ -10,44 +10,50 @@
     <p class="message message-error" role="alert">{{ errorCarga() }}</p>
   }
 
-  <section class="content-card">
+  <mat-card appearance="outlined" class="content-card">
     <h2>Registrar penalidad</h2>
     <form #form="ngForm" (ngSubmit)="guardarPenalidad(form)">
       <div class="form-grid">
         <div class="form-group">
           <label for="tipoPenalidad">Tipo de penalidad</label>
-          <input
-            id="tipoPenalidad"
-            type="text"
-            name="tipo_penalidad"
-            maxlength="100"
-            [(ngModel)]="nuevaPenalidad.tipo_penalidad"
-            required
-          />
+          <mat-form-field appearance="outline" subscriptSizing="dynamic"
+            ><input
+              matInput
+              id="tipoPenalidad"
+              type="text"
+              name="tipo_penalidad"
+              maxlength="100"
+              [(ngModel)]="nuevaPenalidad.tipo_penalidad"
+              required
+          /></mat-form-field>
         </div>
 
         <div class="form-group">
           <label for="monto">Monto (S/)</label>
-          <input
-            id="monto"
-            type="number"
-            name="monto"
-            min="0"
-            step="0.01"
-            [(ngModel)]="nuevaPenalidad.monto"
-            required
-          />
+          <mat-form-field appearance="outline" subscriptSizing="dynamic"
+            ><input
+              matInput
+              id="monto"
+              type="number"
+              name="monto"
+              min="0"
+              step="0.01"
+              [(ngModel)]="nuevaPenalidad.monto"
+              required
+          /></mat-form-field>
         </div>
 
         <div class="form-group">
           <label for="fechaPenalidad">Fecha de penalidad</label>
-          <input
-            id="fechaPenalidad"
-            type="date"
-            name="fecha_penalidad"
-            [(ngModel)]="nuevaPenalidad.fecha_penalidad"
-            required
-          />
+          <mat-form-field appearance="outline" subscriptSizing="dynamic"
+            ><input
+              matInput
+              id="fechaPenalidad"
+              type="date"
+              name="fecha_penalidad"
+              [(ngModel)]="nuevaPenalidad.fecha_penalidad"
+              required
+          /></mat-form-field>
         </div>
 
         <div class="form-group">
@@ -62,18 +68,21 @@
 
         <div class="form-group form-group-full">
           <label for="descripcion">Descripción</label>
-          <textarea
-            id="descripcion"
-            name="descripcion"
-            rows="3"
-            maxlength="500"
-            [(ngModel)]="nuevaPenalidad.descripcion"
-            required
-          ></textarea>
+          <mat-form-field appearance="outline" subscriptSizing="dynamic">
+            <textarea
+              matInput
+              id="descripcion"
+              name="descripcion"
+              rows="3"
+              maxlength="500"
+              [(ngModel)]="nuevaPenalidad.descripcion"
+              required
+            ></textarea>
+          </mat-form-field>
         </div>
 
         <label class="checkbox-field">
-          <input type="checkbox" name="estado" [(ngModel)]="nuevaPenalidad.estado" />
+          <mat-checkbox name="estado" [(ngModel)]="nuevaPenalidad.estado"></mat-checkbox>
           Activa / pendiente
         </label>
       </div>
@@ -83,20 +92,27 @@
       }
 
       <div class="form-actions">
-        <button type="button" class="btn-secondary" (click)="limpiarFormulario(form)">
+        <button mat-button type="button" class="btn-secondary" (click)="limpiarFormulario(form)">
           Limpiar
         </button>
-        <button type="submit" class="btn-primary" [disabled]="form.invalid || guardando()">
+        <button
+          appSoloEscritura
+          mat-flat-button
+          type="submit"
+          class="btn-primary"
+          [disabled]="form.invalid || guardando()"
+        >
           {{ guardando() ? 'Guardando...' : 'Registrar penalidad' }}
         </button>
       </div>
     </form>
-  </section>
+  </mat-card>
 
-  <section class="content-card">
+  <mat-card appearance="outlined" class="content-card">
     <div class="table-header">
       <h2>Penalidades registradas</h2>
       <button
+        mat-button
         type="button"
         class="btn-secondary"
         (click)="cargarPenalidades()"
@@ -138,5 +154,5 @@
         </tbody>
       </table>
     </div>
-  </section>
+  </mat-card>
 </div>

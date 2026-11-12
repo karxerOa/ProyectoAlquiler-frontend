@@ -1,3 +1,5 @@
+import { UiService } from '../../shared/ui.service';
+import { MATERIAL } from '../../shared/material';
 import { Component, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Rol } from '../../model/rol';
@@ -6,11 +8,12 @@ import { RolService } from '../../services/rol.service';
 @Component({
   selector: 'app-rol',
   standalone: true,
-  imports: [ReactiveFormsModule],
+  imports: [...MATERIAL, ReactiveFormsModule],
   templateUrl: './rol.component.html',
   styleUrl: '../../shared/gestion.css',
 })
 export class RolComponent {
+  private readonly ui = inject(UiService);
   private readonly rolService = inject(RolService);
   private readonly fb = inject(FormBuilder);
 
@@ -93,13 +96,13 @@ export class RolComponent {
     });
   }
 
-  eliminar(rol: Rol): void {
-    if (!confirm(`¿Eliminar el rol "${rol.name}"?`)) return;
+  async eliminar(rol: Rol): Promise<void> {
+    if (!(await this.ui.confirm(`¿Eliminar el rol "${rol.name}"?`))) return;
     this.rolService.delete(rol.idRol).subscribe({
       next: () => this.cargar(),
       error: (error: unknown) => {
         console.error('Error al eliminar rol:', error);
-        alert('No se pudo eliminar el rol. Puede tener usuarios asociados.');
+        this.ui.notify('No se pudo eliminar el rol. Puede tener usuarios asociados.');
       },
     });
   }

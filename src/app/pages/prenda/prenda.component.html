@@ -2,38 +2,45 @@
   <header class="page-header">
     <div>
       <p class="eyebrow">COLECCIÓN / CATÁLOGO</p>
-      <h1>Encuentra la prenda perfecta</h1>
+      <h1>Cada prenda tiene su próxima historia.</h1>
       <p>Vestidos, trajes y disfraces para cada ocasión.</p>
     </div>
-    <button class="btn-primary" type="button" (click)="nuevo()">+ Nueva prenda</button>
+    <button appSoloEscritura mat-flat-button class="btn-primary" type="button" (click)="nuevo()">
+      + Nueva prenda
+    </button>
   </header>
   @if (errorCarga()) {
     <p class="error-box" role="alert">
-      {{ errorCarga() }} <button type="button" (click)="cargar()">Reintentar</button>
+      {{ errorCarga() }} <button mat-button type="button" (click)="cargar()">Reintentar</button>
     </p>
   }
   <label class="search-box" for="buscar-prenda"
     ><span>Buscar por nombre</span
-    ><input
-      id="buscar-prenda"
-      type="search"
-      placeholder="Busca un vestido, traje o disfraz…"
-      [value]="busqueda()"
-      (input)="buscar($any($event.target).value)"
-  /></label>
+    ><mat-form-field appearance="outline" subscriptSizing="dynamic"
+      ><input
+        matInput
+        id="buscar-prenda"
+        type="search"
+        placeholder="Busca un vestido, traje o disfraz…"
+        [value]="busqueda()"
+        (input)="buscar($any($event.target).value)" /></mat-form-field
+  ></label>
   <div class="catalog-layout">
-    <aside class="content-card filters" aria-label="Filtros de vestimenta">
+    <mat-card appearance="outlined" class="content-card filters" aria-label="Filtros de vestimenta">
       <h2>Refina tu búsqueda</h2>
       <label
-        >Categoría<select
-          [value]="filtros().categoria"
-          (change)="filtrar('categoria', $any($event.target).value)"
-        >
-          <option value="">Todas las categorías</option>
-          @for (categoria of categorias(); track categoria.id) {
-            <option [value]="categoria.id">{{ categoria.nombre }}</option>
-          }
-        </select></label
+        >Categoría<mat-form-field appearance="outline" subscriptSizing="dynamic"
+          ><select
+            matNativeControl
+            [value]="filtros().categoria"
+            (change)="filtrar('categoria', $any($event.target).value)"
+          >
+            <option value="">Todas las categorías</option>
+            @for (categoria of categorias(); track categoria.id) {
+              <option [value]="categoria.id">{{ categoria.nombre }}</option>
+            }
+          </select></mat-form-field
+        ></label
       >
       @for (campo of camposFiltro; track campo) {
         <label
@@ -45,40 +52,51 @@
                 : campo === 'talla'
                   ? 'Talla'
                   : 'Color'
-          }}<select [value]="filtros()[campo]" (change)="filtrar(campo, $any($event.target).value)">
-            <option value="">Todos</option>
-            @for (opcion of opciones(campo); track opcion) {
-              <option [value]="opcion">{{ opcion }}</option>
-            }
-          </select></label
+          }}<mat-form-field appearance="outline" subscriptSizing="dynamic"
+            ><select
+              matNativeControl
+              [value]="filtros()[campo]"
+              (change)="filtrar(campo, $any($event.target).value)"
+            >
+              <option value="">Todos</option>
+              @for (opcion of opciones(campo); track opcion) {
+                <option [value]="opcion">{{ opcion }}</option>
+              }
+            </select></mat-form-field
+          ></label
         >
       }
       <fieldset>
         <legend>Precio de alquiler (S/)</legend>
         <div class="price-range">
           <label
-            >Desde<input
-              type="number"
-              min="0"
-              [value]="filtros().minimo ?? ''"
-              (input)="filtrar('minimo', $any($event.target).value)" /></label
+            >Desde<mat-form-field appearance="outline" subscriptSizing="dynamic"
+              ><input
+                matInput
+                type="number"
+                min="0"
+                [value]="filtros().minimo ?? ''"
+                (input)="filtrar('minimo', $any($event.target).value)" /></mat-form-field></label
           ><label
-            >Hasta<input
-              type="number"
-              min="0"
-              [value]="filtros().maximo ?? ''"
-              (input)="filtrar('maximo', $any($event.target).value)"
-          /></label>
+            >Hasta<mat-form-field appearance="outline" subscriptSizing="dynamic"
+              ><input
+                matInput
+                type="number"
+                min="0"
+                [value]="filtros().maximo ?? ''"
+                (input)="filtrar('maximo', $any($event.target).value)" /></mat-form-field
+          ></label>
         </div>
       </fieldset>
-      <button class="btn-secondary" type="button" (click)="limpiar()">Limpiar filtros</button
+      <button mat-button class="btn-secondary" type="button" (click)="limpiar()">
+        Limpiar filtros</button
       ><small>El género se muestra solo cuando está informado en el catálogo.</small>
-    </aside>
+    </mat-card>
     <section aria-label="Resultados del catálogo">
       <p class="result-count" aria-live="polite">{{ prendasFiltradas().length }} prendas activas</p>
       <div class="garment-grid">
         @for (prenda of prendasFiltradas(); track prenda.idPrenda) {
-          <article class="content-card garment-card">
+          <mat-card appearance="outlined" class="content-card garment-card">
             <div class="garment-visual">
               <svg viewBox="0 0 100 100" aria-hidden="true">
                 <path d="M35 15 15 30l10 18 12-7v43h26V41l12 7 10-18-20-15q-15 13-30 0Z" /></svg
@@ -93,30 +111,45 @@
               prenda.precioAlquiler | currency: 'PEN' : 'S/ ' : '1.2-2'
             }}</strong>
             <div class="acciones">
-              <button class="btn-action" type="button" (click)="editar(prenda)">Ver / editar</button
-              ><button class="btn-action btn-danger" type="button" (click)="eliminar(prenda)">
+              <button
+                appSoloEscritura
+                mat-button
+                class="btn-action"
+                type="button"
+                (click)="editar(prenda)"
+              >
+                Ver / editar</button
+              ><button
+                appSoloEscritura
+                mat-button
+                class="btn-action btn-danger"
+                type="button"
+                (click)="eliminar(prenda)"
+              >
                 Eliminar
               </button>
             </div>
             @if (disponible(prenda)) {
-              <a class="link" routerLink="/alquileres/nuevo">Registrar alquiler →</a>
+              <a appSoloEscritura class="link" routerLink="/alquileres/nuevo"
+                >Registrar alquiler →</a
+              >
             }
-          </article>
+          </mat-card>
         } @empty {
-          <div class="content-card empty-message">
+          <mat-card appearance="outlined" class="content-card empty-message">
             <h2>No hay prendas que mostrar</h2>
             <p>Prueba otros filtros o registra una nueva prenda.</p>
-            <button class="btn-secondary" type="button" (click)="limpiar()">
+            <button mat-button class="btn-secondary" type="button" (click)="limpiar()">
               Restablecer búsqueda
             </button>
-          </div>
+          </mat-card>
         }
       </div>
     </section>
   </div>
 </div>
 @if (modalAbierto()) {
-  <div class="modal-overlay" (click)="modalAbierto.set(false)">
+  <ng-template appModal (closed)="modalAbierto.set(false)">
     <div
       class="modal"
       role="dialog"
@@ -130,59 +163,81 @@
         <div class="form-grid">
           <div class="form-group">
             <label for="nombre">Nombre</label
-            ><input id="nombre" type="text" formControlName="nombre" />
+            ><mat-form-field appearance="outline" subscriptSizing="dynamic"
+              ><input matInput id="nombre" type="text" formControlName="nombre"
+            /></mat-form-field>
             @if (campoInvalido('nombre')) {
               <small class="error">Campo obligatorio.</small>
             }
           </div>
           <div class="form-group">
-            <label for="talla">Talla</label><input id="talla" type="text" formControlName="talla" />
+            <label for="talla">Talla</label
+            ><mat-form-field appearance="outline" subscriptSizing="dynamic"
+              ><input matInput id="talla" type="text" formControlName="talla"
+            /></mat-form-field>
           </div>
           <div class="form-group">
-            <label for="color">Color</label><input id="color" type="text" formControlName="color" />
+            <label for="color">Color</label
+            ><mat-form-field appearance="outline" subscriptSizing="dynamic"
+              ><input matInput id="color" type="text" formControlName="color"
+            /></mat-form-field>
           </div>
           <div class="form-group">
             <label for="precioAlquiler">Precio de alquiler (S/)</label
-            ><input
-              id="precioAlquiler"
-              type="number"
-              min="0"
-              step="0.01"
-              formControlName="precioAlquiler"
-            />
+            ><mat-form-field appearance="outline" subscriptSizing="dynamic"
+              ><input
+                matInput
+                id="precioAlquiler"
+                type="number"
+                min="0"
+                step="0.01"
+                formControlName="precioAlquiler"
+            /></mat-form-field>
           </div>
           <div class="form-group">
             <label for="estado">Estado</label
-            ><input id="estado" type="text" formControlName="estado" />
+            ><mat-form-field appearance="outline" subscriptSizing="dynamic"
+              ><input matInput id="estado" type="text" formControlName="estado"
+            /></mat-form-field>
           </div>
           <div class="form-group">
             <label for="categoriaId">Categoría</label
-            ><select id="categoriaId" formControlName="categoriaId">
-              <option value="">Selecciona una categoría</option>
-              @for (c of categoriasRegistro(); track c.idCategoria) {
-                <option [value]="c.idCategoria">{{ c.nombre }}</option>
-              }
-            </select>
+            ><mat-form-field appearance="outline" subscriptSizing="dynamic"
+              ><select matNativeControl id="categoriaId" formControlName="categoriaId">
+                <option value="">Selecciona una categoría</option>
+                @for (c of categoriasRegistro(); track c.idCategoria) {
+                  <option [value]="c.idCategoria">{{ c.nombre }}</option>
+                }
+              </select></mat-form-field
+            >
             @if (campoInvalido('categoriaId')) {
               <small class="error">Selecciona una categoría.</small>
             }
           </div>
           <div class="form-group full">
             <label for="descripcion">Descripción</label
-            ><textarea id="descripcion" rows="3" formControlName="descripcion"></textarea>
+            ><mat-form-field appearance="outline" subscriptSizing="dynamic">
+              <textarea matInput id="descripcion" rows="3" formControlName="descripcion"></textarea>
+            </mat-form-field>
           </div>
         </div>
         @if (mensajeError()) {
           <p class="error-box">{{ mensajeError() }}</p>
         }
         <div class="modal-actions">
-          <button type="button" class="btn-secondary" (click)="modalAbierto.set(false)">
+          <button mat-button type="button" class="btn-secondary" (click)="modalAbierto.set(false)">
             Cancelar</button
-          ><button type="submit" class="btn-primary" [disabled]="guardando()">
+          ><button
+            appSoloEscritura
+            mat-flat-button
+            type="submit"
+            class="btn-primary"
+            [disabled]="guardando()"
+          >
             {{ guardando() ? 'Guardando...' : 'Guardar' }}
           </button>
         </div>
       </form>
     </div>
-  </div>
+  </ng-template>
 }
