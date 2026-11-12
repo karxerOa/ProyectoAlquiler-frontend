@@ -103,6 +103,12 @@
   stroke: #71877a;
   stroke-width: 2;
 }
+.garment-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 8px;
+}
 .status {
   background: white;
   border-radius: 20px;

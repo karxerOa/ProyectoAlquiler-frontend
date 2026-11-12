@@ -98,9 +98,13 @@
         @for (prenda of prendasFiltradas(); track prenda.idPrenda) {
           <mat-card appearance="outlined" class="content-card garment-card">
             <div class="garment-visual">
-              <svg viewBox="0 0 100 100" aria-hidden="true">
-                <path d="M35 15 15 30l10 18 12-7v43h26V41l12 7 10-18-20-15q-15 13-30 0Z" /></svg
-              ><span class="status">{{ prenda.estado }}</span>
+              <img
+                [src]="'images/prendas/prenda-' + prenda.idPrenda + '.jpg'"
+                [alt]="prenda.nombre"
+                (error)="$any($event.target).src='images/prendas/default.jpg'"
+                class="garment-img"
+              />
+              <span class="status">{{ prenda.estado }}</span>
             </div>
             <p class="eyebrow">{{ prenda.categoriaNombre || ref.categoria(prenda.categoriaId) }}</p>
             <h2>{{ prenda.nombre }}</h2>
