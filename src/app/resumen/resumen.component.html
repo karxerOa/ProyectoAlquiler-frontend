@@ -24,7 +24,7 @@
         ><span
           ><strong>Nuevo alquiler</strong
           ><small>De la elección a la entrega, en minutos.</small></span
-        ><span>→</span></a
+        ><span class="arrow">→</span></a
       >
     }
     <a mat-button routerLink="/devoluciones" class="quick"
@@ -32,11 +32,11 @@
       ><span
         ><strong>Registrar devolución</strong
         ><small>Recibe, verifica y deja todo listo.</small></span
-      ><span>→</span></a
+      ><span class="arrow">→</span></a
     ><a mat-button routerLink="/reportes" class="quick"
       ><mat-icon fontSet="material-symbols-outlined">bar_chart</mat-icon
       ><span><strong>Resumen del día</strong><small>Tu operación, de un vistazo.</small></span
-      ><span>→</span></a
+      ><span class="arrow">→</span></a
     >
   </section>
   <section class="metrics" aria-label="Indicadores operativos">
@@ -119,19 +119,21 @@
         ><mat-icon fontSet="material-symbols-outlined">schedule</mat-icon
         ><span
           ><strong>{{ agenda().vencidos.length }} alquileres vencidos</strong
-          ><small>Coordina la devolución con tus clientes.</small><em>Ver devoluciones →</em></span
+          ><small>Coordina la devolución con tus clientes.</small
+          ><em class="arrow">Ver devoluciones →</em></span
         ></a
       ><a mat-button routerLink="/pagos"
         ><mat-icon fontSet="material-symbols-outlined">payments</mat-icon
         ><span
           ><strong>Control de pagos</strong><small>Consulta los cobros de tus alquileres.</small
-          ><em>Revisar pagos →</em></span
+          ><em class="arrow">Revisar pagos →</em></span
         ></a
       ><a mat-button routerLink="/mantenimientos"
         ><mat-icon fontSet="material-symbols-outlined">build</mat-icon
         ><span
           ><strong>{{ mantenimiento() }} prendas en mantenimiento</strong
-          ><small>Revisa su estado antes de alquilarlas.</small><em>Ver mantenimientos →</em></span
+          ><small>Revisa su estado antes de alquilarlas.</small
+          ><em class="arrow">Ver mantenimientos →</em></span
         ></a
       ></mat-card
     >
