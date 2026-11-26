@@ -21,7 +21,11 @@ export class LayoutComponent {
   readonly query = signal('');
   readonly settings = signal(false);
   readonly current = signal(this.router.url);
-  readonly groups = [
+  readonly groups = computed(() => this.auth.canWrite() ? this.staffGroups : [{
+    label: 'MI CUENTA',
+    items: [{ label: 'Mis prendas alquiladas', path: '/mis-prendas', icon: 'checkroom' }],
+  }]);
+  private readonly staffGroups = [
     {
       label: 'PRINCIPAL',
       items: [
@@ -57,10 +61,10 @@ export class LayoutComponent {
       ],
     },
   ];
-  readonly links = this.groups.flatMap((g) => g.items);
+  readonly links = computed(() => this.groups().flatMap((g) => g.items));
   readonly results = computed(() =>
     this.query().trim()
-      ? this.links.filter(
+      ? this.links().filter(
           (x) => this.visible(x.path) && x.label.toLowerCase().includes(this.query().toLowerCase()),
         )
       : [],
@@ -68,13 +72,13 @@ export class LayoutComponent {
   readonly title = computed(() =>
     this.current().startsWith('/alquileres/nuevo')
       ? 'Nuevo alquiler'
-      : (this.links.find((x) => this.current().split('?')[0] === x.path)?.label ?? 'Gestión'),
+      : (this.links().find((x) => this.current().split('?')[0] === x.path)?.label ?? 'Gestión'),
   );
   visible(path: string): boolean {
     return !['/usuarios', '/roles'].includes(path) || this.auth.isAdmin();
   }
   constructor() {
-    this.ref.cargar();
+    if (this.auth.canWrite()) this.ref.cargar();
     this.router.events
       .pipe(
         filter((e) => e instanceof NavigationEnd),

@@ -6,6 +6,9 @@ export const authGuard: CanActivateChildFn = (route, state) => {
   const router = inject(Router);
   if (!auth.token())
     return router.createUrlTree(['/login'], { queryParams: { returnUrl: state.url } });
+  const personal = route.routeConfig?.path === 'mis-prendas';
+  if (!auth.canWrite() && !personal) return router.createUrlTree(['/mis-prendas']);
+  if (auth.canWrite() && personal) return router.createUrlTree(['/resumen']);
   if (route.data['admin'] && !auth.isAdmin()) return router.createUrlTree(['/resumen']);
   return true;
 };

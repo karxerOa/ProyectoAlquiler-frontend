@@ -11,6 +11,10 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/layout/layout.component').then((m) => m.LayoutComponent),
     canActivateChild: [authGuard],
     children: [
+      {
+        path: 'mis-prendas',
+        loadComponent: () => import('./pages/cliente/mis-prendas.component').then(m => m.MisPrendasComponent),
+      },
       { path: '', pathMatch: 'full', redirectTo: 'resumen' },
       {
         path: 'resumen',

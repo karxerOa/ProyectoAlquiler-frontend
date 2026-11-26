@@ -7,7 +7,7 @@
     ></button>
   }
   <aside class="sidebar" [class.open]="mobile()">
-    <a class="brand" routerLink="/resumen"
+    <a class="brand" [routerLink]="auth.canWrite() ? '/resumen' : '/mis-prendas'"
       ><span class="brand-mark"
         ><mat-icon fontSet="material-symbols-outlined">checkroom</mat-icon></span
       ><span
@@ -21,7 +21,7 @@
       </div></mat-card
     >
     <nav aria-label="Navegación principal">
-      @for (group of groups; track group.label) {
+      @for (group of groups(); track group.label) {
         <p class="nav-heading">{{ group.label }}</p>
         @for (item of group.items; track item.path) {
           @if (visible(item.path)) {
@@ -55,11 +55,12 @@
         <mat-icon fontSet="material-symbols-outlined">menu</mat-icon>
       </button>
       <nav class="breadcrumb" aria-label="Ruta">
-        <span>Espacio de trabajo</span
+        <span>{{ auth.isAdmin() ? 'Administración' : auth.canWrite() ? 'Espacio del empleado' : 'Mi cuenta' }}</span
         ><mat-icon fontSet="material-symbols-outlined">chevron_right</mat-icon
         ><strong>{{ title() }}</strong>
       </nav>
       <div class="topbar-right">
+        @if (auth.canWrite()) {
         <div class="global-search">
           <mat-form-field appearance="outline" subscriptSizing="dynamic"
             ><mat-icon matPrefix fontSet="material-symbols-outlined">search</mat-icon
@@ -87,12 +88,13 @@
           ><a mat-menu-item routerLink="/devoluciones">Revisar devoluciones pendientes</a
           ><a mat-menu-item routerLink="/pagos">Consultar pagos registrados</a></mat-menu
         >
+        }
         <button mat-button [matMenuTriggerFor]="account" class="profile">
           <span class="avatar">{{ auth.username().slice(0, 2) }}</span
           ><span class="profile-label"
             ><strong>{{ auth.username() }}</strong
             ><small>{{
-              auth.isAdmin() ? 'Administrador' : auth.canWrite() ? 'Empleado' : 'Usuario'
+              auth.isAdmin() ? 'Administrador' : auth.canWrite() ? 'Empleado' : 'Cliente'
             }}</small></span
           ><mat-icon fontSet="material-symbols-outlined">expand_more</mat-icon></button
         ><mat-menu #account="matMenu"

@@ -5,6 +5,7 @@ import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angu
 import { RolService } from '../../services/rol.service';
 import { Usuario } from '../../model/usuario';
 import { UsuarioService } from '../../services/usuario.service';
+import { ReferenciasService } from '../../services/referencias.service';
 import { Rol } from '../../model/rol';
 
 @Component({
@@ -20,6 +21,12 @@ export class UsuarioComponent {
   private readonly rolService = inject(RolService);
   private readonly fb = inject(FormBuilder);
 
+  readonly ref = inject(ReferenciasService);
+  esRolCliente(): boolean {
+    const rol = this.roles().find(r => r.idRol === Number(this.form.controls.rolId.value));
+    return rol?.name.replace(/^ROLE_/, '') === 'USER';
+  }
+
   busqueda = signal('');
   readonly usuarios = this.usuarioService.$usuariosChange;
   readonly roles = this.rolService.$rolesChange;
@@ -33,6 +40,7 @@ export class UsuarioComponent {
     username: ['', [Validators.required, Validators.maxLength(20)]],
     password: ['', [Validators.minLength(8)]],
     enabled: [true],
+    clienteId: [''],
     rolId: ['', [Validators.required, Validators.min(1)]],
   });
 
@@ -93,6 +101,7 @@ export class UsuarioComponent {
       password: '',
       enabled: usuario.enabled,
       rolId: String(usuario.rolId),
+      clienteId: usuario.clienteId ? String(usuario.clienteId) : '',
     });
     this.form.controls.password.clearValidators();
     this.form.controls.password.setValidators([Validators.minLength(8)]);
@@ -107,10 +116,11 @@ export class UsuarioComponent {
       return;
     }
     const value = this.form.getRawValue();
-    const data: { username: string; password?: string; enabled: boolean; rolId: number } = {
+    const data: { username: string; password?: string; enabled: boolean; rolId: number; clienteId: number | null } = {
       username: value.username,
       enabled: value.enabled,
       rolId: Number(value.rolId),
+      clienteId: this.esRolCliente() && value.clienteId ? Number(value.clienteId) : null,
     };
     if (value.password) data.password = value.password;
 
