@@ -4,6 +4,8 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { filter } from 'rxjs';
 import { ReferenciasService } from '../../services/referencias.service';
 import { AuthService } from '../../services/auth.service';
+import { EmpleadoService } from '../../services/empleado.service';
+import { HttpErrorResponse } from '@angular/common/http';
 import { MATERIAL } from '../../shared/material';
 @Component({
   imports: [...MATERIAL, RouterLink, RouterLinkActive, RouterOutlet],
@@ -16,16 +18,27 @@ import { MATERIAL } from '../../shared/material';
 export class LayoutComponent {
   readonly ref = inject(ReferenciasService);
   readonly auth = inject(AuthService);
+  private readonly empleadoService = inject(EmpleadoService);
   private readonly router = inject(Router);
   readonly mobile = signal(false);
   readonly query = signal('');
   readonly settings = signal(false);
+  readonly empleadoNombre = signal('');
+  readonly cargandoEmpleado = signal(false);
+  readonly errorEmpleado = signal('');
   readonly current = signal(this.router.url);
-  readonly groups = computed(() => this.auth.canWrite() ? this.staffGroups : [{
-    label: 'MI CUENTA',
-    items: [{ label: 'Mis prendas alquiladas', path: '/mis-prendas', icon: 'checkroom' }],
-  }]);
-  private readonly staffGroups = [
+  private readonly empleadoPaths = new Set([
+    '/resumen',
+    '/alquileres',
+    '/alquileres/nuevo',
+    '/clientes',
+    '/prendas',
+    '/devoluciones',
+    '/pagos',
+    '/penalidades',
+    '/mantenimientos',
+  ]);
+  readonly groups = [
     {
       label: 'PRINCIPAL',
       items: [
@@ -61,7 +74,7 @@ export class LayoutComponent {
       ],
     },
   ];
-  readonly links = computed(() => this.groups().flatMap((g) => g.items));
+  readonly links = computed(() => this.groups.flatMap((g) => g.items));
   readonly results = computed(() =>
     this.query().trim()
       ? this.links().filter(
@@ -75,7 +88,32 @@ export class LayoutComponent {
       : (this.links().find((x) => this.current().split('?')[0] === x.path)?.label ?? 'Gestión'),
   );
   visible(path: string): boolean {
-    return !['/usuarios', '/roles'].includes(path) || this.auth.isAdmin();
+    return this.auth.isAdmin() || this.empleadoPaths.has(path);
+  }
+  hasVisibleItems(items: { path: string }[]): boolean {
+    return items.some((item) => this.visible(item.path));
+  }
+  abrirConfiguracion(): void {
+    this.settings.set(true);
+    this.empleadoNombre.set('');
+    this.errorEmpleado.set('');
+    if (this.auth.isAdmin()) return;
+
+    this.cargandoEmpleado.set(true);
+    this.empleadoService.findMe().subscribe({
+      next: (empleado) => {
+        this.empleadoNombre.set(`${empleado.nombres} ${empleado.apellidos}`.trim());
+        this.cargandoEmpleado.set(false);
+      },
+      error: (error: HttpErrorResponse) => {
+        this.errorEmpleado.set(
+          error.status === 404
+            ? 'No se encontró una ficha de empleado vinculada a esta cuenta.'
+            : 'No se pudo cargar el nombre del empleado. Intenta abrir esta sección nuevamente.',
+        );
+        this.cargandoEmpleado.set(false);
+      },
+    });
   }
   constructor() {
     if (this.auth.canWrite()) this.ref.cargar();

@@ -7,7 +7,7 @@
     ></button>
   }
   <aside class="sidebar" [class.open]="mobile()">
-    <a class="brand" [routerLink]="auth.canWrite() ? '/resumen' : '/mis-prendas'"
+    <a class="brand" routerLink="/resumen"
       ><span class="brand-mark"
         ><mat-icon fontSet="material-symbols-outlined">checkroom</mat-icon></span
       ><span
@@ -21,20 +21,22 @@
       </div></mat-card
     >
     <nav aria-label="Navegación principal">
-      @for (group of groups(); track group.label) {
-        <p class="nav-heading">{{ group.label }}</p>
-        @for (item of group.items; track item.path) {
-          @if (visible(item.path)) {
-            <a
-              mat-button
-              class="nav-link"
-              [routerLink]="item.path"
-              routerLinkActive="active"
-              [routerLinkActiveOptions]="{ exact: true }"
-              ariaCurrentWhenActive="page"
-              ><mat-icon fontSet="material-symbols-outlined">{{ item.icon }}</mat-icon
-              >{{ item.label }}</a
-            >
+      @for (group of groups; track group.label) {
+        @if (hasVisibleItems(group.items)) {
+          <p class="nav-heading">{{ group.label }}</p>
+          @for (item of group.items; track item.path) {
+            @if (visible(item.path)) {
+              <a
+                mat-button
+                class="nav-link"
+                [routerLink]="item.path"
+                routerLinkActive="active"
+                [routerLinkActiveOptions]="{ exact: true }"
+                ariaCurrentWhenActive="page"
+                ><mat-icon fontSet="material-symbols-outlined">{{ item.icon }}</mat-icon
+                >{{ item.label }}</a
+              >
+            }
           }
         }
       }
@@ -55,7 +57,7 @@
         <mat-icon fontSet="material-symbols-outlined">menu</mat-icon>
       </button>
       <nav class="breadcrumb" aria-label="Ruta">
-        <span>{{ auth.isAdmin() ? 'Administración' : auth.canWrite() ? 'Espacio del empleado' : 'Mi cuenta' }}</span
+        <span>{{ auth.isAdmin() ? 'Administración' : 'Espacio del empleado' }}</span
         ><mat-icon fontSet="material-symbols-outlined">chevron_right</mat-icon
         ><strong>{{ title() }}</strong>
       </nav>
@@ -94,11 +96,11 @@
           ><span class="profile-label"
             ><strong>{{ auth.username() }}</strong
             ><small>{{
-              auth.isAdmin() ? 'Administrador' : auth.canWrite() ? 'Empleado' : 'Cliente'
+              auth.isAdmin() ? 'Administrador' : 'Empleado'
             }}</small></span
           ><mat-icon fontSet="material-symbols-outlined">expand_more</mat-icon></button
         ><mat-menu #account="matMenu"
-          ><button mat-menu-item (click)="settings.set(true)">Mi sesión</button
+          ><button mat-menu-item (click)="abrirConfiguracion()">Mi sesión</button
           ><button mat-menu-item (click)="auth.logout()">Cerrar sesión</button></mat-menu
         >
       </div>
@@ -117,15 +119,29 @@
 @if (settings()) {
   <ng-template appModal (closed)="settings.set(false)"
     ><div class="modal">
-      <h2>Configuración de la sesión</h2>
+      <h2>Mi sesión</h2>
+      @if (!auth.isAdmin()) {
+        <p>
+          Empleado:
+          <strong>
+            @if (cargandoEmpleado()) {
+              Cargando...
+            } @else {
+              {{ empleadoNombre() || 'Nombre no disponible' }}
+            }
+          </strong>
+        </p>
+      }
       <p>
         Usuario: <strong>{{ auth.username() }}</strong>
       </p>
-      <p>Los permisos se administran desde Usuarios y Roles.</p>
-      <p>Moneda: soles (PEN) · Zona horaria: Lima</p>
+      <p>¡Gracias por tu esfuerzo! Cada buena atención hace la diferencia. ¡Sigue así!</p>
+      @if (errorEmpleado()) {
+        <p class="error-box" role="alert">{{ errorEmpleado() }}</p>
+      }
       <div class="modal-actions">
         <button mat-button (click)="auth.logout()">Cerrar sesión</button
-        ><button mat-flat-button (click)="settings.set(false)">Listo</button>
+        ><button mat-flat-button (click)="settings.set(false)">Salir</button>
       </div>
     </div></ng-template
   >

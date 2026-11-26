@@ -86,11 +86,11 @@
         }
       </fieldset>
       <button mat-flat-button class="btn-primary" [disabled]="guardando() || form.invalid">
-        Registrar recepción
+        Confirmar devolución
       </button>
     </form>
   } @else if (!devoluciones().length) {
-    <p>La recepción se registra cuando el alquiler está en curso y tiene prendas vinculadas.</p>
+    <p>{{ motivoNoDisponible() }}</p>
   }
   @if (error()) {
     <p class="error-box" role="alert">{{ error() }}</p>

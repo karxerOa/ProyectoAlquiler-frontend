@@ -2,6 +2,7 @@ import { MATERIAL } from '../../shared/material';
 import { ReferenciasService } from '../../services/referencias.service';
 import { SelectorReferenciaComponent } from '../../shared/selector-referencia.component';
 import { Component, computed, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Pago } from '../../model/pago';
 import { PagoService } from '../../services/pago.service';
@@ -44,6 +45,12 @@ export class PagoComponent {
 
   constructor() {
     this.cargar();
+    this.form.controls.alquilerId.valueChanges
+      .pipe(takeUntilDestroyed())
+      .subscribe((alquilerId) => {
+        const alquiler = this.ref.alquileres().find((a) => a.idAlquiler === Number(alquilerId));
+        if (alquiler) this.form.controls.monto.setValue(alquiler.total);
+      });
   }
 
   cargar(): void {

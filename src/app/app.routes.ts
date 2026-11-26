@@ -11,10 +11,6 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/layout/layout.component').then((m) => m.LayoutComponent),
     canActivateChild: [authGuard],
     children: [
-      {
-        path: 'mis-prendas',
-        loadComponent: () => import('./pages/cliente/mis-prendas.component').then(m => m.MisPrendasComponent),
-      },
       { path: '', pathMatch: 'full', redirectTo: 'resumen' },
       {
         path: 'resumen',
@@ -22,11 +18,13 @@ export const routes: Routes = [
       },
       {
         path: 'reportes',
+        data: { admin: true },
         loadComponent: () =>
           import('./pages/pago/reportes.component').then((m) => m.ReportesComponent),
       },
       {
         path: 'empleados',
+        data: { admin: true },
         loadComponent: () =>
           import('./pages/empleado/empleado.component').then((m) => m.EmpleadoComponent),
       },
@@ -49,11 +47,13 @@ export const routes: Routes = [
       },
       {
         path: 'categorias',
+        data: { admin: true },
         loadComponent: () =>
           import('./pages/categoria/categoria.component').then((m) => m.CategoriaComponent),
       },
       {
         path: 'producciones',
+        data: { admin: true },
         loadComponent: () =>
           import('./pages/produccion/produccion.component').then((m) => m.ProduccionComponent),
       },

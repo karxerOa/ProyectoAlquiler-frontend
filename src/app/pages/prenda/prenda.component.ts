@@ -1,3 +1,4 @@
+import { AuthService } from '../../services/auth.service';
 import { UiService } from '../../shared/ui.service';
 import { MATERIAL } from '../../shared/material';
 import { prendaActiva } from '../../model/flujo';
@@ -15,7 +16,7 @@ import {
 } from '../../model/catalogo';
 import { CategoriaService } from '../../services/categoria.service';
 import { Categoria } from '../../model/categoria';
-import { Prenda } from '../../model/prenda';
+import { Prenda, PrendaData } from '../../model/prenda';
 import { PrendaService } from '../../services/prenda.service';
 
 @Component({
@@ -26,6 +27,38 @@ import { PrendaService } from '../../services/prenda.service';
   styleUrls: ['../../shared/gestion.css', './prenda.component.css'],
 })
 export class PrendaComponent {
+  readonly isAdmin = inject(AuthService).isAdmin;
+  private archivo?: File;
+
+  seleccionarImagen(input: HTMLInputElement): void {
+    this.archivo = input.files?.[0];
+    input.setCustomValidity('');
+    if (this.archivo && !this.imagenValida(this.archivo)) {
+      input.setCustomValidity('Selecciona una imagen JPG o PNG válida de hasta 1 MiB.');
+      input.reportValidity();
+    } else {
+      this.mensajeError.set('');
+    }
+  }
+
+  private imagenValida(archivo: File): boolean {
+    return archivo.size <= 1048576 && ['image/jpeg', 'image/png'].includes(archivo.type);
+  }
+
+  imagenObligatoria(): boolean {
+    const id = this.editandoId();
+    return id === null || !this.prendas().find((prenda) => prenda.idPrenda === id)?.imagen;
+  }
+
+  private leerImagen(archivo: File): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const lector = new FileReader();
+      lector.onload = () => resolve(String(lector.result));
+      lector.onerror = () => reject(lector.error);
+      lector.readAsDataURL(archivo);
+    });
+  }
+
   private readonly ui = inject(UiService);
   readonly ref = inject(ReferenciasService);
   readonly camposFiltro = ['talla', 'color', 'estado', 'genero'] as const;
@@ -129,6 +162,7 @@ export class PrendaComponent {
   }
 
   nuevo(): void {
+    this.archivo = undefined;
     this.editandoId.set(null);
     this.form.reset({
       nombre: '',
@@ -144,6 +178,7 @@ export class PrendaComponent {
   }
 
   editar(prenda: Prenda): void {
+    this.archivo = undefined;
     this.editandoId.set(prenda.idPrenda);
     this.form.setValue({
       nombre: prenda.nombre,
@@ -158,16 +193,39 @@ export class PrendaComponent {
     this.modalAbierto.set(true);
   }
 
-  guardar(): void {
+  async guardar(): Promise<void> {
+    if (this.guardando()) return;
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;
     }
+    if (this.imagenObligatoria() && !this.archivo) {
+      this.mensajeError.set(
+        'La foto es obligatoria. Selecciona una imagen JPG o PNG de hasta 1 MiB.',
+      );
+      return;
+    }
+    if (this.archivo && !this.imagenValida(this.archivo)) {
+      this.mensajeError.set('Selecciona una imagen JPG o PNG válida de hasta 1 MiB.');
+      return;
+    }
     const value = this.form.getRawValue();
-    const data = { ...value, categoriaId: Number(value.categoriaId) };
+    const data: PrendaData = { ...value, categoriaId: Number(value.categoriaId) };
     const id = this.editandoId();
     this.guardando.set(true);
     this.mensajeError.set('');
+    if (this.isAdmin() && this.archivo) {
+      try {
+        data.imagen = await this.leerImagen(this.archivo);
+      } catch {
+        this.guardando.set(false);
+        this.mensajeError.set('No se pudo leer la foto. Selecciona el archivo de nuevo.');
+        return;
+      }
+    } else if (this.isAdmin() && id !== null) {
+      const imagenActual = this.prendas().find((prenda) => prenda.idPrenda === id)?.imagen;
+      if (imagenActual) data.imagen = imagenActual;
+    }
     const request =
       id === null ? this.prendaService.create(data) : this.prendaService.update(id, data);
     request.subscribe({
@@ -179,7 +237,11 @@ export class PrendaComponent {
       error: (error: unknown) => {
         console.error('Error al guardar prenda:', error);
         this.guardando.set(false);
-        this.mensajeError.set('No se pudo guardar la prenda. Revisa la categoría seleccionada.');
+        this.mensajeError.set(
+          this.archivo
+            ? 'No se pudo guardar. Revisa que la foto sea JPG o PNG y de hasta 1 MiB.'
+            : 'No se pudo guardar la prenda. Revisa la categoría seleccionada.',
+        );
       },
     });
   }

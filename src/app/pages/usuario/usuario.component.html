@@ -114,7 +114,7 @@
                 formControlName="password"
             /></mat-form-field>
             @if (campoInvalido('password')) {
-              <small class="error">La contraseña debe tener al menos 6 caracteres.</small>
+              <small class="error">La contraseña debe tener al menos 8 caracteres.</small>
             }
             @if (editandoId() !== null) {
               <small>Déjala vacía para conservar la contraseña actual.</small>
@@ -126,7 +126,11 @@
               ><select matNativeControl id="rolId" formControlName="rolId">
                 <option value="">Selecciona un rol</option>
                 @for (rol of roles(); track rol.idRol) {
-                  <option [value]="rol.idRol">{{ rol.name }}</option>
+                  <option [value]="rol.idRol">{{
+                    normalizarNombreRol(rol.name) === 'ADMIN'
+                      ? 'Administrador'
+                      : rol.name
+                  }}</option>
                 }
               </select></mat-form-field
             >
@@ -134,20 +138,6 @@
               <small class="error">Selecciona un rol válido.</small>
             }
           </div>
-          @if (esRolCliente()) {
-            <div class="form-group full">
-              <label for="clienteId">Ficha del cliente</label>
-              <mat-form-field appearance="outline" subscriptSizing="dynamic">
-                <select matNativeControl id="clienteId" formControlName="clienteId">
-                  <option value="">Sin vincular</option>
-                  @for (c of ref.clientes(); track c.idCliente) {
-                    <option [value]="c.idCliente">{{ c.apellidos }}, {{ c.nombre }} · {{ c.dni }}</option>
-                  }
-                </select>
-              </mat-form-field>
-              <small>Esta cuenta podrá consultar las prendas alquiladas por el cliente seleccionado.</small>
-            </div>
-          }
           <div class="form-group">
             <label for="enabled">Estado</label
             ><mat-form-field appearance="outline" subscriptSizing="dynamic"

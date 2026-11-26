@@ -5,8 +5,8 @@ import { environment } from '../../environments/environment';
 
 type AlquilerData = Omit<
   Alquiler,
-  'idAlquiler' | 'nombreEmpleado' | 'nombreCliente' | 'apellidoCliente'
->;
+  'idAlquiler' | 'empleadoId' | 'nombreEmpleado' | 'nombreCliente' | 'apellidoCliente'
+> & { empleadoId?: number };
 
 @Service()
 export class AlquilerService {

@@ -5,9 +5,11 @@
       <h1>Cada prenda tiene su próxima historia.</h1>
       <p>Vestidos, trajes y disfraces para cada ocasión.</p>
     </div>
-    <button appSoloEscritura mat-flat-button class="btn-primary" type="button" (click)="nuevo()">
-      + Nueva prenda
-    </button>
+    @if (isAdmin()) {
+      <button appSoloEscritura mat-flat-button class="btn-primary" type="button" (click)="nuevo()">
+        + Nueva prenda
+      </button>
+    }
   </header>
   @if (errorCarga()) {
     <p class="error-box" role="alert">
@@ -98,9 +100,13 @@
         @for (prenda of prendasFiltradas(); track prenda.idPrenda) {
           <mat-card appearance="outlined" class="content-card garment-card">
             <div class="garment-visual">
+              @if (prenda.imagen) {
+                <img [src]="prenda.imagen" [alt]="prenda.nombre" loading="lazy">
+              } @else {
               <svg viewBox="0 0 100 100" aria-hidden="true">
-                <path d="M35 15 15 30l10 18 12-7v43h26V41l12 7 10-18-20-15q-15 13-30 0Z" /></svg
-              ><span class="status">{{ prenda.estado }}</span>
+                <path d="M35 15 15 30l10 18 12-7v43h26V41l12 7 10-18-20-15q-15 13-30 0Z" /></svg>
+              }
+              <span class="status">{{ prenda.estado }}</span>
             </div>
             <p class="eyebrow">{{ prenda.categoriaNombre || ref.categoria(prenda.categoriaId) }}</p>
             <h2>{{ prenda.nombre }}</h2>
@@ -110,25 +116,27 @@
             <strong class="price">{{
               prenda.precioAlquiler | currency: 'PEN' : 'S/ ' : '1.2-2'
             }}</strong>
-            <div class="acciones">
-              <button
-                appSoloEscritura
-                mat-button
-                class="btn-action"
-                type="button"
-                (click)="editar(prenda)"
-              >
-                Ver / editar</button
-              ><button
-                appSoloEscritura
-                mat-button
-                class="btn-action btn-danger"
-                type="button"
-                (click)="eliminar(prenda)"
-              >
-                Eliminar
-              </button>
-            </div>
+            @if (isAdmin()) {
+              <div class="acciones">
+                <button
+                  appSoloEscritura
+                  mat-button
+                  class="btn-action"
+                  type="button"
+                  (click)="editar(prenda)"
+                >
+                  Ver / editar</button
+                ><button
+                  appSoloEscritura
+                  mat-button
+                  class="btn-action btn-danger"
+                  type="button"
+                  (click)="eliminar(prenda)"
+                >
+                  Eliminar
+                </button>
+              </div>
+            }
             @if (disponible(prenda)) {
               <a appSoloEscritura class="link" routerLink="/alquileres/nuevo"
                 >Registrar alquiler →</a
@@ -148,7 +156,7 @@
     </section>
   </div>
 </div>
-@if (modalAbierto()) {
+@if (modalAbierto() && isAdmin()) {
   <ng-template appModal (closed)="modalAbierto.set(false)">
     <div
       class="modal"
@@ -161,6 +169,22 @@
       <h2>{{ editandoId() === null ? 'Nueva prenda' : 'Editar prenda' }}</h2>
       <form [formGroup]="form" (ngSubmit)="guardar()">
         <div class="form-grid">
+          @if (isAdmin()) {
+            <div class="form-group full">
+              <label for="foto-prenda">
+                Foto de la prenda {{ imagenObligatoria() ? '(obligatoria)' : '(opcional)' }}
+              </label>
+              <input
+                #foto
+                id="foto-prenda"
+                type="file"
+                accept="image/jpeg,image/png"
+                [required]="imagenObligatoria()"
+                (change)="seleccionarImagen(foto)"
+              />
+              <small>JPG o PNG de hasta 1 MiB. Es obligatoria si la prenda aún no tiene foto.</small>
+            </div>
+          }
           <div class="form-group">
             <label for="nombre">Nombre</label
             ><mat-form-field appearance="outline" subscriptSizing="dynamic"

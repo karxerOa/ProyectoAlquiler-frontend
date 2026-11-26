@@ -192,9 +192,19 @@
   <mat-card appearance="outlined" class="content-card">
     <div class="page-header">
       <h2>Alquileres de {{ c.nombre }} {{ c.apellidos }}</h2>
-      <button mat-button type="button" class="btn-secondary" (click)="historialCliente.set(null)">
-        Cerrar historial
-      </button>
+      <div class="acciones">
+        <a
+          mat-flat-button
+          class="btn-primary"
+          routerLink="/alquileres/nuevo"
+          [queryParams]="{ clienteId: c.idCliente }"
+        >
+          Alquilar una prenda
+        </a>
+        <button mat-button type="button" class="btn-secondary" (click)="historialCliente.set(null)">
+          Cerrar historial
+        </button>
+      </div>
     </div>
     @if (cargandoHistorial()) {
       <p role="status">Cargando historial…</p>

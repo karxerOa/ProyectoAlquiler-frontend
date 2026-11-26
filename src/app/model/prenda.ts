@@ -8,8 +8,8 @@ export interface Prenda {
   estado: string;
   categoriaId: number;
   categoriaNombre?: string;
-  /** Optional API metadata; legacy records remain explicitly unspecified. */
   genero?: string;
+  imagen?: string | null;
 }
 
 export type PrendaData = Omit<Prenda, 'idPrenda' | 'categoriaNombre' | 'genero'>;

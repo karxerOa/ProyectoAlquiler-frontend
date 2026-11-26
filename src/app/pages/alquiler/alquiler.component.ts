@@ -1,7 +1,7 @@
 import { UiService } from '../../shared/ui.service';
 import { MATERIAL } from '../../shared/material';
 import { ReferenciasService } from '../../services/referencias.service';
-import { clientePorDni, dniTexto } from '../../model/flujo';
+import { alquilerEnCurso, clientePorDni, dniTexto } from '../../model/flujo';
 import { DetalleAlquilerComponent } from '../detalle-alquiler/detalle-alquiler.component';
 import { DevolucionComponent } from '../devolucion/devolucion.component';
 import { Component, computed, inject, signal } from '@angular/core';
@@ -33,6 +33,17 @@ export class AlquilerComponent {
     return this.ref
       .devoluciones()
       .some((d) => d.alquilerId === a.idAlquiler && d.estadoPrenda !== 'INCOMPLETO');
+  }
+  puedeRegistrarDevolucion(a: Alquiler) {
+    return (
+      alquilerEnCurso(a) &&
+      this.ref.detalles().some((d) => d.alquilerId === a.idAlquiler) &&
+      !this.devuelto(a)
+    );
+  }
+  accionDevolucion(a: Alquiler) {
+    if (this.devuelto(a)) return 'Ver devolución';
+    return this.puedeRegistrarDevolucion(a) ? 'Registrar devolución' : 'Ver prendas y detalle';
   }
 
   readonly dni = signal('');

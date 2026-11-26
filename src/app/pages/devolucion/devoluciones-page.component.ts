@@ -7,6 +7,8 @@ import { Alquiler } from '../../model/alquiler';
 import { alquilerEnCurso } from '../../model/flujo';
 import { fechaLima } from '../../model/agenda';
 import { normalizar } from '../../model/catalogo';
+import { DetalleAlquiler } from '../../model/detalle-alquiler';
+import { Devolucion, estadoPrendaEnObservacion } from '../../model/devolucion';
 @Component({
   selector: 'app-devoluciones-page',
   standalone: true,
@@ -47,7 +49,9 @@ import { normalizar } from '../../model/catalogo';
                 <td>{{ a.total | currency: 'PEN' : 'S/ ' }}</td>
                 <td>{{ a.fechaFin.slice(0, 10) < hoy ? 'Vencido' : 'En plazo' }}</td>
                 <td>
-                  <button mat-stroked-button (click)="seleccion.set(a)">Revisar devolución</button>
+                  <button mat-stroked-button (click)="seleccion.set(a)">
+                    Registrar devolución
+                  </button>
                 </td>
               </tr>
             } @empty {
@@ -59,6 +63,52 @@ import { normalizar } from '../../model/catalogo';
         </table>
       </div></mat-card
     >
+    <mat-card appearance="outlined" class="content-card">
+      <div class="table-header">
+        <h2>Devoluciones registradas</h2>
+        <p>Consulta las prendas recibidas y el estado registrado para cada una.</p>
+      </div>
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Alquiler / Cliente</th>
+              <th>Fecha de recepción</th>
+              <th>Prendas y estado</th>
+              <th>Estado general</th>
+              <th>Recibió</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (d of registradas(); track d.idDevolucion) {
+              <tr>
+                <td>ALQ-{{ d.alquilerId }} · {{ ref.cliente(clienteId(d.alquilerId)) }}</td>
+                <td>{{ d.fechaDevolucion.slice(0, 10) }}</td>
+                <td>
+                  @for (prenda of prendasDe(d.alquilerId); track prenda.idDetalle) {
+                    <p>
+                      {{ ref.prenda(prenda.prendaId) }} · {{ prenda.cantidad }} unidades —
+                      {{ estadoPorPrenda(d, prenda) }}
+                    </p>
+                  } @empty {
+                    <p>No hay prendas vinculadas a este alquiler.</p>
+                  }
+                  @if (d.observacion) {
+                    <small>{{ d.observacion }}</small>
+                  }
+                </td>
+                <td>{{ d.estadoPrenda }}</td>
+                <td>{{ ref.empleado(d.empleadoId) }}</td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="5">Todavía no hay devoluciones registradas.</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </mat-card>
     @if (seleccion(); as a) {
       <mat-card appearance="outlined" class="content-card"
         ><div class="page-header">
@@ -75,6 +125,16 @@ export class DevolucionesPageComponent {
   readonly hoy = fechaLima();
   readonly query = signal('');
   readonly seleccion = signal<Alquiler | null>(null);
+  readonly registradas = computed(() =>
+    this.ref
+      .devoluciones()
+      .filter((d) =>
+        normalizar(
+          `${this.ref.cliente(this.clienteId(d.alquilerId))} ${d.alquilerId}`,
+        ).includes(normalizar(this.query())),
+      )
+      .sort((a, b) => b.fechaDevolucion.localeCompare(a.fechaDevolucion)),
+  );
   readonly pendientes = computed(() =>
     this.ref
       .alquileres()
@@ -92,4 +152,17 @@ export class DevolucionesPageComponent {
       )
       .sort((a, b) => a.fechaFin.localeCompare(b.fechaFin)),
   );
+  clienteId(alquilerId: number) {
+    return this.ref.alquileres().find((a) => a.idAlquiler === alquilerId)?.clienteId ?? 0;
+  }
+  prendasDe(alquilerId: number): DetalleAlquiler[] {
+    return this.ref.detalles().filter((d) => d.alquilerId === alquilerId);
+  }
+  estadoPorPrenda(devolucion: Devolucion, prenda: DetalleAlquiler) {
+    return estadoPrendaEnObservacion(
+      devolucion.observacion,
+      this.ref.prenda(prenda.prendaId),
+      prenda.cantidad,
+    );
+  }
 }

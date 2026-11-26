@@ -168,6 +168,41 @@
           </div>
 
           <div class="form-group">
+            <label for="username">Nombre de usuario</label>
+            <mat-form-field appearance="outline" subscriptSizing="dynamic"
+              ><input
+                matInput
+                id="username"
+                type="text"
+                autocomplete="username"
+                formControlName="username"
+            /></mat-form-field>
+            @if (campoInvalido('username')) {
+              <small class="error">El usuario es obligatorio (máximo 20 caracteres).</small>
+            }
+          </div>
+
+          <div class="form-group">
+            <label for="password">{{
+              editandoId() === null ? 'Contraseña' : 'Nueva contraseña (opcional)'
+            }}</label>
+            <mat-form-field appearance="outline" subscriptSizing="dynamic"
+              ><input
+                matInput
+                id="password"
+                type="password"
+                autocomplete="new-password"
+                formControlName="password"
+            /></mat-form-field>
+            @if (campoInvalido('password')) {
+              <small class="error">La contraseña debe tener al menos 8 caracteres.</small>
+            }
+            @if (editandoId() !== null) {
+              <small>Déjala vacía para conservar la contraseña actual.</small>
+            }
+          </div>
+
+          <div class="form-group">
             <label for="estado">Estado</label>
             <mat-form-field appearance="outline" subscriptSizing="dynamic"
               ><select matNativeControl id="estado" formControlName="estado">

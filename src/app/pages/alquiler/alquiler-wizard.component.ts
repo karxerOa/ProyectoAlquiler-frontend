@@ -1,7 +1,8 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, effect, inject, signal } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CurrencyPipe } from '@angular/common';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { MatStepperModule } from '@angular/material/stepper';
 import { firstValueFrom } from 'rxjs';
 import { MATERIAL } from '../../shared/material';
@@ -14,6 +15,8 @@ import { Alquiler } from '../../model/alquiler';
 import { fechaLima } from '../../model/agenda';
 import { normalizar } from '../../model/catalogo';
 import { AuthService } from '../../services/auth.service';
+import { EmpleadoService } from '../../services/empleado.service';
+import { Empleado } from '../../model/empleado';
 interface Linea {
   prenda: Prenda;
   cantidad: number;
@@ -30,6 +33,8 @@ export class AlquilerWizardComponent {
   readonly auth = inject(AuthService);
   private readonly alquilerService = inject(AlquilerService);
   private readonly detalleService = inject(DetalleAlquilerService);
+  private readonly empleadoService = inject(EmpleadoService);
+  private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   readonly cliente = signal<Cliente | null>(null);
   readonly lineas = signal<Linea[]>([]);
@@ -37,6 +42,11 @@ export class AlquilerWizardComponent {
   readonly buscarPrenda = signal('');
   readonly guardando = signal(false);
   readonly error = signal('');
+  readonly empleadoSesion = signal<Empleado | null>(null);
+  readonly estadoEmpleadoSesion = signal<'cargando' | 'vinculado' | 'sin-ficha' | 'error'>(
+    'cargando',
+  );
+  readonly errorEmpleadoSesion = signal('');
   readonly creado = signal<Alquiler | null>(null);
   readonly incertidumbre = signal(false);
   readonly cantidadesInvalidas = signal<number[]>([]);
@@ -71,6 +81,51 @@ export class AlquilerWizardComponent {
     fechaFin: [fechaLima(), Validators.required],
     empleadoId: ['', Validators.required],
   });
+
+  constructor() {
+    this.cargarEmpleadoSesion();
+    const rawClienteId = this.route.snapshot.queryParamMap.get('clienteId');
+    const clienteId = Number(rawClienteId);
+    if (!rawClienteId || !Number.isSafeInteger(clienteId) || clienteId < 1) return;
+
+    let seleccionado = false;
+    effect(() => {
+      if (seleccionado) return;
+      const cliente = this.ref.clientes().find((item) => item.idCliente === clienteId);
+      if (cliente) {
+        this.cliente.set(cliente);
+        seleccionado = true;
+      }
+    });
+  }
+
+  private cargarEmpleadoSesion(): void {
+    this.empleadoService.findMe().subscribe({
+      next: (empleado) => {
+        this.empleadoSesion.set(empleado);
+        this.form.controls.empleadoId.clearValidators();
+        this.form.controls.empleadoId.setValue('', { emitEvent: false });
+        this.form.controls.empleadoId.updateValueAndValidity({ emitEvent: false });
+        this.estadoEmpleadoSesion.set('vinculado');
+      },
+      error: (error: unknown) => {
+        if (error instanceof HttpErrorResponse && error.status === 404) {
+          this.form.controls.empleadoId.setValidators([Validators.required, Validators.min(1)]);
+          this.form.controls.empleadoId.updateValueAndValidity({ emitEvent: false });
+          this.estadoEmpleadoSesion.set('sin-ficha');
+          return;
+        }
+
+        const status =
+          error instanceof HttpErrorResponse ? ` (HTTP ${error.status || 'sin conexión'})` : '';
+        this.errorEmpleadoSesion.set(
+          `No se pudo verificar el empleado de la sesión${status}. Recarga la página para volver a intentar.`,
+        );
+        this.estadoEmpleadoSesion.set('error');
+      },
+    });
+  }
+
   seleccionada(id: number): boolean {
     return this.lineas().some((l) => l.prenda.idPrenda === id);
   }
@@ -96,7 +151,21 @@ export class AlquilerWizardComponent {
   }
   fechasValidas(): boolean {
     const v = this.form.getRawValue();
-    return (this.form.valid || !!this.creado()) && !!v.empleadoId && v.fechaFin >= v.fechaInicio;
+    const estado = this.estadoEmpleadoSesion();
+    const alquilerYaCreado = !!this.creado();
+    const empleadoValido =
+      estado === 'vinculado' ||
+      (estado === 'sin-ficha' &&
+        !!v.empleadoId &&
+        (this.form.controls.empleadoId.valid || alquilerYaCreado));
+    return (
+      estado !== 'cargando' &&
+      estado !== 'error' &&
+      empleadoValido &&
+      (alquilerYaCreado ||
+        (this.form.controls.fechaInicio.valid && this.form.controls.fechaFin.valid)) &&
+      v.fechaFin >= v.fechaInicio
+    );
   }
   async guardar(): Promise<void> {
     if (
@@ -118,10 +187,13 @@ export class AlquilerWizardComponent {
         try {
           alquiler = await firstValueFrom(
             this.alquilerService.create({
-              ...v,
+              fechaInicio: v.fechaInicio,
+              fechaFin: v.fechaFin,
               fechaAlquiler: fechaLima(),
               clienteId: this.cliente()!.idCliente,
-              empleadoId: Number(v.empleadoId),
+              ...(this.estadoEmpleadoSesion() === 'sin-ficha'
+                ? { empleadoId: Number(v.empleadoId) }
+                : {}),
               estado: 'PENDIENTE',
               subtotal: this.total(),
               total: this.total(),

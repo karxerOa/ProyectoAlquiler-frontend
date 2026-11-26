@@ -54,7 +54,7 @@
               <td>
                 <div class="acciones">
                   <button mat-button type="button" class="btn-action" (click)="abrir(alquiler)">
-                    Prendas y devolución
+                    {{ accionDevolucion(alquiler) }}
                   </button>
                   <button
                     appSoloEscritura
@@ -135,7 +135,7 @@
             <label for="estado">Estado</label
             ><mat-form-field appearance="outline" subscriptSizing="dynamic"
               ><select matNativeControl id="estado" formControlName="estado">
-                <option value="ACTIVO">ACTIVO</option>
+                <option value="ACTIVO">ACTIVO · entregado al cliente</option>
                 <option value="INACTIVO">INACTIVO</option>
                 <option value="PENDIENTE">PENDIENTE</option>
                 <option value="RESERVADO">RESERVADO</option>

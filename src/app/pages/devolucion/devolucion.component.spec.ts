@@ -45,6 +45,7 @@ describe('Recepción dentro del alquiler', () => {
     c.revisar(12, 'SIN_MANTENIMIENTO');
     c.guardar();
     TestBed.inject(HttpTestingController).expectNone((r) => r.method === 'POST');
+    expect(c.motivoNoDisponible()).toContain('cambia Estado a ACTIVO');
   });
   it('una recepción incompleta no certifica todas las prendas devueltas', () => {
     const { c, ref } = preparar();

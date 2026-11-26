@@ -87,8 +87,12 @@
           @for (prenda of prendas(); track prenda.idPrenda) {
             <mat-card appearance="outlined"
               ><div class="garment-placeholder">
-                <mat-icon fontSet="material-symbols-outlined">checkroom</mat-icon
-                ><small>Sin fotografía registrada</small>
+                @if (prenda.imagen) {
+                  <img [src]="prenda.imagen" [alt]="prenda.nombre" loading="lazy" />
+                } @else {
+                  <mat-icon fontSet="material-symbols-outlined">checkroom</mat-icon>
+                  <small>Sin fotografía registrada</small>
+                }
               </div>
               <small>VT-{{ prenda.idPrenda }} · Talla {{ prenda.talla }}</small>
               <h3>{{ prenda.nombre }}</h3>
@@ -131,16 +135,29 @@
                 [min]="form.controls.fechaInicio.value"
             /></mat-form-field>
           </div>
-          <mat-form-field appearance="outline"
-            ><mat-label>Empleado responsable</mat-label
-            ><mat-select formControlName="empleadoId">
-              @for (e of ref.empleados(); track e.idEmpleado) {
-                <mat-option [value]="'' + e.idEmpleado"
-                  >{{ e.nombres }} {{ e.apellidos }}</mat-option
-                >
+          @if (estadoEmpleadoSesion() === 'cargando') {
+            <p role="status">Verificando empleado responsable…</p>
+          } @else if (estadoEmpleadoSesion() === 'error') {
+            <p class="error-box" role="alert">{{ errorEmpleadoSesion() }}</p>
+          } @else if (estadoEmpleadoSesion() === 'vinculado') {
+            <p role="status">
+              Registrado por: {{ empleadoSesion()?.nombres }} {{ empleadoSesion()?.apellidos }}
+            </p>
+          } @else {
+            <mat-form-field appearance="outline">
+              <mat-label>Empleado responsable</mat-label>
+              <mat-select formControlName="empleadoId" required>
+                @for (e of ref.empleados(); track e.idEmpleado) {
+                  <mat-option [value]="'' + e.idEmpleado"
+                    >{{ e.nombres }} {{ e.apellidos }}</mat-option
+                  >
+                }
+              </mat-select>
+              @if (form.controls.empleadoId.hasError('required') && form.controls.empleadoId.touched) {
+                <mat-error>Selecciona el empleado responsable.</mat-error>
               }
-            </mat-select></mat-form-field
-          >
+            </mat-form-field>
+          }
         </form>
         @if (form.controls.fechaFin.value < form.controls.fechaInicio.value) {
           <p class="error-box">La devolución no puede ser anterior a la entrega.</p>

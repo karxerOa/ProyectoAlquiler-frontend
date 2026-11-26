@@ -1,9 +1,25 @@
 import { inject, Service, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { map } from 'rxjs';
 import type { Empleado } from '../model/empleado';
 import { environment } from '../../environments/environment';
 
-type EmpleadoDatos = Omit<Empleado, 'idEmpleado'>;
+type DatosEmpleado = Pick<
+  Empleado,
+  'nombres' | 'apellidos' | 'dni' | 'telefono' | 'cargo' | 'estado'
+>;
+export type NuevoEmpleado = DatosEmpleado & { username: string; password: string };
+export type ActualizarEmpleado = DatosEmpleado & { username: string; password?: string };
+
+interface EmpleadoApi extends Empleado {
+  password?: unknown;
+}
+
+function sinPassword(empleado: EmpleadoApi): Empleado {
+  const { password, ...datos } = empleado;
+  void password;
+  return datos;
+}
 
 @Service()
 export class EmpleadoService {
@@ -14,19 +30,25 @@ export class EmpleadoService {
   readonly $empleadosChange = this._empleados.asReadonly();
 
   findAll() {
-    return this.http.get<Empleado[]>(this.apiUrl);
+    return this.http
+      .get<EmpleadoApi[]>(this.apiUrl)
+      .pipe(map((empleados) => empleados.map(sinPassword)));
   }
 
   findById(id: number) {
-    return this.http.get<Empleado>(`${this.apiUrl}/${id}`);
+    return this.http.get<EmpleadoApi>(`${this.apiUrl}/${id}`).pipe(map(sinPassword));
   }
 
-  create(empleado: EmpleadoDatos) {
-    return this.http.post<Empleado>(this.apiUrl, empleado);
+  findMe() {
+    return this.http.get<EmpleadoApi>(`${this.apiUrl}/me`).pipe(map(sinPassword));
   }
 
-  update(id: number, empleado: EmpleadoDatos) {
-    return this.http.put<Empleado>(`${this.apiUrl}/${id}`, empleado);
+  create(empleado: NuevoEmpleado) {
+    return this.http.post<EmpleadoApi>(this.apiUrl, empleado).pipe(map(sinPassword));
+  }
+
+  update(id: number, empleado: ActualizarEmpleado) {
+    return this.http.put<EmpleadoApi>(`${this.apiUrl}/${id}`, empleado).pipe(map(sinPassword));
   }
 
   delete(id: number) {

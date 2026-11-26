@@ -26,7 +26,8 @@ Tres pantallas: operación diaria, catálogo y registro de reserva. Se mantienen
 - Índice derivado del catálogo mediante `computed`, con normalización de mayúsculas, espacios y acentos al cambiar los datos. Filtros combinables, límites inclusivos de precio, conteo y restablecimiento.
 - Fichas de prendas con estado, categoría, talla, color, precio y acciones. Categoría de registro seleccionable por nombre.
 - Dashboard conectado al servicio de alquileres, sin cifras ficticias. Separa entregas de reservas pendientes, devoluciones de alquileres activos y devoluciones vencidas; añade búsqueda por cliente, errores y reintento.
-- Reserva con búsqueda del cliente por nombre, selector de empleado, fechas y validación existente del período. La ruta de nuevo alquiler abre el formulario. Los nuevos registros comienzan como pendientes.
+- Reserva con búsqueda del cliente por nombre, selector de empleado, fechas y validación existente del período. La ruta de nuevo alquiler abre el formulario y muestra la foto de cada prenda disponible cuando existe. Los nuevos registros comienzan como pendientes.
+- El historial del cliente permite iniciar un alquiler con ese cliente preseleccionado; el formulario aplica la selección cuando están cargadas las referencias.
 - Estilos de gestión compartidos, diseño adaptable, estados de foco, etiquetas en campos, mensajes accesibles y cierre con Escape en los formularios modificados.
 - Todas las páginas se cargan bajo demanda. Se corrigen fecha fija, idioma del documento y título de la aplicación.
 - La compilación de producción deja de descargar fuentes para incrustarlas; se conservan los enlaces y fuentes alternativas existentes para el navegador.
@@ -49,6 +50,10 @@ npm test -- --watch=false
 - Se conserva una advertencia de presupuesto CSS de la página de empleados, ajena a este rediseño.
 
 ## Contratos y límites
+
+El empleado puede operar alquileres (incluidas las devoluciones), registrar y editar clientes, gestionar mantenimiento y penalidades, y consultar el catálogo de prendas con sus fotos. Solo el administrador puede crear, editar o eliminar prendas, administrar categorías y acceder a pagos, reportes, producción y administración de usuarios y personal. La foto JPG o PNG es obligatoria al crear una prenda y al editar una prenda que aún no tiene foto; al actualizar una que ya la tiene, se conserva si no se selecciona otra. Las prendas antiguas sin foto siguen mostrando el ícono de reserva hasta que un administrador las actualice. La API debe permitir al empleado consultar el catálogo y aplicar los permisos de escritura en el servidor.
+
+El formulario de Personal crea la cuenta vinculada junto con la ficha. Al editar, el username es editable y una contraseña vacía conserva la actual; el frontend elimina cualquier campo `password` de las respuestas de empleados. En el alta de alquiler, `GET /empleados/me` determina el responsable: una respuesta 200 oculta el selector y omite `empleadoId` del payload; un 404 exige seleccionar un empleado; cualquier otro error bloquea el avance hasta resolverlo.
 
 El filtro de género utiliza el dato cuando lo devuelve la API. Los registros anteriores aparecen como «Sin especificar»; no se infiere género a partir del nombre ni se añade un campo de escritura no confirmado por el backend. Para administrar ese dato de forma persistente se necesita ampliar y verificar el contrato del backend, cuyo código no se proporcionó.
 

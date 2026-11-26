@@ -3,6 +3,5 @@ export interface Usuario {
   username: string;
   enabled: boolean;
   rolId: number;
-  clienteId?: number | null;
   name?: string;
 }

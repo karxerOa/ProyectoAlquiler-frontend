@@ -9,8 +9,10 @@
 - «Prendas del alquiler» se integra en la ficha del alquiler. Después de guardar una reserva se abre esa ficha para añadir prendas disponibles. No se permite registrar la entrega sin prendas vinculadas.
 - La recepción se registra dentro del alquiler entregado. La ficha muestra la devolución, quién la recibió y las prendas que pertenecían a ese alquiler.
 - Al recibir, se revisa cada prenda: recibida sin mantenimiento, recibida con mantenimiento o pendiente de recepción. La revisión se conserva como texto en la observación admitida por la API. Se valida que las prendas faltantes coincidan con el estado de recepción incompleta.
+- La pantalla Devoluciones mantiene la lista de pendientes y añade un historial con la fecha, el estado general, quién recibió y el estado de cada prenda. El estado por prenda se muestra cuando está presente en la revisión guardada; los registros antiguos sin ese detalle se identifican como no detallados.
 - Las recepciones completas se presentan como alquileres devueltos y dejan de aparecer en la agenda pendiente. Una recepción incompleta no certifica que todas las prendas se devolvieron.
 - Los alquileres con recepciones no se editan ni eliminan desde este flujo, para conservar el historial.
+- El empleado puede consultar y registrar pagos asociados a alquileres; los reportes financieros continúan reservados para ADMIN. Al seleccionar un alquiler, el formulario propone su total y permite ajustar el monto antes de guardar.
 - Mantenimiento parte de una recepción completa y ofrece las prendas de ese alquiler. Se conserva el contexto de la recepción en la descripción existente del mantenimiento. Los registros antiguos se siguen mostrando sin inventarles un origen.
 - Roles y usuarios se agrupan en «Administración» y salen del menú operativo principal. No se eliminan sus entidades ni se cambia la autorización del servidor.
 - Las antiguas rutas independientes de detalles y devoluciones llevan a Alquileres.
@@ -40,7 +42,7 @@ La revisión y las observaciones tienen el límite actual de 500 caracteres; el 
 
 ## Verificación
 
-Se ejecutaron la compilación de producción y las pruebas automatizadas del proyecto. Las pruebas cubren DNI exacto con ceros iniciales, exclusión de prendas inactivas, historial de clientes homónimos, recepción vinculada al alquiler, reservas aún no entregadas, recepción incompleta y selección de prendas desde una devolución de origen, además de los casos previos de catálogo y agenda.
+Se ejecutaron la compilación de producción y las pruebas automatizadas del proyecto. Las pruebas cubren DNI exacto con ceros iniciales, exclusión de prendas inactivas, historial de clientes homónimos, recepción vinculada al alquiler, reservas aún no entregadas, recepción incompleta, lectura de estado por prenda desde la observación y selección de prendas desde una devolución de origen, además de los casos previos de catálogo y agenda.
 
 No se realizaron escrituras de prueba contra la API real ni se certificó el comportamiento transaccional del backend. La advertencia de tamaño del CSS de empleados ya existía antes de este ajuste.
 

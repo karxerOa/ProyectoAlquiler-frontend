@@ -33,6 +33,15 @@ export class DevolucionComponent {
       !this.devoluciones().some((d) => d.estadoPrenda !== 'INCOMPLETO') &&
       this.prendas().length > 0,
   );
+  readonly motivoNoDisponible = computed(() => {
+    if (!alquilerEnCurso(this.alquiler())) {
+      return `Este alquiler está en estado ${this.alquiler().estado}. Para registrar la devolución, vuelve a Alquileres, pulsa Editar en este alquiler, cambia Estado a ACTIVO y guarda. Después abre nuevamente la ficha.`;
+    }
+    if (!this.prendas().length) {
+      return 'Este alquiler todavía no tiene prendas vinculadas.';
+    }
+    return '';
+  });
   readonly revisiones = signal<Record<number, string>>({});
   revisar(prenda: number, valor: string) {
     this.revisiones.update((r) => ({ ...r, [prenda]: valor }));

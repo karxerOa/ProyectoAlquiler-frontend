@@ -97,6 +97,11 @@
   border-radius: 8px;
   position: relative;
 }
+.garment-visual img {
+  width: 100%;
+  height: 155px;
+  object-fit: contain;
+}
 .garment-visual svg {
   width: 95px;
   fill: none;

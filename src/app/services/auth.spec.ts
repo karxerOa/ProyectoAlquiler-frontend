@@ -2,6 +2,9 @@ import { TestBed } from '@angular/core/testing';
 import { HttpClient, provideHttpClient, withInterceptors } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideRouter, Router } from '@angular/router';
+import { ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
+import { routes } from '../app.routes';
+import { authGuard } from './auth.guard';
 import { AuthService, authUrl, readSession } from './auth.service';
 import { authInterceptor } from './auth.interceptor';
 import { environment } from '../../environments/environment';
@@ -36,10 +39,42 @@ describe('Authentication', () => {
   function login(role = 'ROLE_ADMIN') {
     auth.login('ADMIN', 'example').subscribe();
     const request = http.expectOne(authUrl);
+    expect(request.request.body).toEqual({ username: 'ADMIN', password: 'example' });
     expect(request.request.method).toBe('POST');
     expect(request.request.headers.has('Authorization')).toBe(false);
     request.flush({ access_token: jwt(role) });
   }
+  it.each(['ROLE_ADMIN', 'ROLE_EMPLEADO'])('enforces module access for %s', (role) => {
+    login(role);
+    const router = TestBed.inject(Router);
+    const children = routes.find((r) => r.children)!.children!;
+    for (const child of children.filter((r) => r.loadComponent)) {
+      const result = TestBed.runInInjectionContext(() =>
+        authGuard(
+          { data: child.data ?? {} } as ActivatedRouteSnapshot,
+          { url: '/' + child.path } as RouterStateSnapshot,
+        ),
+      );
+      if (role === 'ROLE_EMPLEADO' && child.data?.['admin']) {
+        expect(result?.toString()).toBe(router.createUrlTree(['/resumen']).toString());
+      } else {
+        expect(result).toBe(true);
+      }
+    }
+  });
+  it('discards a stored client session and redirects protected navigation to login', () => {
+    sessionStorage.setItem('alquiler.session', jwt('ROLE_USER'));
+    const restored = TestBed.runInInjectionContext(() => new AuthService());
+    expect(restored.token()).toBeNull();
+    expect(sessionStorage.getItem('alquiler.session')).toBeNull();
+    const result = TestBed.runInInjectionContext(() =>
+      authGuard(
+        { data: {} } as ActivatedRouteSnapshot,
+        { url: '/clientes' } as RouterStateSnapshot,
+      ),
+    );
+    expect(result.toString()).toContain('/login');
+  });
   it('rejects malformed and expired tokens', () => {
     expect(readSession('invalid')).toBeNull();
     expect(readSession(jwt('USER', -10))).toBeNull();
@@ -59,9 +94,9 @@ describe('Authentication', () => {
     expect(sessionStorage.getItem('alquiler.session')).toBe(auth.token());
   });
   it('clears the session after 401 but preserves it after 403', () => {
-    login('ROLE_USER');
+    login('ROLE_EMPLEADO');
     expect(auth.isAdmin()).toBe(false);
-    expect(auth.canWrite()).toBe(false);
+    expect(auth.canWrite()).toBe(true);
     const client = TestBed.inject(HttpClient);
     client.get(environment.apiUrl + '/usuarios').subscribe({ error: () => {} });
     http

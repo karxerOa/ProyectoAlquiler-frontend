@@ -7,7 +7,7 @@ import { environment } from '../../environments/environment';
 interface Session {
   token: string;
   username: string;
-  roles: string[];
+  role: 'ROLE_ADMIN' | 'ROLE_EMPLEADO';
   expires: number;
 }
 export const authUrl = environment.apiUrl.replace(/\/v1\/?$/, '') + '/login';
@@ -30,11 +30,9 @@ export function readSession(token: string): Session | null {
       c['exp'] * 1000 <= Date.now()
     )
       return null;
-    const roles =
-      typeof c['role'] === 'string'
-        ? c['role'].split(',').map((r) => r.trim().replace(/^ROLE_/, ''))
-        : [];
-    return { token, username: c['sub'], roles, expires: c['exp'] * 1000 };
+    const role = c['role'];
+    if (role !== 'ROLE_ADMIN' && role !== 'ROLE_EMPLEADO') return null;
+    return { token, username: c['sub'], role, expires: c['exp'] * 1000 };
   } catch {
     return null;
   }
@@ -46,10 +44,8 @@ export class AuthService {
   private readonly session = signal<Session | null>(this.restore());
   private timer?: ReturnType<typeof setTimeout>;
   readonly username = computed(() => this.session()?.username ?? '');
-  readonly isAdmin = computed(() => this.session()?.roles.includes('ADMIN') ?? false);
-  readonly canWrite = computed(
-    () => this.session()?.roles.some((r) => ['ADMIN', 'EMPLEADO'].includes(r)) ?? false,
-  );
+  readonly isAdmin = computed(() => this.session()?.role === 'ROLE_ADMIN');
+  readonly canWrite = computed(() => this.session() !== null);
   constructor() {
     this.scheduleExpiry();
   }
@@ -79,7 +75,9 @@ export class AuthService {
   }
   private restore(): Session | null {
     try {
-      return readSession(sessionStorage.getItem(storageKey) ?? '');
+      const session = readSession(sessionStorage.getItem(storageKey) ?? '');
+      if (!session) sessionStorage.removeItem(storageKey);
+      return session;
     } catch {
       return null;
     }
