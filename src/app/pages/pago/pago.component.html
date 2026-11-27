@@ -4,12 +4,22 @@
       <h1>Gestión de pagos</h1>
       <p>Registra pagos asociados a los alquileres y consulta sus estados.</p>
     </div>
-    <button appSoloEscritura mat-flat-button class="btn-primary" type="button" (click)="nuevo()">
+    <button
+      appSoloEscritura
+      mat-flat-button
+      class="btn-primary"
+      type="button"
+      (click)="nuevo()"
+      [disabled]="guardando() || cargando() || !!errorCarga()"
+    >
       + Registrar pago
     </button>
   </div>
   @if (errorCarga()) {
-    <p class="error-box">{{ errorCarga() }}</p>
+    <p class="error-box">
+      {{ errorCarga() }}
+      <button mat-button (click)="cargar()" [disabled]="cargando()">Reintentar</button>
+    </p>
   }
   <mat-card appearance="outlined" class="stats-card">
     <mat-icon fontSet="material-symbols-outlined">payments</mat-icon>
@@ -38,6 +48,7 @@
             <th>Método</th>
             <th>Estado</th>
             <th>Alquiler</th>
+            <th>Acciones</th>
           </tr>
         </thead>
         <tbody>
@@ -47,11 +58,33 @@
               <td>S/ {{ pago.monto }}</td>
               <td>{{ pago.metodoPago }}</td>
               <td>{{ pago.estado }}</td>
-              <td>{{ ref.alquiler(pago.alquilerId) }}</td>
+              <td>#{{ pago.alquilerId }} · {{ ref.alquiler(pago.alquilerId) }}</td>
+              <td>
+                @if (puedeCambiar(pago)) {
+                  <button
+                    appSoloEscritura
+                    mat-button
+                    [disabled]="guardando() || cargando()"
+                    (click)="cambiarEstado(pago, 'PAGADO')"
+                  >
+                    Confirmar pago
+                  </button>
+                  <button
+                    appSoloEscritura
+                    mat-button
+                    [disabled]="guardando() || cargando()"
+                    (click)="cambiarEstado(pago, 'ANULADO')"
+                  >
+                    Anular
+                  </button>
+                } @else {
+                  <span>Solo lectura</span>
+                }
+              </td>
             </tr>
           } @empty {
             <tr>
-              <td colspan="5" class="empty-message">No se encontraron pagos.</td>
+              <td colspan="6" class="empty-message">No se encontraron pagos.</td>
             </tr>
           }
         </tbody>
@@ -60,11 +93,21 @@
   </mat-card>
 </div>
 @if (modalAbierto()) {
-  <ng-template appModal (closed)="modalAbierto.set(false)">
+  <ng-template appModal (closed)="!guardando() && modalAbierto.set(false)">
     <div class="modal" (click)="$event.stopPropagation()">
       <h2>Registrar pago</h2>
       <form [formGroup]="form" (ngSubmit)="guardar()">
         <div class="form-grid">
+          <div class="form-group full">
+            <app-selector-referencia
+              etiqueta="Alquiler"
+              [opciones]="opcionesAlquileres()"
+              formControlName="alquilerId"
+            />
+            @if (campoInvalido('alquilerId')) {
+              <small class="error">Selecciona un registro válido.</small>
+            }
+          </div>
           <div class="form-group">
             <label for="fechaPago">Fecha</label
             ><mat-form-field appearance="outline" subscriptSizing="dynamic"
@@ -85,7 +128,14 @@
             @if (campoInvalido('monto')) {
               <small class="error">El monto debe ser mayor que cero.</small>
             }
-            <small>Se completa con el total del alquiler seleccionado; puedes ajustarlo.</small>
+            @if (form.controls.alquilerId.value && saldo(+form.controls.alquilerId.value) === 0) {
+              <small>Este alquiler ya está pagado por completo.</small>
+            } @else if (form.controls.alquilerId.value) {
+              <small
+                >Saldo pendiente: S/ {{ saldo(+form.controls.alquilerId.value)?.toFixed(2) }}.
+                Puedes registrar un abono menor.</small
+              >
+            }
           </div>
           <div class="form-group">
             <label for="metodoPago">Método de pago</label
@@ -104,26 +154,21 @@
               ><select matNativeControl id="estado" formControlName="estado">
                 <option value="PAGADO">PAGADO</option>
                 <option value="PENDIENTE">PENDIENTE</option>
-                <option value="ANULADO">ANULADO</option>
               </select></mat-form-field
             >
-          </div>
-          <div class="form-group full">
-            <app-selector-referencia
-              etiqueta="Alquiler"
-              [opciones]="ref.opcionesAlquileres()"
-              formControlName="alquilerId"
-            />
-            @if (campoInvalido('alquilerId')) {
-              <small class="error">Selecciona un registro válido.</small>
-            }
           </div>
         </div>
         @if (mensajeError()) {
           <p class="error-box">{{ mensajeError() }}</p>
         }
         <div class="modal-actions">
-          <button mat-button type="button" class="btn-secondary" (click)="modalAbierto.set(false)">
+          <button
+            mat-button
+            type="button"
+            class="btn-secondary"
+            [disabled]="guardando()"
+            (click)="modalAbierto.set(false)"
+          >
             Cancelar</button
           ><button
             appSoloEscritura

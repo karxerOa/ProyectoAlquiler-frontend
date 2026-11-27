@@ -4,7 +4,7 @@ import { RouterLink } from '@angular/router';
 import { MATERIAL } from '../../shared/material';
 import { ReferenciasService } from '../../services/referencias.service';
 import { PagoService } from '../../services/pago.service';
-import { Pago } from '../../model/pago';
+import { Pago, pagoCobrado, saldoAlquiler } from '../../model/pago';
 @Component({
   selector: 'app-reportes',
   standalone: true,
@@ -108,9 +108,7 @@ export class ReportesComponent {
   readonly pagos = signal<Pago[]>([]);
   readonly error = signal('');
   readonly cargando = signal(false);
-  readonly validos = computed(() =>
-    this.pagos().filter((p) => !['ANULADO', 'PENDIENTE'].includes(p.estado.toUpperCase())),
-  );
+  readonly validos = computed(() => this.pagos().filter(pagoCobrado));
   readonly total = computed(() => this.ref.alquileres().reduce((n, a) => n + a.total, 0));
   readonly pagado = computed(() => this.validos().reduce((n, p) => n + p.monto, 0));
   readonly saldo = computed(() =>
@@ -122,7 +120,7 @@ export class ReportesComponent {
       .reduce((n, p) => n + p.monto, 0);
   }
   restante(id: number, total: number): number {
-    return Math.max(0, total - this.cobrado(id));
+    return saldoAlquiler(total, this.validos(), id);
   }
   constructor() {
     this.cargar();
