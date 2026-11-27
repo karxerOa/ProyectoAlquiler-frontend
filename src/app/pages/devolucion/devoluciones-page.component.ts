@@ -1,4 +1,5 @@
 import { Component, computed, inject, signal } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { CurrencyPipe } from '@angular/common';
 import { MATERIAL } from '../../shared/material';
 import { ReferenciasService } from '../../services/referencias.service';
@@ -12,8 +13,8 @@ import { Devolucion, estadoPrendaEnObservacion } from '../../model/devolucion';
 @Component({
   selector: 'app-devoluciones-page',
   standalone: true,
-  imports: [...MATERIAL, CurrencyPipe, DevolucionComponent],
-  styleUrl: '../../shared/gestion.css',
+  imports: [...MATERIAL, CurrencyPipe, DevolucionComponent, RouterLink],
+  styleUrls: ['../../shared/gestion.css', './devoluciones-page.component.css'],
   template: ` <div class="page-container">
     <header class="page-header">
       <div>
@@ -74,9 +75,10 @@ import { Devolucion, estadoPrendaEnObservacion } from '../../model/devolucion';
             <tr>
               <th>Alquiler / Cliente</th>
               <th>Fecha de recepción</th>
-              <th>Prendas y estado</th>
+
               <th>Estado general</th>
               <th>Recibió</th>
+              <th>Acciones</th>
             </tr>
           </thead>
           <tbody>
@@ -84,21 +86,13 @@ import { Devolucion, estadoPrendaEnObservacion } from '../../model/devolucion';
               <tr>
                 <td>ALQ-{{ d.alquilerId }} · {{ ref.cliente(clienteId(d.alquilerId)) }}</td>
                 <td>{{ d.fechaDevolucion.slice(0, 10) }}</td>
-                <td>
-                  @for (prenda of prendasDe(d.alquilerId); track prenda.idDetalle) {
-                    <p>
-                      {{ ref.prenda(prenda.prendaId) }} · {{ prenda.cantidad }} unidades —
-                      {{ estadoPorPrenda(d, prenda) }}
-                    </p>
-                  } @empty {
-                    <p>No hay prendas vinculadas a este alquiler.</p>
-                  }
-                  @if (d.observacion) {
-                    <small>{{ d.observacion }}</small>
-                  }
-                </td>
                 <td>{{ d.estadoPrenda }}</td>
                 <td>{{ ref.empleado(d.empleadoId) }}</td>
+                <td>
+                  <button mat-stroked-button type="button" (click)="detalle.set(d)">
+                    Ver detalle
+                  </button>
+                </td>
               </tr>
             } @empty {
               <tr>
@@ -110,13 +104,75 @@ import { Devolucion, estadoPrendaEnObservacion } from '../../model/devolucion';
       </div>
     </mat-card>
     @if (seleccion(); as a) {
-      <mat-card appearance="outlined" class="content-card"
-        ><div class="page-header">
-          <h2>ALQ-{{ a.idAlquiler }} · {{ ref.cliente(a.clienteId) }}</h2>
-          <button mat-button (click)="seleccion.set(null)">Cerrar</button>
-        </div>
-        <app-devolucion [alquiler]="a" (actualizada)="ref.cargar(true)"
-      /></mat-card>
+      <ng-template appModal (closed)="seleccion.set(null)">
+        <section class="ficha">
+          <header>
+            <h2>Registrar devolución</h2>
+            <p>ALQ-{{ a.idAlquiler }} · {{ ref.cliente(a.clienteId) }}</p>
+          </header>
+          <div class="contenido">
+            <app-devolucion [alquiler]="a" [enModal]="true" (actualizada)="recepcionRegistrada()" />
+          </div>
+          <footer>
+            <button mat-stroked-button type="button" (click)="seleccion.set(null)">Cerrar</button>
+          </footer>
+        </section>
+      </ng-template>
+    }
+    @if (detalle(); as d) {
+      <ng-template appModal (closed)="detalle.set(null)">
+        <section class="ficha">
+          <header>
+            <h2>Detalle de devolución</h2>
+            <p>ALQ-{{ d.alquilerId }} · {{ ref.cliente(clienteId(d.alquilerId)) }}</p>
+          </header>
+          <div class="contenido">
+            <dl>
+              <div>
+                <dt>Fecha de recepción</dt>
+                <dd>{{ d.fechaDevolucion.slice(0, 10) }}</dd>
+              </div>
+              <div>
+                <dt>Estado general</dt>
+                <dd>{{ d.estadoPrenda === 'DANADO' ? 'Dañado' : d.estadoPrenda }}</dd>
+              </div>
+              <div>
+                <dt>Recibió</dt>
+                <dd>{{ ref.empleado(d.empleadoId) }}</dd>
+              </div>
+            </dl>
+            <h3>Prendas del alquiler</h3>
+            @for (p of prendasDe(d.alquilerId); track p.idDetalle) {
+              <div class="prenda">
+                <div>
+                  <strong>{{ ref.prenda(p.prendaId) }}</strong>
+                  <p>
+                    {{ p.cantidad }} {{ p.cantidad === 1 ? 'unidad' : 'unidades' }} ·
+                    {{ estadoPorPrenda(d, p) }}
+                  </p>
+                </div>
+                @if (d.estadoPrenda !== 'INCOMPLETO') {
+                  <a
+                    mat-stroked-button
+                    routerLink="/mantenimientos"
+                    [queryParams]="{ devolucion: d.idDevolucion, prenda: p.prendaId }"
+                    >Revisar mantenimiento</a
+                  >
+                }
+              </div>
+            } @empty {
+              <p>Sin prendas vinculadas.</p>
+            }
+            @if (d.observacion) {
+              <h3>Observaciones</h3>
+              <p>{{ d.observacion }}</p>
+            }
+          </div>
+          <footer>
+            <button mat-stroked-button type="button" (click)="detalle.set(null)">Cerrar</button>
+          </footer>
+        </section>
+      </ng-template>
     }
   </div>`,
 })
@@ -125,13 +181,18 @@ export class DevolucionesPageComponent {
   readonly hoy = fechaLima();
   readonly query = signal('');
   readonly seleccion = signal<Alquiler | null>(null);
+  readonly detalle = signal<Devolucion | null>(null);
+  recepcionRegistrada(): void {
+    this.seleccion.set(null);
+    this.ref.cargar(true);
+  }
   readonly registradas = computed(() =>
     this.ref
       .devoluciones()
       .filter((d) =>
-        normalizar(
-          `${this.ref.cliente(this.clienteId(d.alquilerId))} ${d.alquilerId}`,
-        ).includes(normalizar(this.query())),
+        normalizar(`${this.ref.cliente(this.clienteId(d.alquilerId))} ${d.alquilerId}`).includes(
+          normalizar(this.query()),
+        ),
       )
       .sort((a, b) => b.fechaDevolucion.localeCompare(a.fechaDevolucion)),
   );

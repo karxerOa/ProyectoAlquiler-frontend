@@ -1,5 +1,7 @@
-<mat-card appearance="outlined" class="content-card">
-  <h2>Recepción y devolución</h2>
+<section [class.content-card]="!enModal()">
+  @if (!enModal()) {
+    <h2>Recepción y devolución</h2>
+  }
   @for (d of devoluciones(); track d.idDevolucion) {
     <article>
       <h3>Devolución registrada · {{ d.fechaDevolucion.slice(0, 10) }}</h3>
@@ -95,4 +97,4 @@
   @if (error()) {
     <p class="error-box" role="alert">{{ error() }}</p>
   }
-</mat-card>
+</section>

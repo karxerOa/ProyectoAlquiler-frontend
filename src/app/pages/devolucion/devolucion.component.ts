@@ -16,6 +16,7 @@ import { RouterLink } from '@angular/router';
   styleUrl: '../../shared/gestion.css',
 })
 export class DevolucionComponent {
+  readonly enModal = input(false);
   readonly alquiler = input.required<Alquiler>();
   readonly actualizada = output<void>();
   readonly ref = inject(ReferenciasService);
