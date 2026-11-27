@@ -10,7 +10,7 @@ interface Session {
   role: 'ROLE_ADMIN' | 'ROLE_EMPLEADO';
   expires: number;
 }
-export const authUrl = environment.apiUrl.replace(/\/v1\/?$/, '') + '/login';
+export const authUrl = environment.loginUrl;
 const storageKey = 'alquiler.session';
 /** Decoding claims is only for UX. The API verifies the signature and permissions. */
 export function readSession(token: string): Session | null {

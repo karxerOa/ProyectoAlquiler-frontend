@@ -38,7 +38,7 @@ describe('Authentication', () => {
   });
   function login(role = 'ROLE_ADMIN') {
     auth.login('ADMIN', 'example').subscribe();
-    const request = http.expectOne(authUrl);
+    const request = http.expectOne(new URL('/login', environment.apiUrl).href);
     expect(request.request.body).toEqual({ username: 'ADMIN', password: 'example' });
     expect(request.request.method).toBe('POST');
     expect(request.request.headers.has('Authorization')).toBe(false);
@@ -84,7 +84,7 @@ describe('Authentication', () => {
     expect(auth.isAdmin()).toBe(true);
     const client = TestBed.inject(HttpClient);
     client.get(environment.apiUrl + '/prendas').subscribe();
-    const api = http.expectOne(environment.apiUrl + '/prendas');
+    const api = http.expectOne(new URL('/v1/prendas', environment.apiUrl).href);
     expect(api.request.headers.get('Authorization')).toBe('Bearer ' + auth.token());
     api.flush([]);
     client.get('https://example.com/data').subscribe();
