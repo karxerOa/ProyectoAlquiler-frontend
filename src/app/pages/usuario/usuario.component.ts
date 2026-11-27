@@ -24,7 +24,7 @@ export class UsuarioComponent {
   readonly roles = computed(() =>
     this.rolService
       .$rolesChange()
-      .filter((rol) => this.normalizarNombreRol(rol.name) === 'ADMIN'),
+      .filter((rol) => ['ADMIN', 'EMPLEADO'].includes(this.normalizarNombreRol(rol.name))),
   );
   modalAbierto = signal(false);
   editandoId = signal<number | null>(null);
@@ -99,7 +99,7 @@ export class UsuarioComponent {
       username: usuario.username,
       password: '',
       enabled: usuario.enabled,
-      rolId: this.roles().some((rol) => rol.idRol === usuario.rolId) ? String(usuario.rolId) : '',
+      rolId: String(usuario.rolId),
     });
     this.form.controls.password.clearValidators();
     this.form.controls.password.setValidators([Validators.minLength(8)]);

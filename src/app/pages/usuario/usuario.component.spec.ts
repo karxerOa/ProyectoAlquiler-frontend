@@ -8,7 +8,8 @@ import { UsuarioService } from '../../services/usuario.service';
 import { UsuarioComponent } from './usuario.component';
 
 describe('UsuarioComponent roles', () => {
-  it('excludes employee roles while keeping administrator roles selectable', () => {
+  it('offers both internal roles and saves an employee using the role ID from the API', () => {
+    const create = vi.fn(() => of({}));
     const roles = signal<Rol[]>([]);
     const rolesDisponibles: Rol[] = [
       { idRol: 1, name: 'ADMIN', description: '' },
@@ -32,6 +33,7 @@ describe('UsuarioComponent roles', () => {
             $usuariosChange: signal([]).asReadonly(),
             findAll: vi.fn(() => of([])),
             setUsuariosChange: vi.fn(),
+            create,
           },
         },
         { provide: RolService, useValue: rolService },
@@ -40,7 +42,12 @@ describe('UsuarioComponent roles', () => {
     });
     const component = TestBed.runInInjectionContext(() => new UsuarioComponent());
 
-    expect(component.roles().map((rol) => rol.idRol)).toEqual([1, 2]);
-    expect(component.normalizarNombreRol(' ROLE_ADMIN ')).toBe('ADMIN');
+    expect(component.roles().map((rol) => rol.idRol)).toEqual([1, 2, 3, 4, 5]);
+    component.nuevo();
+    component.form.patchValue({ username: 'prueba', password: 'soloPrueba123', rolId: '4' });
+    component.guardar();
+    expect(create).toHaveBeenCalledWith({
+      username: 'prueba', password: 'soloPrueba123', enabled: true, rolId: 4,
+    });
   });
 });
