@@ -86,6 +86,8 @@
                   >
                     Anular
                   </button>
+                } @else if (pago.estado.trim().toUpperCase() === 'PAGADO') {
+                  <span title="Este cobro ya fue confirmado">Pago cerrado</span>
                 } @else {
                   <span>Solo lectura</span>
                 }
