@@ -39,6 +39,14 @@ export class PagoComponent {
   mensajeError = signal('');
   errorCarga = signal('');
 
+  readonly registroDisponible = computed(
+    () =>
+      !this.guardando() &&
+      !this.cargando() &&
+      !this.errorCarga() &&
+      this.opcionesAlquileres().length > 0,
+  );
+
   form = this.fb.nonNullable.group({
     fechaPago: [this.fechaLocal(), Validators.required],
     monto: [0, [Validators.required, Validators.min(0.01)]],
@@ -96,6 +104,7 @@ export class PagoComponent {
   }
 
   nuevo(): void {
+    if (!this.registroDisponible()) return;
     this.form.reset({
       fechaPago: this.fechaLocal(),
       monto: 0,
@@ -116,6 +125,10 @@ export class PagoComponent {
     const value = this.form.getRawValue();
     const data = { ...value, alquilerId: Number(value.alquilerId) };
     const saldo = this.saldo(data.alquilerId);
+    if (saldo === 0) {
+      this.mensajeError.set('Este alquiler ya está pagado por completo.');
+      return;
+    }
     if (saldo === undefined || data.monto > saldo) {
       this.mensajeError.set(
         'El monto supera el saldo disponible o el alquiler ya no está disponible.',

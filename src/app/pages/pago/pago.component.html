@@ -10,11 +10,20 @@
       class="btn-primary"
       type="button"
       (click)="nuevo()"
-      [disabled]="guardando() || cargando() || !!errorCarga()"
+      [disabled]="!registroDisponible()"
     >
       + Registrar pago
     </button>
   </div>
+  @if (
+    !cargando() &&
+    !errorCarga() &&
+    !ref.pendientes() &&
+    !ref.errores().includes('alquileres') &&
+    !opcionesAlquileres().length
+  ) {
+    <p role="status">No hay alquileres con saldo pendiente para registrar un pago.</p>
+  }
   @if (errorCarga()) {
     <p class="error-box">
       {{ errorCarga() }}
@@ -175,7 +184,11 @@
             mat-flat-button
             type="submit"
             class="btn-primary"
-            [disabled]="guardando()"
+            [disabled]="
+              !registroDisponible() ||
+              form.invalid ||
+              !(saldo(+form.controls.alquilerId.value) ?? 0)
+            "
           >
             {{ guardando() ? 'Guardando...' : 'Registrar pago' }}
           </button>

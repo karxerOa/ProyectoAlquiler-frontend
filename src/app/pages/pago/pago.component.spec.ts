@@ -96,6 +96,18 @@ describe('PagoComponent', () => {
     await component.cambiarEstado(pago, 'ANULADO');
     component.ref.alquileres.set([{ ...alquiler, total: 50 }]);
     expect(component.opcionesAlquileres()).toEqual([]);
+    component.nuevo();
+    expect(component.modalAbierto()).toBe(false);
+    component.form.patchValue({ alquilerId: '12', monto: 1 });
+    component.guardar();
+    http.expectNone({ method: 'POST', url });
+    component.ref.alquileres.set([
+      { ...alquiler, total: 50 },
+      { ...alquiler, idAlquiler: 13 },
+    ]);
+    expect(component.opcionesAlquileres().map((opcion) => opcion.valor)).toEqual([13]);
+    component.nuevo();
+    expect(component.modalAbierto()).toBe(true);
     await component.cambiarEstado(pendiente, 'PAGADO');
     await component.cambiarEstado(pendiente, 'ANULADO');
     expect(confirmar).not.toHaveBeenCalled();
