@@ -1,4 +1,4 @@
 export const environment = {
   production: false,
-  apiUrl: 'http://localhost:9494/v1',
+  apiUrl: 'ttps://proyecto-alquiler-backend.onrender.com',
 };
