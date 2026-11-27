@@ -4,10 +4,20 @@
       <h1>Gestión de mantenimientos</h1>
       <p>Registra y controla los trabajos realizados en las prendas.</p>
     </div>
-    <button appSoloEscritura mat-flat-button class="btn-primary" type="button" (click)="nuevo()">
-      + Desde devolución
+    <button
+      appSoloEscritura
+      mat-flat-button
+      class="btn-primary"
+      type="button"
+      (click)="nuevo()"
+      [disabled]="!origenes().length"
+    >
+      <mat-icon fontSet="material-symbols-outlined">add</mat-icon> Desde devolución
     </button>
   </div>
+  @if (!ref.pendientes() && !ref.errores().includes('devoluciones') && !origenes().length) {
+    <p role="status">Registra una devolución completa para iniciar un mantenimiento.</p>
+  }
   @if (errorCarga()) {
     <p class="error-box">{{ errorCarga() }}</p>
   }
@@ -87,30 +97,27 @@
 </div>
 @if (modalAbierto()) {
   <ng-template appModal (closed)="modalAbierto.set(false)">
-    <div class="modal" (click)="$event.stopPropagation()">
+    <div class="modal operaciones-modal" (click)="$event.stopPropagation()">
       <h2>{{ editandoId() === null ? 'Nuevo mantenimiento' : 'Editar mantenimiento' }}</h2>
       <form [formGroup]="form" (ngSubmit)="guardar()">
-        @if (editandoId() === null) {
-          <label
-            >Devolución de origen<mat-form-field appearance="outline" subscriptSizing="dynamic"
-              ><select
-                matNativeControl
-                [value]="origen()"
-                (change)="cambiarOrigen($any($event.target).value)"
-              >
-                <option value="">Selecciona una recepción completa</option>
-                @for (o of origenes(); track o.valor) {
-                  <option [value]="o.valor">{{ o.nombre }}</option>
-                }
-              </select></mat-form-field
-            ></label
-          >
-          <p>
-            Solo se muestran prendas de esta devolución. El contexto se conservará en la descripción
-            del mantenimiento.
-          </p>
-        }
         <div class="form-grid">
+          @if (editandoId() === null) {
+            <div class="form-group full">
+              <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                <mat-label>Devolución de origen</mat-label>
+                <mat-select
+                  [value]="origen()"
+                  (selectionChange)="cambiarOrigen($event.value)"
+                  placeholder="Selecciona una recepción completa"
+                >
+                  @for (o of origenes(); track o.valor) {
+                    <mat-option [value]="'' + o.valor">{{ o.nombre }}</mat-option>
+                  }
+                </mat-select>
+              </mat-form-field>
+              <small>Elige la devolución para ver sus prendas.</small>
+            </div>
+          }
           <div class="form-group">
             <label for="fechaInicio">Fecha de inicio</label
             ><mat-form-field appearance="outline" subscriptSizing="dynamic"
@@ -184,9 +191,9 @@
             mat-flat-button
             type="submit"
             class="btn-primary"
-            [disabled]="guardando()"
+            [disabled]="guardando() || form.invalid"
           >
-            {{ guardando() ? 'Guardando...' : 'Guardar' }}
+            {{ guardando() ? 'Guardando...' : 'Guardar mantenimiento' }}
           </button>
         </div>
       </form>

@@ -6,7 +6,7 @@
     </div>
 
     <button appSoloEscritura mat-flat-button class="btn-primary" type="button" (click)="nuevo()">
-      + Nueva producción
+      <mat-icon fontSet="material-symbols-outlined">add</mat-icon> Nueva producción
     </button>
   </div>
 
@@ -93,7 +93,7 @@
 <!-- MODAL NUEVO / EDITAR -->
 @if (modalAbierto()) {
   <ng-template appModal (closed)="cerrarModal()">
-    <div class="modal" (click)="$event.stopPropagation()">
+    <div class="modal operaciones-modal" (click)="$event.stopPropagation()">
       <h2>{{ editandoId() === null ? 'Nueva producción' : 'Editar producción' }}</h2>
 
       <form [formGroup]="form" (ngSubmit)="guardar()">
@@ -180,9 +180,9 @@
             mat-flat-button
             type="submit"
             class="btn-primary"
-            [disabled]="guardando()"
+            [disabled]="guardando() || form.invalid"
           >
-            {{ guardando() ? 'Guardando...' : 'Guardar' }}
+            {{ guardando() ? 'Guardando...' : 'Guardar producción' }}
           </button>
         </div>
       </form>

@@ -1,3 +1,5 @@
+import { UiService } from '../../shared/ui.service';
+import { environment } from '../../../environments/environment';
 import { TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting, HttpTestingController } from '@angular/common/http/testing';
@@ -52,5 +54,72 @@ describe('Mantenimiento desde una recepción', () => {
     expect(c.origenes().map((o) => o.valor)).toEqual([3]);
     c.origen.set('4');
     expect(c.prendasRecibidas()).toEqual([]);
+  });
+  it('valida fechas y origen antes de crear y conserva la prenda al editar', async () => {
+    TestBed.configureTestingModule({
+      providers: [provideHttpClient(), provideHttpClientTesting(), provideRouter([])],
+    });
+    const c = TestBed.createComponent(MantenimientoComponent).componentInstance;
+    const http = TestBed.inject(HttpTestingController);
+    const url = environment.apiUrl + '/mantenimientos';
+    http.expectOne(url).flush([]);
+    vi.spyOn(c.ref, 'cargar').mockImplementation(() => {});
+    vi.spyOn(c.ref, 'devolucion').mockReturnValue('Devolución 3');
+    c.ref.devoluciones.set([
+      {
+        idDevolucion: 3,
+        alquilerId: 10,
+        empleadoId: 8,
+        fechaDevolucion: '2026-11-27',
+        estadoPrenda: 'BUENO',
+        observacion: '',
+      },
+    ]);
+    c.ref.detalles.set([
+      { idDetalle: 1, alquilerId: 10, prendaId: 7, cantidad: 1, precioUnitario: 50, subtotal: 50 },
+    ]);
+    vi.spyOn(c.ref, 'opcionesPrendas').mockReturnValue([{ valor: 7, nombre: 'Vestido' }]);
+    c.nuevo();
+    c.form.patchValue({
+      fechaInicio: '2026-11-27',
+      fechaFin: '2026-11-26',
+      tipoMantenimiento: 'Lavado',
+      descripcion: 'Limpieza',
+      empleadoId: '8',
+      prendaId: '7',
+    });
+    c.guardar();
+    http.expectNone({ method: 'POST', url });
+    c.cambiarOrigen('3');
+    expect(c.form.controls.prendaId.value).toBe('');
+    c.form.controls.prendaId.setValue('7');
+    c.guardar();
+    http.expectNone({ method: 'POST', url });
+    c.form.controls.fechaFin.setValue('2026-11-28');
+    c.guardar();
+    c.guardar();
+    const post = http.expectOne({ method: 'POST', url });
+    expect(post.request.body).toMatchObject({ prendaId: 7, empleadoId: 8 });
+    expect(post.request.body.descripcion).toContain('Devolución 3');
+    const registro = { ...post.request.body, idMantenimiento: 4 };
+    post.flush(registro);
+    http.expectOne(url).flush([registro]);
+    c.editar(registro);
+    expect(c.form.controls.prendaId.disabled).toBe(true);
+    c.form.controls.estado.setValue('FINALIZADO');
+    c.guardar();
+    const put = http.expectOne({ method: 'PUT', url: url + '/4' });
+    expect(put.request.body).toMatchObject({
+      prendaId: 7,
+      estado: 'FINALIZADO',
+      descripcion: registro.descripcion,
+    });
+    put.flush(put.request.body);
+    http.expectOne(url).flush([registro]);
+    vi.spyOn(TestBed.inject(UiService), 'confirm').mockResolvedValue(true);
+    await c.eliminar(registro);
+    http.expectOne({ method: 'DELETE', url: url + '/4' }).flush(null);
+    http.expectOne(url).flush([]);
+    http.verify();
   });
 });

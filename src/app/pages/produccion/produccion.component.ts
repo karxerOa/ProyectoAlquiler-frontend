@@ -31,17 +31,19 @@ export class ProduccionComponent {
 
   form = this.fb.nonNullable.group({
     fechaProduccion: ['', [Validators.required]],
-    cantidad: [1, [Validators.required, Validators.min(1)]],
+    cantidad: [1, [Validators.required, Validators.min(1), Validators.pattern(/^\d+$/)]],
     costoProduccion: [0, [Validators.required, Validators.min(0)]],
     descripcion: ['', [Validators.required, Validators.maxLength(255)]],
-    prenda: [1, [Validators.required, Validators.min(1)]],
-    empleado: [1, [Validators.required, Validators.min(1)]],
+    prenda: ['', [Validators.required, Validators.min(1)]],
+    empleado: ['', [Validators.required, Validators.min(1)]],
   });
 
   produccionesFiltradas = computed(() => {
     const texto = this.busqueda();
     return this.producciones().filter((p) =>
-      `${p.descripcion} ${p.fechaProduccion}`.toLowerCase().includes(texto),
+      `${p.descripcion} ${p.fechaProduccion} ${this.ref.prenda(p.idPrenda)} ${this.ref.empleado(p.idEmpleado)}`
+        .toLowerCase()
+        .includes(texto),
     );
   });
 
@@ -75,8 +77,8 @@ export class ProduccionComponent {
       cantidad: 1,
       costoProduccion: 0,
       descripcion: '',
-      prenda: 1,
-      empleado: 1,
+      prenda: '',
+      empleado: '',
     });
     this.mensajeError.set('');
     this.modalAbierto.set(true);
@@ -89,14 +91,15 @@ export class ProduccionComponent {
       cantidad: prod.cantidad,
       costoProduccion: prod.costoProduccion,
       descripcion: prod.descripcion,
-      prenda: prod.idPrenda,
-      empleado: prod.idEmpleado,
+      prenda: String(prod.idPrenda),
+      empleado: String(prod.idEmpleado),
     });
     this.mensajeError.set('');
     this.modalAbierto.set(true);
   }
 
   guardar(): void {
+    if (this.guardando()) return;
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;
