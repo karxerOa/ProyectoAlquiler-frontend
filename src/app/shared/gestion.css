@@ -6,28 +6,28 @@
 /* El layout ya pone el padding y el fondo */
 .page-container {
   display: grid;
-  gap: 16px;
+  gap: var(--gap);
 }
 
 .page-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
-  gap: 16px;
+  gap: var(--gap);
 }
 
 .page-header h1 {
   margin: 0 0 6px;
   font-family: var(--serif);
   font-size: clamp(24px, 3vw, 32px);
-  font-weight: 500;
+  font-weight: 700;
   letter-spacing: -0.5px;
 }
 
 .page-header p {
   margin: 0;
   color: var(--muted);
-  font-size: 12px;
+  font-size: 13px;
 }
 
 /* ---------- Botones ---------- */
@@ -36,9 +36,9 @@
   color: #fff;
   background: var(--plum);
   border: 0;
-  border-radius: 8px;
+  border-radius: var(--control-radius);
   font: inherit;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 600;
   cursor: pointer;
   white-space: nowrap;
@@ -59,9 +59,9 @@
   color: var(--ink);
   background: transparent;
   border: 1px solid var(--line);
-  border-radius: 8px;
+  border-radius: var(--control-radius);
   font: inherit;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 500;
   cursor: pointer;
 }
@@ -73,10 +73,10 @@
 /* ---------- Tarjetas ---------- */
 .stats-card,
 .content-card {
-  padding: 16px 18px;
+  padding: clamp(16px, 2vw, 24px);
   background: var(--surface);
   border: 1px solid var(--line);
-  border-radius: 10px;
+  border-radius: var(--radius);
 }
 
 .stats-card {
@@ -89,8 +89,8 @@
 
 .stats-icon {
   padding: 10px;
-  background: #cfe0ee;
-  border-radius: 10px;
+  background: var(--tint);
+  border-radius: var(--radius);
   font-size: 20px;
   line-height: 1;
 }
@@ -98,7 +98,7 @@
 .stats-card p {
   margin: 0 0 4px;
   color: var(--muted);
-  font-size: 10px;
+  font-size: 13px;
 }
 
 .stats-card h2 {
@@ -114,7 +114,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 16px;
+  gap: var(--gap);
   margin-bottom: 14px;
 }
 
@@ -129,12 +129,12 @@
   max-width: 100%;
   padding: 9px 12px;
   color: var(--ink);
-  background: #f1f8fd;
+  background: var(--surface);
   border: 1px solid var(--line);
-  border-radius: 8px;
+  border-radius: var(--control-radius);
   font: inherit;
-  font-size: 12px;
-  outline: none;
+  font-size: 13px;
+
 }
 
 .table-header input:focus {
@@ -160,15 +160,15 @@ td {
 
 th {
   color: var(--muted);
-  background: #cfe0ee;
-  font-size: 9px;
+  background: var(--tint);
+  font-size: 13px;
   font-weight: 600;
   letter-spacing: 0.6px;
   text-transform: uppercase;
 }
 
 td {
-  font-size: 12px;
+  font-size: 13px;
 }
 
 tbody tr:last-child td {
@@ -183,17 +183,17 @@ tbody tr:last-child td {
 .btn-action {
   padding: 6px 12px;
   color: var(--plum);
-  background: #d7d3e8;
+  background: var(--tint);
   border: 0;
   border-radius: 6px;
   font: inherit;
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 600;
   cursor: pointer;
 }
 
 .btn-action:hover {
-  background: #c8c2de;
+  background: #D8E6FF;
 }
 
 .btn-danger {
@@ -242,7 +242,7 @@ tbody tr:last-child td {
 
 .form-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 14px;
 }
 
@@ -257,7 +257,7 @@ tbody tr:last-child td {
 }
 
 .form-group label {
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 600;
 }
 
@@ -266,21 +266,21 @@ tbody tr:last-child td {
 .form-group textarea {
   padding: 10px 12px;
   color: var(--ink);
-  background: #f1f8fd;
+  background: var(--surface);
   border: 1px solid var(--line);
-  border-radius: 8px;
+  border-radius: var(--control-radius);
   font: inherit;
-  font-size: 12px;
+  font-size: 13px;
 }
 
 .form-group input:focus {
-  outline: none;
+
   border-color: var(--plum);
 }
 
 .error {
   color: #a14b57;
-  font-size: 10px;
+  font-size: 13px;
 }
 
 .error-box {
@@ -288,8 +288,8 @@ tbody tr:last-child td {
   padding: 10px 12px;
   color: #a14b57;
   background: #ecd3d6;
-  border-radius: 8px;
-  font-size: 12px;
+  border-radius: var(--control-radius);
+  font-size: 13px;
 }
 
 .modal-actions {
@@ -321,3 +321,15 @@ tbody tr:last-child td {
     grid-template-columns: 1fr;
   }
 }
+
+.stats-card > mat-icon {
+  box-sizing: content-box;
+  padding: 10px;
+  border-radius: var(--control-radius);
+  background: var(--tint);
+  color: var(--plum);
+}
+.content-card, .stats-card { box-shadow: var(--shadow); }
+.table-header { flex-wrap: wrap; }
+.table-header h2 { font-size: 17px; }
+tbody tr:hover { background: #F7FAFF; }

@@ -2,11 +2,9 @@
   <section class="welcome" aria-label="Lucy, alquiler de vestimentas">
     <a class="brand" href="/login">lucy.</a>
     <div>
-      <p class="eyebrow">ALQUILER DE VESTIMENTAS</p>
       <h1>Cada ocasión,<br />bien organizada.</h1>
-      <p>Prendas, reservas y devoluciones.<br />Todo en un mismo lugar.</p>
+      <p>Gestiona prendas, alquileres y devoluciones.</p>
     </div>
-    <small>Gestión de tu boutique</small>
   </section>
   <section class="access">
     <mat-card appearance="outlined">
@@ -22,17 +20,19 @@
           <p role="status">Tu sesión terminó. Ingresa nuevamente para continuar.</p>
         }
         <form [formGroup]="form" (ngSubmit)="submit()" [attr.aria-busy]="pending()">
-          <mat-form-field appearance="outline"
-            ><mat-label>Usuario</mat-label
-            ><input matInput formControlName="username" autocomplete="username" required />
+          <label for="login-user">Usuario</label>
+          <mat-form-field appearance="outline">
+            <input id="login-user" placeholder="Escribe tu usuario" matInput formControlName="username" autocomplete="username" required />
             @if (form.controls.username.hasError('required')) {
               <mat-error>Escribe tu usuario.</mat-error>
             }
           </mat-form-field>
-          <mat-form-field appearance="outline"
-            ><mat-label>Contraseña</mat-label
-            ><input
+          <label for="login-password">Contraseña</label>
+          <mat-form-field appearance="outline">
+            <input
               matInput
+              id="login-password"
+              placeholder="Escribe tu contraseña"
               formControlName="password"
               [type]="showPassword() ? 'text' : 'password'"
               autocomplete="current-password"
@@ -54,9 +54,8 @@
             {{ pending() ? 'Ingresando…' : 'Iniciar sesión' }}
           </button>
         </form>
-        <p class="help">¿Necesitas acceso? Contacta al administrador de tu boutique.</p>
+        <p class="help">¿Necesitas acceso?<br />Contacta al administrador de tu boutique.</p>
       </mat-card-content>
     </mat-card>
-    <small>Tu próxima ocasión empieza con una buena organización.</small>
   </section>
 </main>

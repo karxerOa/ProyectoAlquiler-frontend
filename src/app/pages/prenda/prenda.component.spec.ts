@@ -95,6 +95,21 @@ describe('PrendaComponent', () => {
     http.expectOne(`${environment.apiUrl}/prendas`).flush([]);
   });
 
+  it('rejects a dropped PDF and accepts a replacement PNG in the same form', () => {
+    component.nuevo();
+    const drop = (file: File) => {
+      const event = new Event('drop', { cancelable: true }) as DragEvent;
+      Object.defineProperty(event, 'dataTransfer', { value: { files: [file] } });
+      component.soltarImagen(event);
+      expect(event.defaultPrevented).toBe(true);
+    };
+    drop(new File(['documento'], 'ficha.pdf', { type: 'application/pdf' }));
+    expect(component.errorFoto()).toContain('JPG o PNG');
+    const foto = new File(['foto'], 'prenda.png', { type: 'image/png' });
+    drop(foto);
+    expect(component.errorFoto()).toBe('');
+    expect(component.archivo()).toBe(foto);
+  });
   it('keeps the existing photo when editing a garment without selecting another', async () => {
     const prenda: Prenda = {
       idPrenda: 4,

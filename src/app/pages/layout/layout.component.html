@@ -6,20 +6,15 @@
       (click)="mobile.set(false)"
     ></button>
   }
-  <aside class="sidebar" [class.open]="mobile()">
-    <a class="brand" routerLink="/resumen"
+  <aside id="main-navigation" class="sidebar" [class.open]="mobile()">
+    <a class="brand" aria-label="Lucy, inicio" routerLink="/resumen"
       ><span class="brand-mark"
         ><mat-icon fontSet="material-symbols-outlined">checkroom</mat-icon></span
       ><span
-        ><small>Alquiler de vestimentas</small><strong>Lucy<span>.</span></strong></span
+        ><strong>lucy<span>.</span></strong></span
       ></a
     >
-    <mat-card appearance="outlined" class="store"
-      ><mat-icon fontSet="material-symbols-outlined">checkroom</mat-icon>
-      <div>
-        <strong>Alquiler de<br />vestimentas Lucy</strong><small>Sede principal</small>
-      </div></mat-card
-    >
+
     <nav aria-label="Navegación principal">
       @for (group of groups; track group.label) {
         @if (hasVisibleItems(group.items)) {
@@ -41,16 +36,17 @@
         }
       }
     </nav>
-    <button mat-button class="settings" (click)="settings.set(true)">
+    <button mat-button class="settings" (click)="mobile.set(false); abrirConfiguracion()">
       <mat-icon fontSet="material-symbols-outlined">settings</mat-icon>Configuración
     </button>
-    <div class="system"><span>● Sesión activa</span><small>v.1.0</small></div>
   </aside>
   <main class="main-content">
     <header class="topbar">
       <button
         mat-icon-button
         class="menu-toggle"
+        aria-controls="main-navigation"
+        [attr.aria-expanded]="mobile()"
         aria-label="Abrir navegación"
         (click)="mobile.set(!mobile())"
       >

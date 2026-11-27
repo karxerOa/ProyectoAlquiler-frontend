@@ -3,7 +3,7 @@
   min-height: 100dvh;
   background: var(--bg);
   color: var(--ink);
-  font-family: Inter, Arial, sans-serif;
+  font-family: var(--serif);
 }
 .sidebar {
   width: 232px;
@@ -22,7 +22,7 @@
   gap: 10px;
   align-items: center;
   text-decoration: none;
-  color: var(--ink);
+  color: var(--plum);
   margin: 0 10px 26px;
 }
 .brand-mark {
@@ -41,37 +41,12 @@
   margin-bottom: 2px;
 }
 .brand strong {
-  font-size: 34px;
+  font-size: 40px;
   letter-spacing: -1.5px;
   line-height: 1;
 }
 .brand strong span {
   color: var(--plum);
-}
-.store {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 12px;
-  padding: 16px 12px;
-  background: #fcfcfd;
-  border: 1px solid var(--line);
-  border-radius: 9px;
-  margin-bottom: 6px;
-  font-size: 12px;
-}
-.store > mat-icon {
-  background: #f2f5f9;
-  color: #8d98a6;
-  padding: 8px;
-  width: 36px;
-  height: 36px;
-}
-.store small {
-  display: block;
-  color: var(--muted);
-  margin-top: 8px;
-  font-size: 10px;
 }
 .sidebar > nav {
   overflow: auto;
@@ -80,8 +55,6 @@
   scrollbar-color: #d1d8e0 transparent;
   margin-right: -12px;
   padding-right: 12px;
-  -webkit-mask-image: linear-gradient(to bottom, black calc(100% - 32px), transparent 100%);
-  mask-image: linear-gradient(to bottom, black calc(100% - 32px), transparent 100%);
 }
 .sidebar > nav::-webkit-scrollbar {
   width: 4px;
@@ -99,7 +72,7 @@
 .nav-heading {
   font-size: 9px;
   letter-spacing: 1.3px;
-  color: #87909c;
+  color: var(--muted);
   margin: 20px 12px 10px;
 }
 .nav-link {
@@ -108,48 +81,36 @@
   border-radius: 6px;
   margin: 3px 0;
   height: 42px;
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 400;
-  color: #5f6b7a !important;
+  color: var(--ink) !important;
 }
 .nav-link mat-icon {
-  color: #8b95a1;
+  color: var(--muted);
   font-size: 21px;
   width: 21px;
   height: 21px;
   margin-right: 12px;
 }
 .nav-link.active {
-  background: #e9f2fe;
-  color: #1976cd !important;
+  background: var(--tint);
+  color: var(--plum) !important;
   font-weight: 600;
 }
 .nav-link.active mat-icon {
-  color: #1976cd;
+  color: var(--plum);
 }
 .settings {
   justify-content: flex-start;
   margin-top: 14px;
   color: #67727f !important;
 }
-.system {
-  display: flex;
-  justify-content: space-between;
-  font-size: 9px;
-  color: #8b95a1;
-  padding: 18px 10px 0;
-  border-top: 1px solid var(--line);
-  margin-top: 12px;
-}
-.system span {
-  color: #478e76;
-}
 .main-content {
   flex: 1;
   min-width: 0;
 }
 .topbar {
-  height: 76px;
+  height: 68px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -159,7 +120,7 @@
   z-index: 10;
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  background: rgba(255, 255, 255, 0.82);
+  background: var(--surface);
   border-bottom: 1px solid rgba(226, 232, 240, 0.7);
   gap: 16px;
 }
@@ -167,7 +128,7 @@
   display: flex;
   align-items: center;
   gap: 14px;
-  font-size: 11px;
+  font-size: 14px;
   white-space: nowrap;
 }
 .breadcrumb span {
@@ -195,7 +156,7 @@
   width: 100%;
   --mat-form-field-container-height: 36px;
   --mat-form-field-container-vertical-padding: 7px;
-  font-size: 10px;
+  font-size: 12px;
 }
 .global-search mat-icon {
   font-size: 16px;
@@ -234,14 +195,14 @@
   box-shadow: 0 10px 30px #1f29371a;
 }
 .search-results p {
-  font-size: 12px;
+  font-size: 14px;
 }
 .profile {
   height: 50px;
   color: var(--ink) !important;
   border-left: 1px solid var(--line);
   border-radius: 0;
-  font-size: 12px;
+  font-size: 14px;
 }
 .profile-label {
   display: inline-flex;
@@ -253,7 +214,7 @@
 }
 .profile-label small {
   color: #939ba5;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 400;
 }
 .avatar {
@@ -264,7 +225,7 @@
   background: #eee9e1;
   color: #7f7362;
   border-radius: 50%;
-  font-size: 10px;
+  font-size: 12px;
 }
 .page-content {
   padding: 30px;
@@ -295,11 +256,13 @@
   .sidebar {
     position: fixed;
     left: -240px;
+    visibility: hidden;
     z-index: 20;
     transition: left 0.2s;
     width: 232px;
   }
   .sidebar.open {
+    visibility: visible;
     left: 0;
   }
   .menu-toggle {

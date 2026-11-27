@@ -1,8 +1,8 @@
 <div class="page-container">
   <header class="page-header">
     <div>
-      <p class="eyebrow">COLECCIÓN / CATÁLOGO</p>
-      <h1>Cada prenda tiene su próxima historia.</h1>
+      <p class="eyebrow">COLECCIÓN LUCY</p>
+      <h1>Catálogo de vestimentas</h1>
       <p>Vestidos, trajes y disfraces para cada ocasión.</p>
     </div>
     @if (isAdmin()) {
@@ -16,6 +16,7 @@
       {{ errorCarga() }} <button mat-button type="button" (click)="cargar()">Reintentar</button>
     </p>
   }
+  <div class="catalog-tools">
   <label class="search-box" for="buscar-prenda"
     ><span>Buscar por nombre</span
     ><mat-form-field appearance="outline" subscriptSizing="dynamic"
@@ -27,13 +28,15 @@
         [value]="busqueda()"
         (input)="buscar($any($event.target).value)" /></mat-form-field
   ></label>
+    <button type="button" class="filter-toggle" [attr.aria-expanded]="filtrosAbiertos()" aria-controls="catalog-filters" (click)="filtrosAbiertos.set(!filtrosAbiertos())">
+      <mat-icon fontSet="material-symbols-outlined">tune</mat-icon>{{ filtrosAbiertos() ? 'Ocultar filtros' : 'Filtros' }}
+    </button>
+  </div>
   <div class="catalog-layout">
-    <mat-card appearance="outlined" class="content-card filters" aria-label="Filtros de vestimenta">
+    <mat-card appearance="outlined" id="catalog-filters" [class.filters-open]="filtrosAbiertos()" class="content-card filters" aria-label="Filtros de vestimenta">
       <h2>Refina tu búsqueda</h2>
       <label
-        >Categoría<mat-form-field appearance="outline" subscriptSizing="dynamic"
-          ><select
-            matNativeControl
+        >Categoría<select
             [value]="filtros().categoria"
             (change)="filtrar('categoria', $any($event.target).value)"
           >
@@ -41,8 +44,7 @@
             @for (categoria of categorias(); track categoria.id) {
               <option [value]="categoria.id">{{ categoria.nombre }}</option>
             }
-          </select></mat-form-field
-        ></label
+          </select></label
       >
       @for (campo of camposFiltro; track campo) {
         <label
@@ -54,9 +56,7 @@
                 : campo === 'talla'
                   ? 'Talla'
                   : 'Color'
-          }}<mat-form-field appearance="outline" subscriptSizing="dynamic"
-            ><select
-              matNativeControl
+          }}<select
               [value]="filtros()[campo]"
               (change)="filtrar(campo, $any($event.target).value)"
             >
@@ -64,8 +64,7 @@
               @for (opcion of opciones(campo); track opcion) {
                 <option [value]="opcion">{{ opcion }}</option>
               }
-            </select></mat-form-field
-          ></label
+            </select></label
         >
       }
       <fieldset>
@@ -95,7 +94,7 @@
       ><small>El género se muestra solo cuando está informado en el catálogo.</small>
     </mat-card>
     <section aria-label="Resultados del catálogo">
-      <p class="result-count" aria-live="polite">{{ prendasFiltradas().length }} prendas activas</p>
+      <p class="result-count" aria-live="polite">{{ prendasFiltradas().length }} {{ prendasFiltradas().length === 1 ? 'prenda' : 'prendas' }}</p>
       <div class="garment-grid">
         @for (prenda of prendasFiltradas(); track prenda.idPrenda) {
           <mat-card appearance="outlined" class="content-card garment-card">
@@ -108,7 +107,7 @@
               }
               <span class="status">{{ prenda.estado }}</span>
             </div>
-            <p class="eyebrow">{{ prenda.categoriaNombre || ref.categoria(prenda.categoriaId) }}</p>
+            <p class="category-name">{{ prenda.categoriaNombre || ref.categoria(prenda.categoriaId) }}</p>
             <h2>{{ prenda.nombre }}</h2>
             <p>
               {{ prenda.talla }} · {{ prenda.color }} · {{ prenda.genero || 'Sin especificar' }}
@@ -138,9 +137,7 @@
               </div>
             }
             @if (disponible(prenda)) {
-              <a appSoloEscritura class="link" routerLink="/alquileres/nuevo"
-                >Registrar alquiler →</a
-              >
+              <a appSoloEscritura class="rent-button" routerLink="/alquileres/nuevo">Registrar alquiler</a>
             }
           </mat-card>
         } @empty {
@@ -159,7 +156,7 @@
 @if (modalAbierto() && isAdmin()) {
   <ng-template appModal (closed)="modalAbierto.set(false)">
     <div
-      class="modal"
+      class="modal garment-modal"
       role="dialog"
       aria-modal="true"
       aria-label="Registro de prenda"
@@ -170,19 +167,22 @@
       <form [formGroup]="form" (ngSubmit)="guardar()">
         <div class="form-grid">
           @if (isAdmin()) {
-            <div class="form-group full">
-              <label for="foto-prenda">
-                Foto de la prenda {{ imagenObligatoria() ? '(obligatoria)' : '(opcional)' }}
-              </label>
-              <input
-                #foto
-                id="foto-prenda"
-                type="file"
-                accept="image/jpeg,image/png"
-                [required]="imagenObligatoria()"
-                (change)="seleccionarImagen(foto)"
-              />
-              <small>JPG o PNG de hasta 1 MiB. Es obligatoria si la prenda aún no tiene foto.</small>
+            <div class="form-group full photo-field">
+              <strong>Foto de la prenda <small>{{ imagenObligatoria() ? '(obligatoria)' : '(opcional)' }}</small></strong>
+              <div class="photo-drop" [class.dragging]="arrastrando()"
+                (dragover)="$event.preventDefault(); arrastrando.set(true)"
+                (dragleave)="arrastrando.set(false)" (drop)="soltarImagen($event)">
+                <mat-icon fontSet="material-symbols-outlined">{{ archivo() ? 'image' : 'add_photo_alternate' }}</mat-icon>
+                <div class="photo-info" aria-live="polite">
+                  <strong>{{ archivo()?.name || 'Arrastra tu foto aquí' }}</strong>
+                  <small>JPG o PNG · Hasta 1 MiB</small>
+                </div>
+                <input #foto type="file" hidden accept="image/jpeg,image/png" (change)="seleccionarImagen(foto)" />
+                <button mat-flat-button class="photo-button" type="button" (click)="foto.click()" [disabled]="guardando()">
+                  {{ archivo() ? 'Cambiar imagen' : 'Elegir imagen' }}
+                </button>
+              </div>
+              @if (errorFoto()) { <small class="error" role="alert">{{ errorFoto() }}</small> }
             </div>
           }
           <div class="form-group">

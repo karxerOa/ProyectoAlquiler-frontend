@@ -1,13 +1,8 @@
 <div class="page-container">
-  <header class="page-header">
-    <div>
-      <p class="eyebrow">TU DÍA, BAJO CONTROL</p>
-      <h1>Un buen día empieza en orden.</h1>
-      <p>Hola, {{ auth.username() }}. Esto es lo que sucede hoy en tu tienda.</p>
-    </div>
-    <button mat-stroked-button disabled>
-      <mat-icon fontSet="material-symbols-outlined">calendar_today</mat-icon>{{ fecha }}
-    </button>
+  <header class="hero">
+    <h1>Un buen día empieza en orden.</h1>
+    <p>Consulta los movimientos de tu tienda.</p>
+    <div class="hero-date"><mat-icon fontSet="material-symbols-outlined">calendar_today</mat-icon>{{ fecha }}</div>
   </header>
   @if (error()) {
     <p class="error-box" role="alert">
@@ -17,29 +12,26 @@
   @if (cargando()) {
     <mat-progress-bar mode="indeterminate" aria-label="Cargando resumen" />
   }
-  <section class="quick-actions">
+  <section class="quick-actions" aria-label="Acciones frecuentes">
     @if (auth.canWrite()) {
-      <a mat-flat-button routerLink="/alquileres/nuevo" class="quick primary"
-        ><span class="quick-icon">＋</span
-        ><span
-          ><strong>Nuevo alquiler</strong
-          ><small>De la elección a la entrega, en minutos.</small></span
-        ><span class="arrow">→</span></a
-      >
+      <a routerLink="/alquileres/nuevo" class="quick primary">
+        <mat-icon fontSet="material-symbols-outlined">add</mat-icon>Nuevo alquiler
+      </a>
     }
-    <a mat-button routerLink="/devoluciones" class="quick"
-      ><mat-icon fontSet="material-symbols-outlined">undo</mat-icon
-      ><span
-        ><strong>Registrar devolución</strong
-        ><small>Recibe, verifica y deja todo listo.</small></span
-      ><span class="arrow">→</span></a
-    ><a mat-button routerLink="/reportes" class="quick"
-      ><mat-icon fontSet="material-symbols-outlined">bar_chart</mat-icon
-      ><span><strong>Resumen del día</strong><small>Tu operación, de un vistazo.</small></span
-      ><span class="arrow">→</span></a
-    >
+    <a routerLink="/devoluciones" class="quick">
+      <mat-icon fontSet="material-symbols-outlined">undo</mat-icon>Registrar devolución
+    </a>
+    @if (auth.isAdmin()) {
+      <a routerLink="/reportes" class="quick">
+        <mat-icon fontSet="material-symbols-outlined">bar_chart</mat-icon>Resumen del día
+      </a>
+    } @else {
+      <button type="button" class="quick" (click)="metricas.focus(); metricas.scrollIntoView({ block: 'start' })">
+        <mat-icon fontSet="material-symbols-outlined">bar_chart</mat-icon>Resumen del día
+      </button>
+    }
   </section>
-  <section class="metrics" aria-label="Indicadores operativos">
+  <section class="metrics" #metricas tabindex="-1" aria-label="Indicadores operativos">
     <mat-card appearance="outlined"
       ><span
         >Alquileres activos <mat-icon fontSet="material-symbols-outlined">checkroom</mat-icon></span
@@ -120,20 +112,20 @@
         ><span
           ><strong>{{ agenda().vencidos.length }} alquileres vencidos</strong
           ><small>Coordina la devolución con tus clientes.</small
-          ><em class="arrow">Ver devoluciones →</em></span
+          ><em>Ver devoluciones</em></span
         ></a
       ><a mat-button routerLink="/pagos"
         ><mat-icon fontSet="material-symbols-outlined">payments</mat-icon
         ><span
           ><strong>Control de pagos</strong><small>Consulta los cobros de tus alquileres.</small
-          ><em class="arrow">Revisar pagos →</em></span
+          ><em>Revisar pagos</em></span
         ></a
       ><a mat-button routerLink="/mantenimientos"
         ><mat-icon fontSet="material-symbols-outlined">build</mat-icon
         ><span
           ><strong>{{ mantenimiento() }} prendas en mantenimiento</strong
           ><small>Revisa su estado antes de alquilarlas.</small
-          ><em class="arrow">Ver mantenimientos →</em></span
+          ><em>Ver mantenimientos</em></span
         ></a
       ></mat-card
     >
@@ -144,7 +136,7 @@
         <h2>Alquileres recientes</h2>
         <p>Las últimas operaciones de tu tienda</p>
       </div>
-      <a mat-button routerLink="/alquileres">Ver todos los alquileres →</a>
+      <a mat-button routerLink="/alquileres">Ver todos los alquileres</a>
     </div>
     <div class="table-tools">
       <div class="tabs">
@@ -210,5 +202,4 @@
     </div>
     <footer>Mostrando {{ visibles().length }} operaciones recientes</footer></mat-card
   >
-  <p class="closing">Una tienda organizada. Una experiencia extraordinaria.</p>
 </div>
